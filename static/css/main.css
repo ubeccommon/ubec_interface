@@ -1,0 +1,492 @@
+/*
+UBEC Protocol Website - Main Stylesheet
+========================================
+
+Ubuntu-inspired color palette and design system following the project's
+philosophical principles.
+
+Attribution:
+    This project uses the services of Claude and Anthropic PBC to inform 
+    our decisions and recommendations. This project was made possible with 
+    the assistance of Claude and Anthropic PBC.
+*/
+
+/* ========================================================================
+   ROOT VARIABLES - Ubuntu-Inspired Color Palette
+   ======================================================================== */
+
+:root {
+    /* Element Colors */
+    --color-air: #87CEEB;      /* Sky Blue - Diversity */
+    --color-water: #4FC3F7;    /* Water Blue - Reciprocity */
+    --color-earth: #8BC34A;    /* Earth Green - Mutualism */
+    --color-fire: #FF6B6B;     /* Fire Red - Regeneration */
+    
+    /* Primary & Secondary */
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    
+    /* Neutrals */
+    --color-text: #2c3e50;
+    --color-text-light: #7f8c8d;
+    --color-background: #ffffff;
+    --color-background-alt: #f8f9fa;
+    --color-border: #e0e0e0;
+    
+    /* Semantic Colors */
+    --color-success: #4CAF50;
+    --color-warning: #FFC107;
+    --color-error: #f44336;
+    --color-info: #2196F3;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    
+    /* Typography */
+    --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-monospace: 'Courier New', Courier, monospace;
+    
+    /* Border Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* ========================================================================
+   RESET & BASE STYLES
+   ======================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family-primary);
+    color: var(--color-text);
+    background-color: var(--color-background);
+    line-height: 1.6;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ========================================================================
+   LAYOUT COMPONENTS
+   ======================================================================== */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    color: var(--color-text);
+}
+
+.section-description {
+    font-size: 1.125rem;
+    color: var(--color-text-light);
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto var(--spacing-xxl);
+}
+
+.lead {
+    font-size: 1.25rem;
+    color: var(--color-text-light);
+}
+
+/* ========================================================================
+   NAVIGATION
+   ======================================================================== */
+
+.navbar {
+    background: white;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+}
+
+.navbar-brand .logo {
+    display: flex;
+    flex-direction: column;
+    color: var(--primary-color);
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo-subtext {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+}
+
+.navbar-menu {
+    display: flex;
+    gap: var(--spacing-lg);
+}
+
+.nav-link {
+    color: var(--color-text);
+    font-weight: 500;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background: var(--color-background-alt);
+}
+
+.nav-link.active {
+    color: var(--primary-color);
+    background: var(--color-background-alt);
+}
+
+/* ========================================================================
+   HERO SECTIONS
+   ======================================================================== */
+
+.hero {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: var(--spacing-xxl) 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-xxl);
+    opacity: 0.95;
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xxl);
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+/* ========================================================================
+   FOUR ELEMENTS SECTION
+   ======================================================================== */
+
+.four-elements {
+    padding: var(--spacing-xxl) 0;
+}
+
+.elements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xxl);
+}
+
+.element-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.element-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Element-specific colors */
+.element-air { border-top: 4px solid var(--color-air); }
+.element-water { border-top: 4px solid var(--color-water); }
+.element-earth { border-top: 4px solid var(--color-earth); }
+.element-fire { border-top: 4px solid var(--color-fire); }
+
+.element-header {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.element-symbol {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: var(--spacing-sm);
+}
+
+.element-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.element-body {
+    text-align: center;
+}
+
+.token-code {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+}
+
+.ubuntu-principle {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    font-style: italic;
+    margin-bottom: var(--spacing-md);
+}
+
+.element-description {
+    margin-bottom: var(--spacing-lg);
+}
+
+.element-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.element-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.element-stat .stat-label {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+.element-stat .stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.element-status {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.element-status.status-live {
+    background: #e8f5e9;
+    color: var(--color-success);
+}
+
+/* ========================================================================
+   BUTTONS
+   ======================================================================== */
+
+.btn {
+    display: inline-block;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius-md);
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* ========================================================================
+   FOOTER
+   ======================================================================== */
+
+.footer {
+    background: #2c3e50;
+    color: white;
+    padding: var(--spacing-xxl) 0 var(--spacing-lg);
+    margin-top: var(--spacing-xxl);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.footer-section h3,
+.footer-section h4 {
+    margin-bottom: var(--spacing-md);
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.footer-section a {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-section a:hover {
+    color: white;
+}
+
+.ubuntu-quote {
+    font-style: italic;
+    opacity: 0.9;
+    margin-bottom: var(--spacing-md);
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: var(--spacing-lg);
+    text-align: center;
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.attribution {
+    margin-top: var(--spacing-md);
+    font-size: 0.75rem;
+}
+
+/* ========================================================================
+   UTILITY CLASSES
+   ======================================================================== */
+
+.badge {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-lg);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.badge.status-live {
+    background: #e8f5e9;
+    color: var(--color-success);
+}
+
+.badge.status-pending {
+    background: #fff3e0;
+    color: var(--color-warning);
+}
+
+/* ========================================================================
+   RESPONSIVE DESIGN
+   ======================================================================== */
+
+@media (max-width: 768px) {
+    .navbar .container {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+    
+    .navbar-menu {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .elements-grid {
+        grid-template-columns: 1fr;
+    }
+}

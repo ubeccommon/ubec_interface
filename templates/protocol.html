@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Protocol Overview - UBEC Protocol Network{% endblock %}
+
+{% block content %}
+<section class="protocol-hero">
+    <div class="container">
+        <h1>UBEC Protocol Architecture</h1>
+        <p class="lead">Technical deep dive into the four-element token ecosystem and holonic evaluation framework</p>
+    </div>
+</section>
+
+<section class="protocol-content">
+    <div class="container">
+        <!-- Token Ecosystem Section -->
+        <div class="protocol-section">
+            <h2>Four-Element Token Ecosystem</h2>
+            <p>
+                The UBEC Protocol implements a sophisticated token architecture based on the four classical elements,
+                each representing a fundamental aspect of economic cooperation according to Ubuntu philosophy.
+            </p>
+            
+            <div class="token-details-grid">
+                {% if tokens %}
+                    {% for token in tokens %}
+                    <div class="token-detail-card">
+                        <div class="token-header">
+                            <span class="token-symbol">{{ token.element_symbol }}</span>
+                            <h3>{{ token.token_code }} - {{ token.element }}</h3>
+                        </div>
+                        <dl class="token-specs">
+                            <dt>Ubuntu Principle:</dt>
+                            <dd>{{ token.ubuntu_principle }}</dd>
+                            
+                            <dt>Issuer Address:</dt>
+                            <dd class="address">{{ token.issuer[:8] }}...{{ token.issuer[-8:] }}</dd>
+                            
+                            <dt>Total Supply:</dt>
+                            <dd>{{ "{:,.0f}".format(token.total_supply) }} tokens</dd>
+                            
+                            <dt>Current Holders:</dt>
+                            <dd>{{ token.holders_count }} accounts</dd>
+                            
+                            <dt>Status:</dt>
+                            <dd><span class="badge status-{{ token.status }}">{{ token.status|capitalize }}</span></dd>
+                        </dl>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Holonic Evaluation Framework -->
+        <div class="protocol-section">
+            <h2>Holonic Evaluation Framework</h2>
+            <p>
+                Network participants are evaluated across five dimensions of Ubuntu alignment,
+                creating a holonic (nested whole) assessment of their contribution to the commons.
+            </p>
+            
+            {% if holonic_scores %}
+            <div class="holonic-dimensions">
+                <div class="dimension-card">
+                    <h4>Autonomy Integration</h4>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: {{ (holonic_scores.autonomy_integration * 100)|round }}%"></div>
+                    </div>
+                    <span class="score-value">{{ (holonic_scores.autonomy_integration * 100)|round }}%</span>
+                </div>
+                
+                <div class="dimension-card">
+                    <h4>Ubuntu Alignment</h4>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: {{ (holonic_scores.ubuntu_alignment * 100)|round }}%"></div>
+                    </div>
+                    <span class="score-value">{{ (holonic_scores.ubuntu_alignment * 100)|round }}%</span>
+                </div>
+                
+                <div class="dimension-card">
+                    <h4>Reciprocity Health</h4>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: {{ (holonic_scores.reciprocity_health * 100)|round }}%"></div>
+                    </div>
+                    <span class="score-value">{{ (holonic_scores.reciprocity_health * 100)|round }}%</span>
+                </div>
+                
+                <div class="dimension-card">
+                    <h4>Mutualism Capacity</h4>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: {{ (holonic_scores.mutualism_capacity * 100)|round }}%"></div>
+                    </div>
+                    <span class="score-value">{{ (holonic_scores.mutualism_capacity * 100)|round }}%</span>
+                </div>
+                
+                <div class="dimension-card">
+                    <h4>Regeneration Impact</h4>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: {{ (holonic_scores.regeneration_impact * 100)|round }}%"></div>
+                    </div>
+                    <span class="score-value">{{ (holonic_scores.regeneration_impact * 100)|round }}%</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Stellar Integration -->
+        <div class="protocol-section">
+            <h2>Stellar Blockchain Integration</h2>
+            <p>
+                UBEC tokens operate on the Stellar network, leveraging its fast, low-cost,
+                and environmentally sustainable blockchain infrastructure.
+            </p>
+            
+            <div class="integration-details">
+                <div class="detail-box">
+                    <h4>Network</h4>
+                    <p>Stellar Mainnet (Public Network)</p>
+                </div>
+                <div class="detail-box">
+                    <h4>Transaction Speed</h4>
+                    <p>3-5 seconds per confirmation</p>
+                </div>
+                <div class="detail-box">
+                    <h4>Transaction Cost</h4>
+                    <p>0.00001 XLM (~$0.000003)</p>
+                </div>
+                <div class="detail-box">
+                    <h4>Energy Efficiency</h4>
+                    <p>Carbon-neutral blockchain</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="protocol-cta">
+            <h2>Explore the UBEC Network</h2>
+            <div class="cta-buttons">
+                <a href="/dashboard" class="btn btn-primary">View Live Dashboard</a>
+                <a href="/docs" class="btn btn-secondary">Read Documentation</a>
+                <a href="/api/docs" class="btn btn-secondary">API Reference</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .protocol-section {
+        margin: 3rem 0;
+        padding: 2rem 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .token-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .token-detail-card {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .token-specs {
+        margin-top: 1rem;
+    }
+    
+    .token-specs dt {
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+    
+    .token-specs dd {
+        margin-left: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .address {
+        font-family: monospace;
+        font-size: 0.9em;
+        word-break: break-all;
+    }
+    
+    .holonic-dimensions {
+        display: grid;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .dimension-card {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+    
+    .score-bar {
+        height: 24px;
+        background: #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+    
+    .score-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        transition: width 0.3s ease;
+    }
+    
+    .integration-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .detail-box {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+</style>
+{% endblock %}

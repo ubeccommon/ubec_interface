@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}UBEC Protocol Network - Ubuntu Bioregional Economic Commons{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Ubuntu Bioregional Economic Commons</h1>
+            <p class="hero-subtitle">"I am because we are" - Building economic liberation through regenerative design</p>
+            
+            <div class="hero-stats">
+                {% if network_status %}
+                <div class="stat">
+                    <span class="stat-value">{{ network_status.active_participants|default("0") }}</span>
+                    <span class="stat-label">Active Participants</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ network_status.total_transactions_24h|default("0") }}</span>
+                    <span class="stat-label">Transactions (24h)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ (network_status.average_ubuntu_score * 100)|round|int }}%</span>
+                    <span class="stat-label">Ubuntu Alignment</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ network_status.bioregions_count|default("0") }}</span>
+                    <span class="stat-label">Bioregions</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Four Elements Section -->
+<section class="four-elements">
+    <div class="container">
+        <h2 class="section-title">The Four Elements of Economic Cooperation</h2>
+        <p class="section-description">
+            The UBEC protocol implements Ubuntu philosophy through a four-element token ecosystem, 
+            where each element represents a fundamental aspect of healthy economic relationships.
+        </p>
+        
+        <div class="elements-grid">
+            {% if tokens %}
+                {% for token in tokens %}
+                <div class="element-card element-{{ token.element|lower }}">
+                    <div class="element-header">
+                        <span class="element-symbol">{{ token.element_symbol|default("") }}</span>
+                        <h3 class="element-name">{{ token.element }}</h3>
+                    </div>
+                    
+                    <div class="element-body">
+                        <div class="token-code">{{ token.token_code }}</div>
+                        <div class="ubuntu-principle">{{ token.ubuntu_principle }}</div>
+                        <p class="element-description">{{ token.description }}</p>
+                        
+                        <div class="element-stats">
+                            <div class="element-stat">
+                                <span class="stat-label">Supply</span>
+                                <span class="stat-value">{{ "{:,.0f}".format(token.total_supply) }}</span>
+                            </div>
+                            <div class="element-stat">
+                                <span class="stat-label">Holders</span>
+                                <span class="stat-value">{{ token.holders_count }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="element-status status-{{ token.status }}">
+                            {{ token.status|capitalize }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback if tokens not loaded -->
+                <div class="element-card element-air">
+                    <div class="element-header">
+                        <span class="element-symbol">🌬️</span>
+                        <h3 class="element-name">Air</h3>
+                    </div>
+                    <div class="element-body">
+                        <div class="token-code">UBEC</div>
+                        <div class="ubuntu-principle">Diversity</div>
+                        <p class="element-description">Gateway & Universal Access</p>
+                    </div>
+                </div>
+                
+                <div class="element-card element-water">
+                    <div class="element-header">
+                        <span class="element-symbol">💧</span>
+                        <h3 class="element-name">Water</h3>
+                    </div>
+                    <div class="element-body">
+                        <div class="token-code">UBECrc</div>
+                        <div class="ubuntu-principle">Reciprocity</div>
+                        <p class="element-description">Flow & Exchange</p>
+                    </div>
+                </div>
+                
+                <div class="element-card element-earth">
+                    <div class="element-header">
+                        <span class="element-symbol">🌍</span>
+                        <h3 class="element-name">Earth</h3>
+                    </div>
+                    <div class="element-body">
+                        <div class="token-code">UBECgpi</div>
+                        <div class="ubuntu-principle">Mutualism</div>
+                        <p class="element-description">Stability & Value</p>
+                    </div>
+                </div>
+                
+                <div class="element-card element-fire">
+                    <div class="element-header">
+                        <span class="element-symbol">🔥</span>
+                        <h3 class="element-name">Fire</h3>
+                    </div>
+                    <div class="element-body">
+                        <div class="token-code">UBECtt</div>
+                        <div class="ubuntu-principle">Regeneration</div>
+                        <p class="element-description">Transformation & Action</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Ubuntu Philosophy Section -->
+<section class="ubuntu-philosophy">
+    <div class="container">
+        <div class="philosophy-grid">
+            <div class="philosophy-content">
+                <h2>Ubuntu Philosophy Meets Blockchain Technology</h2>
+                <p>
+                    Ubuntu is an ancient African philosophy captured in the phrase: 
+                    <strong>"I am because we are."</strong> It recognizes that individual wellbeing 
+                    is inseparable from collective wellbeing.
+                </p>
+                <p>
+                    The UBEC Protocol embodies this wisdom in a blockchain-based economic system, 
+                    where cooperation, reciprocity, and regeneration are not just encouraged but 
+                    structurally embedded in the token mechanics.
+                </p>
+                <div class="philosophy-principles">
+                    <div class="principle">
+                        <h4>🌬️ Diversity (Air)</h4>
+                        <p>Everyone welcomed and valued for their unique contribution</p>
+                    </div>
+                    <div class="principle">
+                        <h4>💧 Reciprocity (Water)</h4>
+                        <p>Balanced giving and receiving creates healthy flow</p>
+                    </div>
+                    <div class="principle">
+                        <h4>🌍 Mutualism (Earth)</h4>
+                        <p>Stable, mutually beneficial relationships build resilience</p>
+                    </div>
+                    <div class="principle">
+                        <h4>🔥 Regeneration (Fire)</h4>
+                        <p>Positive transformation heals and renews systems</p>
+                    </div>
+                </div>
+                <a href="/protocol" class="btn btn-primary">Explore the Protocol</a>
+            </div>
+            
+            <div class="philosophy-visual">
+                <div class="holonic-diagram">
+                    <!-- Placeholder for visualization -->
+                    <div class="diagram-placeholder">
+                        <p>Holonic Evaluation Framework</p>
+                        <p class="diagram-note">Interactive visualization coming soon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">How UBEC Works</h2>
+        
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Start with UBEC (Air)</h3>
+                <p>
+                    Begin your journey with UBEC tokens, the gateway to the four-element ecosystem. 
+                    These represent diversity and universal access.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Participate in Reciprocity</h3>
+                <p>
+                    As you engage in balanced giving and receiving, you earn UBECrc (Water) tokens, 
+                    representing healthy flows of economic exchange.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Build Mutualistic Relationships</h3>
+                <p>
+                    Developing stable, mutually beneficial partnerships earns you UBECgpi (Earth) tokens, 
+                    reflecting long-term sustainable cooperation.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Create Regenerative Impact</h3>
+                <p>
+                    Actions that transform and heal systems earn UBECtt (Fire) tokens, 
+                    recognizing your contribution to collective regeneration.
+                </p>
+            </div>
+        </div>
+        
+        <div class="cta-box">
+            <h3>Discover the Stories Behind the Tokens</h3>
+            <p>Each token has a unique journey from philosophical vision to blockchain reality</p>
+            <a href="/stories" class="btn btn-primary">Read the Token Stories</a>
+            <a href="/dashboard" class="btn btn-secondary">View Live Dashboard</a>
+        </div>
+    </div>
+</section>
+
+<!-- Network Status Section -->
+<section class="network-status-preview">
+    <div class="container">
+        <h2 class="section-title">Live Network Status</h2>
+        
+        <div class="status-grid">
+            <div class="status-card">
+                <h4>Network Health</h4>
+                <div class="health-indicator {{ network_status.network_health|default('unknown') }}">
+                    {{ network_status.network_health|default("Loading...")|capitalize }}
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <h4>Latest Block</h4>
+                <p class="timestamp">
+                    {% if network_status and network_status.last_block_time %}
+                        {{ network_status.last_block_time[:19] }}
+                    {% else %}
+                        Loading...
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div class="status-card">
+                <h4>System Status</h4>
+                <div class="system-indicators">
+                    <span class="indicator operational">🟢 Blockchain</span>
+                    <span class="indicator operational">🟢 Database</span>
+                    <span class="indicator operational">🟢 API</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/home.js"></script>
+{% endblock %}

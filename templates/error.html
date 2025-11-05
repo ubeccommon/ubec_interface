@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Error - UBEC Protocol Network{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <div class="container">
+        <div class="error-content">
+            <h1 class="error-code">{{ status_code|default("Error") }}</h1>
+            <h2 class="error-message">{{ error|default("Something went wrong") }}</h2>
+            
+            <p class="error-description">
+                {% if status_code == 404 %}
+                    The page you're looking for doesn't exist or has been moved.
+                {% elif status_code == 500 %}
+                    We're experiencing technical difficulties. Please try again later.
+                {% else %}
+                    An unexpected error occurred. Our team has been notified.
+                {% endif %}
+            </p>
+            
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">Return Home</a>
+                <a href="/dashboard" class="btn btn-secondary">View Dashboard</a>
+            </div>
+            
+            <div class="error-help">
+                <h3>Need help?</h3>
+                <ul>
+                    <li><a href="/docs">Documentation</a></li>
+                    <li><a href="/about">About UBEC</a></li>
+                    <li><a href="/api/docs">API Documentation</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

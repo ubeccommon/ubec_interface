@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ubuntu Bioregional Economic Commons - Four Element Token Ecosystem">
+    <meta name="keywords" content="UBEC, Ubuntu, blockchain, tokens, economic commons, regenerative economy">
+    <title>{% block title %}UBEC Protocol Network{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    
+    <!-- Additional page-specific styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <a href="/" class="logo">
+                    <span class="logo-text">UBEC</span>
+                    <span class="logo-subtext">Protocol Network</span>
+                </a>
+            </div>
+            
+            <div class="navbar-menu">
+                <a href="/" class="nav-link {% if page == 'home' %}active{% endif %}">Home</a>
+                <a href="/protocol" class="nav-link {% if page == 'protocol' %}active{% endif %}">Protocol</a>
+                <a href="/stories" class="nav-link {% if page == 'stories' %}active{% endif %}">Token Stories</a>
+                <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/docs" class="nav-link {% if page == 'docs' %}active{% endif %}">Documentation</a>
+                <a href="/about" class="nav-link {% if page == 'about' %}active{% endif %}">About</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>UBEC Protocol</h3>
+                    <p class="ubuntu-quote">"I am because we are"</p>
+                    <p>Ubuntu Bioregional Economic Commons</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Four Elements</h4>
+                    <ul>
+                        <li>🌬️ Air (UBEC) - Diversity</li>
+                        <li>💧 Water (UBECrc) - Reciprocity</li>
+                        <li>🌍 Earth (UBECgpi) - Mutualism</li>
+                        <li>🔥 Fire (UBECtt) - Regeneration</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="/stories">Token Stories</a></li>
+                        <li><a href="/docs">Documentation</a></li>
+                        <li><a href="/protocol">Protocol Overview</a></li>
+                        <li><a href="/dashboard">Live Dashboard</a></li>
+                        <li><a href="/about">About Ubuntu</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Network</h4>
+                    <ul>
+                        <li><a href="https://stellar.org" target="_blank">Stellar Network</a></li>
+                        <li><a href="/api/docs" target="_blank">API Documentation</a></li>
+                        <li><a href="https://github.com" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 UBEC Protocol Network. Released under open source license.</p>
+                <p class="attribution">
+                    This project uses the services of Claude and Anthropic PBC to inform our decisions 
+                    and recommendations. This project was made possible with the assistance of 
+                    Claude and Anthropic PBC.
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

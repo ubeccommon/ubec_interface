@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Live Dashboard - UBEC Protocol Network{% endblock %}
+
+{% block content %}
+<section class="dashboard-header">
+    <div class="container">
+        <h1>Live Network Dashboard</h1>
+        <p class="lead">Real-time data from the UBEC Protocol blockchain network</p>
+        <div class="last-updated">
+            Last updated: <span id="last-update-time">{{ network_status.last_block_time[:19] if network_status else "Loading..." }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-content">
+    <div class="container">
+        <!-- Network Overview -->
+        <div class="dashboard-section">
+            <h2>Network Overview</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">👥</div>
+                    <div class="metric-value">{{ network_status.active_participants if network_status else "0" }}</div>
+                    <div class="metric-label">Active Participants</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🔄</div>
+                    <div class="metric-value">{{ network_status.total_transactions_24h if network_status else "0" }}</div>
+                    <div class="metric-label">Transactions (24h)</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🌍</div>
+                    <div class="metric-value">{{ network_status.bioregions_count if network_status else "0" }}</div>
+                    <div class="metric-label">Bioregions</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">💚</div>
+                    <div class="metric-value">{{ (network_status.average_ubuntu_score * 100)|round|int if network_status else "0" }}%</div>
+                    <div class="metric-label">Ubuntu Score</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Holonic Scores -->
+        <div class="dashboard-section">
+            <h2>Holonic Evaluation Scores</h2>
+            {% if holonic_scores %}
+            <div class="holonic-grid">
+                <div class="holonic-card">
+                    <h4>Overall Network Health</h4>
+                    <div class="large-score">{{ (holonic_scores.overall_network_health * 100)|round|int }}%</div>
+                    <div class="score-indicator">
+                        <div class="indicator-bar" style="width: {{ (holonic_scores.overall_network_health * 100)|round }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="holonic-card">
+                    <h4>Five Dimensions</h4>
+                    <div class="dimensions-list">
+                        <div class="dimension-item">
+                            <span class="dimension-name">Autonomy Integration</span>
+                            <span class="dimension-score">{{ (holonic_scores.autonomy_integration * 100)|round }}%</span>
+                        </div>
+                        <div class="dimension-item">
+                            <span class="dimension-name">Ubuntu Alignment</span>
+                            <span class="dimension-score">{{ (holonic_scores.ubuntu_alignment * 100)|round }}%</span>
+                        </div>
+                        <div class="dimension-item">
+                            <span class="dimension-name">Reciprocity Health</span>
+                            <span class="dimension-score">{{ (holonic_scores.reciprocity_health * 100)|round }}%</span>
+                        </div>
+                        <div class="dimension-item">
+                            <span class="dimension-name">Mutualism Capacity</span>
+                            <span class="dimension-score">{{ (holonic_scores.mutualism_capacity * 100)|round }}%</span>
+                        </div>
+                        <div class="dimension-item">
+                            <span class="dimension-name">Regeneration Impact</span>
+                            <span class="dimension-score">{{ (holonic_scores.regeneration_impact * 100)|round }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="dashboard-section">
+            <h2>Recent Transactions</h2>
+            <div class="transactions-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hash</th>
+                            <th>Type</th>
+                            <th>Token</th>
+                            <th>Amount</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_transactions %}
+                            {% for tx in recent_transactions[:10] %}
+                            <tr>
+                                <td class="hash">{{ tx.hash[:12] }}...</td>
+                                <td><span class="badge tx-{{ tx.type }}">{{ tx.type }}</span></td>
+                                <td><span class="token-badge">{{ tx.token }}</span></td>
+                                <td class="amount">{{ "{:,.2f}".format(tx.amount) }}</td>
+                                <td class="timestamp">{{ tx.timestamp[:19] }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="no-data">Loading transactions...</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Distribution Statistics -->
+        <div class="dashboard-section">
+            <h2>Token Distribution</h2>
+            {% if distribution_stats %}
+            <div class="distribution-grid">
+                <div class="distribution-card">
+                    <h4>Distribution Model</h4>
+                    <p class="distribution-model">65 / 30 / 5</p>
+                    <div class="distribution-breakdown">
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Community Circulation</span>
+                            <span class="breakdown-value">65%</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Stewardship Reserve</span>
+                            <span class="breakdown-value">30%</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Administration</span>
+                            <span class="breakdown-value">5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Auto-refresh notification -->
+        <div class="auto-refresh-notice">
+            <span class="refresh-icon">🔄</span>
+            Dashboard refreshes automatically every 30 seconds
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+    }
+    
+    .dashboard-section {
+        margin: 3rem 0;
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .metric-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .metric-label {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .holonic-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+    
+    .holonic-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .large-score {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #4CAF50;
+        margin: 1rem 0;
+    }
+    
+    .dimensions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .dimension-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    
+    .transactions-table {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+    
+    .transactions-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .transactions-table th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .transactions-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .hash {
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+    
+    .token-badge {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85em;
+    }
+    
+    .auto-refresh-notice {
+        text-align: center;
+        padding: 1rem;
+        background: #e3f2fd;
+        border-radius: 8px;
+        margin-top: 2rem;
+        color: #1976d2;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh dashboard every 30 seconds
+    setInterval(() => {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}
