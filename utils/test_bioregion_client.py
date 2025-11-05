@@ -24,7 +24,7 @@ from pathlib import Path
 # Add parent directory to path to import backend_api
 sys.path.insert(0, str(Path(__file__).parent))
 
-from backend_api import BackendAPIClient
+from backend_client import BackendAPIClient
 
 
 async def test_bioregion_integration():
