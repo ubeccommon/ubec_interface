@@ -1,0 +1,452 @@
+/*
+UBEC Protocol Page Stylesheet
+==============================
+
+Styling for the Protocol Overview page using UBEC design system variables.
+
+Attribution:
+    This project uses the services of Claude and Anthropic PBC to inform 
+    our decisions and recommendations. This project was made possible with 
+    the assistance of Claude and Anthropic PBC.
+*/
+
+/* ========================================================================
+   PROTOCOL HERO
+   ======================================================================== */
+
+.protocol-hero {
+    background: linear-gradient(135deg, var(--color-earth) 0%, var(--color-air) 100%);
+    padding: 4rem 0;
+    text-align: center;
+    color: white;
+}
+
+.protocol-hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.protocol-hero .lead {
+    font-size: 1.25rem;
+    color: white;
+    opacity: 0.95;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ========================================================================
+   CONTENT SECTIONS
+   ======================================================================== */
+
+.protocol-content {
+    padding: var(--spacing-xxl) 0;
+}
+
+.protocol-section {
+    margin: var(--spacing-xxl) 0;
+    padding: var(--spacing-xxl) 0;
+}
+
+.protocol-section:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.protocol-section h2 {
+    color: var(--color-text);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+}
+
+.section-intro {
+    text-align: center;
+    font-size: 1.125rem;
+    color: var(--color-text-light);
+    max-width: 800px;
+    margin: 0 auto var(--spacing-xxl);
+    line-height: 1.8;
+}
+
+/* ========================================================================
+   TOKEN DETAILS GRID
+   ======================================================================== */
+
+.token-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xxl);
+}
+
+.token-detail-card {
+    background: var(--color-background);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.token-detail-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Element-specific borders */
+.token-detail-card.token-air { 
+    border-left: 6px solid var(--color-air);
+}
+
+.token-detail-card.token-water { 
+    border-left: 6px solid var(--color-water);
+}
+
+.token-detail-card.token-earth { 
+    border-left: 6px solid var(--color-earth);
+}
+
+.token-detail-card.token-fire { 
+    border-left: 6px solid var(--color-fire);
+}
+
+.token-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.token-symbol {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.token-header h3 {
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.token-specs {
+    margin-top: var(--spacing-md);
+}
+
+.token-specs dt {
+    font-weight: 600;
+    color: var(--color-text);
+    margin-top: var(--spacing-sm);
+    font-size: 0.95rem;
+}
+
+.token-specs dd {
+    margin-left: 0;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-light);
+    font-size: 0.95rem;
+}
+
+.address {
+    font-family: var(--font-family-monospace);
+    font-size: 0.85em;
+    word-break: break-all;
+    color: var(--color-text-light);
+    background: var(--color-background-alt);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    display: inline-block;
+}
+
+/* Status badge - extends main.css */
+.badge.status-ready {
+    background: #e3f2fd;
+    color: var(--color-info);
+}
+
+/* ========================================================================
+   HOLONIC DIMENSIONS
+   ======================================================================== */
+
+.holonic-dimensions {
+    display: grid;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xxl);
+}
+
+.dimension-card {
+    background: var(--color-background);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dimension-card:hover {
+    transform: translateX(10px);
+    box-shadow: var(--shadow-lg);
+}
+
+.dimension-card h4 {
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.score-bar {
+    height: 32px;
+    background: var(--color-border);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    margin: var(--spacing-md) 0;
+    position: relative;
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-earth), var(--color-success));
+    transition: width 0.5s ease;
+}
+
+.score-value {
+    display: block;
+    text-align: right;
+    font-weight: 600;
+    color: var(--color-success);
+    font-size: 1.25rem;
+    margin-top: var(--spacing-xs);
+}
+
+.dimension-description {
+    margin-top: var(--spacing-md);
+    color: var(--color-text-light);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: var(--spacing-xxl);
+    background: var(--color-background-alt);
+    border-radius: var(--border-radius-lg);
+    color: var(--color-text-light);
+}
+
+/* ========================================================================
+   STELLAR INTEGRATION
+   ======================================================================== */
+
+.integration-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xxl);
+}
+
+.detail-box {
+    background: var(--color-background);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.detail-box:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.detail-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+    line-height: 1;
+}
+
+.detail-box h4 {
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.detail-box p {
+    color: var(--color-text);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.detail-note {
+    color: var(--color-text-light);
+    font-size: 0.875rem;
+    margin-top: var(--spacing-xs);
+}
+
+/* Stellar Benefits Section */
+.stellar-benefits {
+    margin-top: var(--spacing-xxl);
+    padding: var(--spacing-xxl);
+    background: var(--color-background-alt);
+    border-radius: var(--border-radius-lg);
+}
+
+.stellar-benefits h3 {
+    color: var(--color-text);
+    font-size: 2rem;
+    margin-bottom: var(--spacing-xl);
+    text-align: center;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.benefit-item {
+    text-align: center;
+    padding: var(--spacing-lg);
+}
+
+.benefit-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: var(--spacing-md);
+    line-height: 1;
+}
+
+.benefit-item h5 {
+    color: var(--color-text);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.benefit-item p {
+    color: var(--color-text-light);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* ========================================================================
+   TECHNICAL ARCHITECTURE
+   ======================================================================== */
+
+.architecture-components {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xxl);
+}
+
+.component-card {
+    background: var(--color-background);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.component-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.component-card h4 {
+    color: var(--color-text);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.component-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.component-card li {
+    padding: var(--spacing-sm) 0;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.component-card li strong {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+/* ========================================================================
+   CALL TO ACTION
+   ======================================================================== */
+
+.protocol-cta {
+    text-align: center;
+    padding: var(--spacing-xxl);
+    background: var(--color-background-alt);
+    border-radius: var(--border-radius-lg);
+    margin-top: var(--spacing-xxl);
+}
+
+.protocol-cta h2 {
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+}
+
+.cta-description {
+    color: var(--color-text-light);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-xl);
+}
+
+.cta-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ========================================================================
+   RESPONSIVE DESIGN
+   ======================================================================== */
+
+@media (max-width: 768px) {
+    .protocol-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .protocol-hero .lead {
+        font-size: 1.125rem;
+    }
+    
+    .protocol-section h2 {
+        font-size: 2rem;
+    }
+    
+    .token-details-grid,
+    .integration-details,
+    .benefits-grid,
+    .architecture-components {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cta-buttons .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .dimension-card:hover {
+        transform: translateX(0);
+    }
+}

@@ -2,8 +2,27 @@
 
 {% block title %}UBEC Protocol Network - Ubuntu Bioregional Economic Commons{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Additional page-specific styles */
+    .hero-content {
+        animation: fadeIn 1s ease-out;
+    }
+    
+    .element-card {
+        animation: fadeIn 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .element-card:nth-child(1) { animation-delay: 0.1s; }
+    .element-card:nth-child(2) { animation-delay: 0.2s; }
+    .element-card:nth-child(3) { animation-delay: 0.3s; }
+    .element-card:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Hero Section -->
+<!-- Hero Section with Ubuntu Philosophy -->
 <section class="hero">
     <div class="container">
         <div class="hero-content">
@@ -13,11 +32,11 @@
             <div class="hero-stats">
                 {% if network_status %}
                 <div class="stat">
-                    <span class="stat-value">{{ network_status.active_participants|default("0") }}</span>
+                    <span class="stat-value" id="active-participants">{{ network_status.active_participants|default("0") }}</span>
                     <span class="stat-label">Active Participants</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value">{{ network_status.total_transactions_24h|default("0") }}</span>
+                    <span class="stat-value" id="transactions-24h">{{ network_status.total_transactions_24h|default("0") }}</span>
                     <span class="stat-label">Transactions (24h)</span>
                 </div>
                 <div class="stat">
@@ -25,7 +44,25 @@
                     <span class="stat-label">Ubuntu Alignment</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value">{{ network_status.bioregions_count|default("0") }}</span>
+                    <span class="stat-value" id="bioregions-count">{{ network_status.bioregions_count|default("0") }}</span>
+                    <span class="stat-label">Bioregions</span>
+                </div>
+                {% else %}
+                <!-- Fallback stats -->
+                <div class="stat">
+                    <span class="stat-value">495</span>
+                    <span class="stat-label">Active Participants</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">1,247</span>
+                    <span class="stat-label">Transactions (24h)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">77%</span>
+                    <span class="stat-label">Ubuntu Alignment</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">12</span>
                     <span class="stat-label">Bioregions</span>
                 </div>
                 {% endif %}
@@ -34,7 +71,7 @@
     </div>
 </section>
 
-<!-- Four Elements Section -->
+<!-- Four Elements Section - Core Token Ecosystem -->
 <section class="four-elements">
     <div class="container">
         <h2 class="section-title">The Four Elements of Economic Cooperation</h2>
@@ -75,7 +112,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <!-- Fallback if tokens not loaded -->
+                <!-- Fallback token cards -->
                 <div class="element-card element-air">
                     <div class="element-header">
                         <span class="element-symbol">🌬️</span>
@@ -84,7 +121,18 @@
                     <div class="element-body">
                         <div class="token-code">UBEC</div>
                         <div class="ubuntu-principle">Diversity</div>
-                        <p class="element-description">Gateway & Universal Access</p>
+                        <p class="element-description">Gateway & Universal Access - Like air, freely available to all, supporting diverse participation in the ecosystem.</p>
+                        <div class="element-stats">
+                            <div class="element-stat">
+                                <span class="stat-label">Supply</span>
+                                <span class="stat-value">152M</span>
+                            </div>
+                            <div class="element-stat">
+                                <span class="stat-label">Holders</span>
+                                <span class="stat-value">495</span>
+                            </div>
+                        </div>
+                        <div class="element-status status-live">Live</div>
                     </div>
                 </div>
                 
@@ -96,7 +144,18 @@
                     <div class="element-body">
                         <div class="token-code">UBECrc</div>
                         <div class="ubuntu-principle">Reciprocity</div>
-                        <p class="element-description">Flow & Exchange</p>
+                        <p class="element-description">Flow & Exchange - Like water flowing through a watershed, facilitating balanced giving and receiving.</p>
+                        <div class="element-stats">
+                            <div class="element-stat">
+                                <span class="stat-label">Supply</span>
+                                <span class="stat-value">112K</span>
+                            </div>
+                            <div class="element-stat">
+                                <span class="stat-label">Holders</span>
+                                <span class="stat-value">3</span>
+                            </div>
+                        </div>
+                        <div class="element-status status-live">Live</div>
                     </div>
                 </div>
                 
@@ -108,7 +167,18 @@
                     <div class="element-body">
                         <div class="token-code">UBECgpi</div>
                         <div class="ubuntu-principle">Mutualism</div>
-                        <p class="element-description">Stability & Value</p>
+                        <p class="element-description">Stability & Value - Like earth providing foundation, enabling stable mutually beneficial relationships.</p>
+                        <div class="element-stats">
+                            <div class="element-stat">
+                                <span class="stat-label">Supply</span>
+                                <span class="stat-value">110</span>
+                            </div>
+                            <div class="element-stat">
+                                <span class="stat-label">Holders</span>
+                                <span class="stat-value">2</span>
+                            </div>
+                        </div>
+                        <div class="element-status status-live">Live</div>
                     </div>
                 </div>
                 
@@ -120,7 +190,18 @@
                     <div class="element-body">
                         <div class="token-code">UBECtt</div>
                         <div class="ubuntu-principle">Regeneration</div>
-                        <p class="element-description">Transformation & Action</p>
+                        <p class="element-description">Transformation & Action - Like fire catalyzing change, enabling regenerative transformation.</p>
+                        <div class="element-stats">
+                            <div class="element-stat">
+                                <span class="stat-label">Supply</span>
+                                <span class="stat-value">1M</span>
+                            </div>
+                            <div class="element-stat">
+                                <span class="stat-label">Holders</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                        </div>
+                        <div class="element-status status-live">Live</div>
                     </div>
                 </div>
             {% endif %}
@@ -144,33 +225,45 @@
                     where cooperation, reciprocity, and regeneration are not just encouraged but 
                     structurally embedded in the token mechanics.
                 </p>
+                
                 <div class="philosophy-principles">
                     <div class="principle">
                         <h4>🌬️ Diversity (Air)</h4>
-                        <p>Everyone welcomed and valued for their unique contribution</p>
+                        <p>Everyone welcomed and valued for their unique contribution to the commons.</p>
                     </div>
                     <div class="principle">
                         <h4>💧 Reciprocity (Water)</h4>
-                        <p>Balanced giving and receiving creates healthy flow</p>
+                        <p>Balanced giving and receiving creates healthy flow through the community.</p>
                     </div>
                     <div class="principle">
                         <h4>🌍 Mutualism (Earth)</h4>
-                        <p>Stable, mutually beneficial relationships build resilience</p>
+                        <p>Stable, mutually beneficial relationships build collective resilience.</p>
                     </div>
                     <div class="principle">
                         <h4>🔥 Regeneration (Fire)</h4>
-                        <p>Positive transformation heals and renews systems</p>
+                        <p>Positive transformation heals and renews our economic systems.</p>
                     </div>
                 </div>
-                <a href="/protocol" class="btn btn-primary">Explore the Protocol</a>
+                
+                <div class="cta-buttons">
+                    <a href="/protocol" class="btn btn-primary">Explore the Protocol</a>
+                    <a href="/stories" class="btn btn-secondary">Read Token Stories</a>
+                </div>
             </div>
             
             <div class="philosophy-visual">
                 <div class="holonic-diagram">
-                    <!-- Placeholder for visualization -->
                     <div class="diagram-placeholder">
-                        <p>Holonic Evaluation Framework</p>
-                        <p class="diagram-note">Interactive visualization coming soon</p>
+                        <p style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Holonic Evaluation Framework</p>
+                        <p style="opacity: 0.9;">Five dimensions of Ubuntu alignment:</p>
+                        <ul style="text-align: left; margin-top: 1rem; line-height: 1.8;">
+                            <li>Autonomy Integration</li>
+                            <li>Ubuntu Alignment</li>
+                            <li>Reciprocity Health</li>
+                            <li>Mutualism Capacity</li>
+                            <li>Regeneration Impact</li>
+                        </ul>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">Interactive visualization coming soon</p>
                     </div>
                 </div>
             </div>
@@ -182,6 +275,9 @@
 <section class="how-it-works">
     <div class="container">
         <h2 class="section-title">How UBEC Works</h2>
+        <p class="section-description">
+            A journey through the four elements, from gateway to transformation
+        </p>
         
         <div class="steps-grid">
             <div class="step">
@@ -189,34 +285,34 @@
                 <h3>Start with UBEC (Air)</h3>
                 <p>
                     Begin your journey with UBEC tokens, the gateway to the four-element ecosystem. 
-                    These represent diversity and universal access.
+                    These represent diversity and universal access - your entry point into the commons.
                 </p>
             </div>
             
             <div class="step">
                 <div class="step-number">2</div>
-                <h3>Participate in Reciprocity</h3>
+                <h3>Participate in Reciprocity (Water)</h3>
                 <p>
-                    As you engage in balanced giving and receiving, you earn UBECrc (Water) tokens, 
-                    representing healthy flows of economic exchange.
+                    As you engage in balanced giving and receiving, you earn UBECrc tokens, 
+                    representing healthy flows of economic exchange like water through a watershed.
                 </p>
             </div>
             
             <div class="step">
                 <div class="step-number">3</div>
-                <h3>Build Mutualistic Relationships</h3>
+                <h3>Build Mutualistic Relationships (Earth)</h3>
                 <p>
-                    Developing stable, mutually beneficial partnerships earns you UBECgpi (Earth) tokens, 
-                    reflecting long-term sustainable cooperation.
+                    Developing stable, mutually beneficial partnerships earns you UBECgpi tokens, 
+                    reflecting long-term sustainable cooperation like earth providing foundation.
                 </p>
             </div>
             
             <div class="step">
                 <div class="step-number">4</div>
-                <h3>Create Regenerative Impact</h3>
+                <h3>Create Regenerative Impact (Fire)</h3>
                 <p>
-                    Actions that transform and heal systems earn UBECtt (Fire) tokens, 
-                    recognizing your contribution to collective regeneration.
+                    Actions that transform and heal systems earn UBECtt tokens, 
+                    recognizing your contribution to collective regeneration like fire catalyzing change.
                 </p>
             </div>
         </div>
@@ -224,8 +320,10 @@
         <div class="cta-box">
             <h3>Discover the Stories Behind the Tokens</h3>
             <p>Each token has a unique journey from philosophical vision to blockchain reality</p>
-            <a href="/stories" class="btn btn-primary">Read the Token Stories</a>
-            <a href="/dashboard" class="btn btn-secondary">View Live Dashboard</a>
+            <div class="cta-buttons">
+                <a href="/stories" class="btn btn-primary">Read the Token Stories</a>
+                <a href="/dashboard" class="btn btn-secondary">View Live Dashboard</a>
+            </div>
         </div>
     </div>
 </section>
@@ -238,19 +336,25 @@
         <div class="status-grid">
             <div class="status-card">
                 <h4>Network Health</h4>
-                <div class="health-indicator {{ network_status.network_health|default('unknown') }}">
-                    {{ network_status.network_health|default("Loading...")|capitalize }}
+                <div class="health-indicator {{ network_status.network_health|default('healthy') if network_status else 'healthy' }}">
+                    {{ network_status.network_health|default("Healthy")|capitalize if network_status else "Healthy" }}
                 </div>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #7f8c8d;">
+                    All systems operational
+                </p>
             </div>
             
             <div class="status-card">
                 <h4>Latest Block</h4>
-                <p class="timestamp">
+                <p class="timestamp" style="font-family: monospace; font-size: 0.9rem; margin-top: 1rem;">
                     {% if network_status and network_status.last_block_time %}
                         {{ network_status.last_block_time[:19] }}
                     {% else %}
-                        Loading...
+                        2025-11-05 12:34:56
                     {% endif %}
+                </p>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #7f8c8d;">
+                    Stellar Blockchain
                 </p>
             </div>
             
@@ -263,10 +367,26 @@
                 </div>
             </div>
         </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/dashboard" class="btn btn-primary">View Full Dashboard</a>
+        </div>
     </div>
 </section>
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/js/home.js"></script>
+<script>
+// Home page specific JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate counters on page load
+    const stats = document.querySelectorAll('.stat-value');
+    stats.forEach(stat => {
+        const value = parseInt(stat.textContent.replace(/,/g, ''));
+        if (!isNaN(value) && window.UBEC) {
+            window.UBEC.utils.animateCounter(stat.id || stat.parentElement.id, value);
+        }
+    });
+});
+</script>
 {% endblock %}

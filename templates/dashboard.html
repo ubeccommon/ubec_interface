@@ -160,16 +160,50 @@
 
 {% block extra_css %}
 <style>
+    /* Dashboard Header - UBEC Design System */
     .dashboard-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #8BC34A 0%, #87CEEB 100%);
         padding: 3rem 0;
+    }
+    
+    .dashboard-header h1 {
+        color: #2c3e50;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .dashboard-header .lead {
+        color: #2c3e50;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .last-updated {
+        color: #2c3e50;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+    }
+    
+    #last-update-time {
+        font-weight: 600;
+    }
+    
+    /* Dashboard Content */
+    .dashboard-content {
+        padding: 2rem 0;
     }
     
     .dashboard-section {
         margin: 3rem 0;
     }
     
+    .dashboard-section h2 {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Network Metrics */
     .metrics-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -180,9 +214,15 @@
     .metric-card {
         background: white;
         padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
     
     .metric-icon {
@@ -193,14 +233,17 @@
     .metric-value {
         font-size: 2.5rem;
         font-weight: bold;
-        color: #667eea;
+        color: #8BC34A;
+        margin-bottom: 0.5rem;
     }
     
     .metric-label {
         color: #666;
         margin-top: 0.5rem;
+        font-size: 0.95rem;
     }
     
+    /* Holonic Scores */
     .holonic-grid {
         display: grid;
         grid-template-columns: 1fr 2fr;
@@ -211,8 +254,13 @@
     .holonic-card {
         background: white;
         padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .holonic-card h4 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
     }
     
     .large-score {
@@ -220,6 +268,21 @@
         font-weight: bold;
         color: #4CAF50;
         margin: 1rem 0;
+        text-align: center;
+    }
+    
+    .score-indicator {
+        height: 24px;
+        background: #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+    
+    .indicator-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #8BC34A, #4CAF50);
+        transition: width 0.5s ease;
     }
     
     .dimensions-list {
@@ -231,16 +294,34 @@
     .dimension-item {
         display: flex;
         justify-content: space-between;
-        padding: 0.75rem;
+        align-items: center;
+        padding: 0.75rem 1rem;
         background: #f8f9fa;
-        border-radius: 4px;
+        border-radius: 8px;
+        transition: background 0.2s ease;
     }
     
+    .dimension-item:hover {
+        background: #e9ecef;
+    }
+    
+    .dimension-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    
+    .dimension-score {
+        font-weight: 600;
+        color: #8BC34A;
+        font-size: 1.1rem;
+    }
+    
+    /* Transactions Table */
     .transactions-table {
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: hidden;
     }
     
     .transactions-table table {
@@ -253,33 +334,182 @@
         padding: 1rem;
         text-align: left;
         font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #e0e0e0;
     }
     
     .transactions-table td {
         padding: 1rem;
         border-bottom: 1px solid #e0e0e0;
+        color: #555;
+    }
+    
+    .transactions-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .transactions-table tbody tr:last-child td {
+        border-bottom: none;
     }
     
     .hash {
-        font-family: monospace;
+        font-family: 'Courier New', monospace;
         font-size: 0.9em;
+        color: #666;
+    }
+    
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+    
+    .badge.tx-payment {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .badge.tx-trade {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .badge.tx-transfer {
+        background: #fff3cd;
+        color: #856404;
     }
     
     .token-badge {
-        background: #667eea;
+        background: #8BC34A;
         color: white;
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
         font-size: 0.85em;
+        font-weight: 600;
     }
     
+    .amount {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .timestamp {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 2rem;
+        color: #999;
+        font-style: italic;
+    }
+    
+    /* Distribution Statistics */
+    .distribution-grid {
+        display: grid;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+    
+    .distribution-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .distribution-card h4 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .distribution-model {
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        color: #8BC34A;
+        margin: 1.5rem 0;
+    }
+    
+    .distribution-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .breakdown-label {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .breakdown-value {
+        color: #8BC34A;
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+    
+    /* Auto-refresh Notice */
     .auto-refresh-notice {
         text-align: center;
         padding: 1rem;
-        background: #e3f2fd;
+        background: #e8f5e9;
         border-radius: 8px;
         margin-top: 2rem;
-        color: #1976d2;
+        color: #2e7d32;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .refresh-icon {
+        font-size: 1.25rem;
+        animation: rotate 2s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .holonic-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .transactions-table {
+            overflow-x: auto;
+        }
+        
+        .transactions-table table {
+            min-width: 600px;
+        }
     }
 </style>
 {% endblock %}
@@ -290,5 +520,14 @@
     setInterval(() => {
         location.reload();
     }, 30000);
+    
+    // Update last refresh time immediately
+    document.addEventListener('DOMContentLoaded', function() {
+        const updateTime = document.getElementById('last-update-time');
+        if (updateTime && updateTime.textContent === 'Loading...') {
+            const now = new Date();
+            updateTime.textContent = now.toISOString().substring(0, 19).replace('T', ' ');
+        }
+    });
 </script>
 {% endblock %}
