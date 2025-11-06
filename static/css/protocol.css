@@ -1,8 +1,9 @@
 /*
-UBEC Protocol Page Stylesheet
-==============================
+UBEC Protocol Page - Additional Styles
+=======================================
 
-Styling for the Protocol Overview page using UBEC design system variables.
+Only protocol-specific styles that are NOT in main.css.
+Uses CSS variables and extends base classes from main.css.
 
 Attribution:
     This project uses the services of Claude and Anthropic PBC to inform 
@@ -11,39 +12,8 @@ Attribution:
 */
 
 /* ========================================================================
-   PROTOCOL HERO
+   PROTOCOL SECTIONS
    ======================================================================== */
-
-.protocol-hero {
-    background: linear-gradient(135deg, var(--color-earth) 0%, var(--color-air) 100%);
-    padding: 4rem 0;
-    text-align: center;
-    color: white;
-}
-
-.protocol-hero h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.protocol-hero .lead {
-    font-size: 1.25rem;
-    color: white;
-    opacity: 0.95;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-/* ========================================================================
-   CONTENT SECTIONS
-   ======================================================================== */
-
-.protocol-content {
-    padding: var(--spacing-xxl) 0;
-}
 
 .protocol-section {
     margin: var(--spacing-xxl) 0;
@@ -51,24 +21,7 @@ Attribution:
 }
 
 .protocol-section:not(:last-child) {
-    border-bottom: 1px solid var(--color-border);
-}
-
-.protocol-section h2 {
-    color: var(--color-text);
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-lg);
-    text-align: center;
-}
-
-.section-intro {
-    text-align: center;
-    font-size: 1.125rem;
-    color: var(--color-text-light);
-    max-width: 800px;
-    margin: 0 auto var(--spacing-xxl);
-    line-height: 1.8;
+    border-bottom: 1px solid var(--border-light);
 }
 
 /* ========================================================================
@@ -79,37 +32,28 @@ Attribution:
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-xl);
-    margin-top: var(--spacing-xxl);
+    margin-top: var(--spacing-xl);
 }
 
+/* Extends .card from main.css */
 .token-detail-card {
-    background: var(--color-background);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Element-specific border colors */
 }
 
-.token-detail-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-}
-
-/* Element-specific borders */
 .token-detail-card.token-air { 
-    border-left: 6px solid var(--color-air);
+    border-left: 6px solid var(--element-air);
 }
 
 .token-detail-card.token-water { 
-    border-left: 6px solid var(--color-water);
+    border-left: 6px solid var(--element-water);
 }
 
 .token-detail-card.token-earth { 
-    border-left: 6px solid var(--color-earth);
+    border-left: 6px solid var(--element-earth);
 }
 
 .token-detail-card.token-fire { 
-    border-left: 6px solid var(--color-fire);
+    border-left: 6px solid var(--element-fire);
 }
 
 .token-header {
@@ -118,18 +62,16 @@ Attribution:
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-md);
-    border-bottom: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--border-light);
 }
 
 .token-symbol {
-    font-size: 3rem;
+    font-size: var(--font-size-5xl);
     line-height: 1;
 }
 
 .token-header h3 {
-    color: var(--color-text);
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: var(--font-size-2xl);
     margin: 0;
 }
 
@@ -139,33 +81,33 @@ Attribution:
 
 .token-specs dt {
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--text-primary);
     margin-top: var(--spacing-sm);
-    font-size: 0.95rem;
+    font-size: var(--font-size-sm);
 }
 
 .token-specs dd {
     margin-left: 0;
     margin-bottom: var(--spacing-sm);
-    color: var(--color-text-light);
-    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
 }
 
 .address {
-    font-family: var(--font-family-monospace);
-    font-size: 0.85em;
+    font-family: var(--font-monospace);
+    font-size: var(--font-size-xs);
     word-break: break-all;
-    color: var(--color-text-light);
-    background: var(--color-background-alt);
+    color: var(--text-secondary);
+    background: var(--background-alt);
     padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--radius-sm);
     display: inline-block;
 }
 
-/* Status badge - extends main.css */
+/* Extends .badge from main.css */
 .badge.status-ready {
     background: #e3f2fd;
-    color: var(--color-info);
+    color: var(--info);
 }
 
 /* ========================================================================
@@ -175,66 +117,51 @@ Attribution:
 .holonic-dimensions {
     display: grid;
     gap: var(--spacing-lg);
-    margin-top: var(--spacing-xxl);
+    margin-top: var(--spacing-xl);
 }
 
-.dimension-card {
-    background: var(--color-background);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.dimension-card:hover {
-    transform: translateX(10px);
-    box-shadow: var(--shadow-lg);
-}
-
+/* Extends .card from main.css */
 .dimension-card h4 {
-    color: var(--color-text);
+    font-size: var(--font-size-xl);
     margin-bottom: var(--spacing-md);
-    font-size: 1.25rem;
-    font-weight: 600;
 }
 
 .score-bar {
     height: 32px;
-    background: var(--color-border);
-    border-radius: var(--border-radius-lg);
+    background: var(--border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     margin: var(--spacing-md) 0;
-    position: relative;
 }
 
 .score-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-earth), var(--color-success));
-    transition: width 0.5s ease;
+    background: linear-gradient(90deg, var(--element-earth), var(--success));
+    transition: width var(--transition-slow);
 }
 
 .score-value {
     display: block;
     text-align: right;
     font-weight: 600;
-    color: var(--color-success);
-    font-size: 1.25rem;
+    color: var(--success);
+    font-size: var(--font-size-xl);
     margin-top: var(--spacing-xs);
 }
 
 .dimension-description {
     margin-top: var(--spacing-md);
-    color: var(--color-text-light);
-    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
     line-height: 1.6;
 }
 
 .no-data-message {
     text-align: center;
     padding: var(--spacing-xxl);
-    background: var(--color-background-alt);
-    border-radius: var(--border-radius-lg);
-    color: var(--color-text-light);
+    background: var(--background-alt);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
 }
 
 /* ========================================================================
@@ -245,61 +172,42 @@ Attribution:
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--spacing-xl);
-    margin-top: var(--spacing-xxl);
+    margin-top: var(--spacing-xl);
 }
 
+/* Extends .card from main.css */
 .detail-box {
-    background: var(--color-background);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
     text-align: center;
-    box-shadow: var(--shadow-md);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.detail-box:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
 }
 
 .detail-icon {
-    font-size: 3rem;
+    font-size: var(--font-size-5xl);
     margin-bottom: var(--spacing-md);
     line-height: 1;
 }
 
 .detail-box h4 {
-    color: var(--color-text);
+    font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-sm);
-    font-size: 1.125rem;
-    font-weight: 600;
 }
 
 .detail-box p {
-    color: var(--color-text);
     line-height: 1.6;
     margin: 0;
 }
 
 .detail-note {
-    color: var(--color-text-light);
-    font-size: 0.875rem;
+    color: var(--text-light);
+    font-size: var(--font-size-xs);
     margin-top: var(--spacing-xs);
 }
 
-/* Stellar Benefits Section */
+/* Stellar Benefits */
 .stellar-benefits {
     margin-top: var(--spacing-xxl);
     padding: var(--spacing-xxl);
-    background: var(--color-background-alt);
-    border-radius: var(--border-radius-lg);
-}
-
-.stellar-benefits h3 {
-    color: var(--color-text);
-    font-size: 2rem;
-    margin-bottom: var(--spacing-xl);
-    text-align: center;
+    background: var(--background-alt);
+    border-radius: var(--radius-lg);
 }
 
 .benefits-grid {
@@ -314,23 +222,21 @@ Attribution:
 }
 
 .benefit-icon {
-    font-size: 2.5rem;
+    font-size: var(--font-size-4xl);
     display: block;
     margin-bottom: var(--spacing-md);
     line-height: 1;
 }
 
 .benefit-item h5 {
-    color: var(--color-text);
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-sm);
 }
 
 .benefit-item p {
-    color: var(--color-text-light);
+    color: var(--text-secondary);
     line-height: 1.6;
-    font-size: 0.95rem;
+    font-size: var(--font-size-sm);
 }
 
 /* ========================================================================
@@ -341,26 +247,12 @@ Attribution:
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-xl);
-    margin-top: var(--spacing-xxl);
+    margin-top: var(--spacing-xl);
 }
 
-.component-card {
-    background: var(--color-background);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.component-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-}
-
+/* Extends .card from main.css */
 .component-card h4 {
-    color: var(--color-text);
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: var(--font-size-xl);
     margin-bottom: var(--spacing-md);
 }
 
@@ -372,13 +264,13 @@ Attribution:
 
 .component-card li {
     padding: var(--spacing-sm) 0;
-    color: var(--color-text-light);
+    color: var(--text-secondary);
     line-height: 1.6;
-    font-size: 0.95rem;
+    font-size: var(--font-size-sm);
 }
 
 .component-card li strong {
-    color: var(--color-text);
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -389,27 +281,9 @@ Attribution:
 .protocol-cta {
     text-align: center;
     padding: var(--spacing-xxl);
-    background: var(--color-background-alt);
-    border-radius: var(--border-radius-lg);
+    background: var(--background-alt);
+    border-radius: var(--radius-lg);
     margin-top: var(--spacing-xxl);
-}
-
-.protocol-cta h2 {
-    color: var(--color-text);
-    margin-bottom: var(--spacing-md);
-}
-
-.cta-description {
-    color: var(--color-text-light);
-    font-size: 1.125rem;
-    margin-bottom: var(--spacing-xl);
-}
-
-.cta-buttons {
-    display: flex;
-    gap: var(--spacing-md);
-    justify-content: center;
-    flex-wrap: wrap;
 }
 
 /* ========================================================================
@@ -417,36 +291,10 @@ Attribution:
    ======================================================================== */
 
 @media (max-width: 768px) {
-    .protocol-hero h1 {
-        font-size: 2rem;
-    }
-    
-    .protocol-hero .lead {
-        font-size: 1.125rem;
-    }
-    
-    .protocol-section h2 {
-        font-size: 2rem;
-    }
-    
     .token-details-grid,
     .integration-details,
     .benefits-grid,
     .architecture-components {
         grid-template-columns: 1fr;
-    }
-    
-    .cta-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .cta-buttons .btn {
-        width: 100%;
-        max-width: 300px;
-    }
-    
-    .dimension-card:hover {
-        transform: translateX(0);
     }
 }

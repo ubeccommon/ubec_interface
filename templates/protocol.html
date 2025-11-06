@@ -3,23 +3,287 @@
 {% block title %}Protocol Overview - UBEC Protocol Network{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/protocol.css">
+<style>
+    /* ====================================================================
+       PROTOCOL PAGE STYLES
+       All styles inline following about.html pattern
+       ==================================================================== */
+    
+    /* Protocol Sections */
+    .protocol-section {
+        margin: var(--spacing-xxl) 0;
+        padding: var(--spacing-xxl) 0;
+    }
+    
+    .protocol-section:not(:last-child) {
+        border-bottom: 1px solid var(--border-light);
+    }
+    
+    /* Token Details Grid */
+    .token-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xl);
+    }
+    
+    /* Element-specific borders */
+    .token-detail-card.token-air { 
+        border-left: 6px solid var(--element-air);
+    }
+    
+    .token-detail-card.token-water { 
+        border-left: 6px solid var(--element-water);
+    }
+    
+    .token-detail-card.token-earth { 
+        border-left: 6px solid var(--element-earth);
+    }
+    
+    .token-detail-card.token-fire { 
+        border-left: 6px solid var(--element-fire);
+    }
+    
+    .token-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--border-light);
+    }
+    
+    .token-symbol {
+        font-size: var(--font-size-5xl);
+        line-height: 1;
+    }
+    
+    .token-header h3 {
+        font-size: var(--font-size-2xl);
+        margin: 0;
+    }
+    
+    .token-specs {
+        margin-top: var(--spacing-md);
+    }
+    
+    .token-specs dt {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-top: var(--spacing-sm);
+        font-size: var(--font-size-sm);
+    }
+    
+    .token-specs dd {
+        margin-left: 0;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+    }
+    
+    .address {
+        font-family: var(--font-monospace);
+        font-size: var(--font-size-xs);
+        word-break: break-all;
+        color: var(--text-secondary);
+        background: var(--background-alt);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        display: inline-block;
+    }
+    
+    .badge.status-ready {
+        background: #e3f2fd;
+        color: var(--info);
+    }
+    
+    /* Holonic Dimensions */
+    .holonic-dimensions {
+        display: grid;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-xl);
+    }
+    
+    .dimension-card h4 {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .score-bar {
+        height: 32px;
+        background: var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin: var(--spacing-md) 0;
+    }
+    
+    .score-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--element-earth), var(--success));
+        transition: width var(--transition-slow);
+    }
+    
+    .score-value {
+        display: block;
+        text-align: right;
+        font-weight: 600;
+        color: var(--success);
+        font-size: var(--font-size-xl);
+        margin-top: var(--spacing-xs);
+    }
+    
+    .dimension-description {
+        margin-top: var(--spacing-md);
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        line-height: 1.6;
+    }
+    
+    .no-data-message {
+        text-align: center;
+        padding: var(--spacing-xxl);
+        background: var(--background-alt);
+        border-radius: var(--radius-lg);
+        color: var(--text-secondary);
+    }
+    
+    /* Stellar Integration */
+    .integration-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xl);
+    }
+    
+    .detail-box {
+        text-align: center;
+    }
+    
+    .detail-icon {
+        font-size: var(--font-size-5xl);
+        margin-bottom: var(--spacing-md);
+        line-height: 1;
+    }
+    
+    .detail-box h4 {
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .detail-box p {
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    .detail-note {
+        color: var(--text-light);
+        font-size: var(--font-size-xs);
+        margin-top: var(--spacing-xs);
+    }
+    
+    .stellar-benefits {
+        margin-top: var(--spacing-xxl);
+        padding: var(--spacing-xxl);
+        background: var(--background-alt);
+        border-radius: var(--radius-lg);
+    }
+    
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .benefit-item {
+        text-align: center;
+        padding: var(--spacing-lg);
+    }
+    
+    .benefit-icon {
+        font-size: var(--font-size-4xl);
+        display: block;
+        margin-bottom: var(--spacing-md);
+        line-height: 1;
+    }
+    
+    .benefit-item h5 {
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .benefit-item p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: var(--font-size-sm);
+    }
+    
+    /* Technical Architecture */
+    .architecture-components {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xl);
+    }
+    
+    .component-card h4 {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .component-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .component-card li {
+        padding: var(--spacing-sm) 0;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: var(--font-size-sm);
+    }
+    
+    .component-card li strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    /* Call to Action */
+    .protocol-cta {
+        text-align: center;
+        padding: var(--spacing-xxl);
+        background: var(--background-alt);
+        border-radius: var(--radius-lg);
+        margin-top: var(--spacing-xxl);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .token-details-grid,
+        .integration-details,
+        .benefits-grid,
+        .architecture-components {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<section class="protocol-hero">
+<!-- Hero uses .hero class from main.css for consistent Ubuntu gradient -->
+<section class="hero">
     <div class="container">
-        <h1>UBEC Protocol Architecture</h1>
+        <h1 class="hero-title">UBEC Protocol Architecture</h1>
         <p class="lead">Technical deep dive into the four-element token ecosystem and holonic evaluation framework</p>
     </div>
 </section>
 
-<section class="protocol-content">
+<section class="section">
     <div class="container">
         <!-- Token Ecosystem Section -->
         <div class="protocol-section">
-            <h2>Four-Element Token Ecosystem</h2>
-            <p class="section-intro">
+            <h2 class="section-title">Four-Element Token Ecosystem</h2>
+            <p class="section-description">
                 The UBEC Protocol implements a sophisticated token architecture based on the four classical elements,
                 each representing a fundamental aspect of economic cooperation according to Ubuntu philosophy.
             </p>
@@ -27,7 +291,7 @@
             <div class="token-details-grid">
                 {% if tokens %}
                     {% for token in tokens %}
-                    <div class="token-detail-card token-{{ token.element|lower }}">
+                    <div class="card token-detail-card token-{{ token.element|lower }}">
                         <div class="token-header">
                             <span class="token-symbol">{{ token.element_symbol }}</span>
                             <h3>{{ token.token_code }} - {{ token.element }}</h3>
@@ -52,7 +316,7 @@
                     {% endfor %}
                 {% else %}
                     <!-- Fallback if tokens not loaded -->
-                    <div class="token-detail-card token-air">
+                    <div class="card token-detail-card token-air">
                         <div class="token-header">
                             <span class="token-symbol">🌬️</span>
                             <h3>UBEC - Air</h3>
@@ -65,7 +329,7 @@
                         </dl>
                     </div>
                     
-                    <div class="token-detail-card token-water">
+                    <div class="card token-detail-card token-water">
                         <div class="token-header">
                             <span class="token-symbol">💧</span>
                             <h3>UBECrc - Water</h3>
@@ -78,7 +342,7 @@
                         </dl>
                     </div>
                     
-                    <div class="token-detail-card token-earth">
+                    <div class="card token-detail-card token-earth">
                         <div class="token-header">
                             <span class="token-symbol">🌍</span>
                             <h3>UBECgpi - Earth</h3>
@@ -91,7 +355,7 @@
                         </dl>
                     </div>
                     
-                    <div class="token-detail-card token-fire">
+                    <div class="card token-detail-card token-fire">
                         <div class="token-header">
                             <span class="token-symbol">🔥</span>
                             <h3>UBECtt - Fire</h3>
@@ -109,15 +373,15 @@
         
         <!-- Holonic Evaluation Framework -->
         <div class="protocol-section">
-            <h2>Holonic Evaluation Framework</h2>
-            <p class="section-intro">
+            <h2 class="section-title">Holonic Evaluation Framework</h2>
+            <p class="section-description">
                 Network participants are evaluated across five dimensions of Ubuntu alignment,
                 creating a holonic (nested whole) assessment of their contribution to the commons.
             </p>
             
             {% if holonic_scores %}
             <div class="holonic-dimensions">
-                <div class="dimension-card">
+                <div class="card dimension-card">
                     <h4>Autonomy Integration</h4>
                     <div class="score-bar">
                         <div class="score-fill" style="width: {{ (holonic_scores.autonomy_integration * 100)|round }}%"></div>
@@ -129,7 +393,7 @@
                     </p>
                 </div>
                 
-                <div class="dimension-card">
+                <div class="card dimension-card">
                     <h4>Ubuntu Alignment</h4>
                     <div class="score-bar">
                         <div class="score-fill" style="width: {{ (holonic_scores.ubuntu_alignment * 100)|round }}%"></div>
@@ -141,7 +405,7 @@
                     </p>
                 </div>
                 
-                <div class="dimension-card">
+                <div class="card dimension-card">
                     <h4>Reciprocity Health</h4>
                     <div class="score-bar">
                         <div class="score-fill" style="width: {{ (holonic_scores.reciprocity_health * 100)|round }}%"></div>
@@ -153,7 +417,7 @@
                     </p>
                 </div>
                 
-                <div class="dimension-card">
+                <div class="card dimension-card">
                     <h4>Mutualism Capacity</h4>
                     <div class="score-bar">
                         <div class="score-fill" style="width: {{ (holonic_scores.mutualism_capacity * 100)|round }}%"></div>
@@ -165,7 +429,7 @@
                     </p>
                 </div>
                 
-                <div class="dimension-card">
+                <div class="card dimension-card">
                     <h4>Regeneration Impact</h4>
                     <div class="score-bar">
                         <div class="score-fill" style="width: {{ (holonic_scores.regeneration_impact * 100)|round }}%"></div>
@@ -186,32 +450,32 @@
         
         <!-- Stellar Integration -->
         <div class="protocol-section">
-            <h2>Stellar Blockchain Integration</h2>
-            <p class="section-intro">
+            <h2 class="section-title">Stellar Blockchain Integration</h2>
+            <p class="section-description">
                 UBEC tokens operate on the Stellar network, leveraging its fast, low-cost,
                 and environmentally sustainable blockchain infrastructure.
             </p>
             
             <div class="integration-details">
-                <div class="detail-box">
+                <div class="card detail-box">
                     <div class="detail-icon">🌐</div>
                     <h4>Network</h4>
                     <p>Stellar Mainnet (Public Network)</p>
                     <p class="detail-note">Production-ready since Oct 2015</p>
                 </div>
-                <div class="detail-box">
+                <div class="card detail-box">
                     <div class="detail-icon">⚡</div>
                     <h4>Transaction Speed</h4>
                     <p>3-5 seconds per confirmation</p>
                     <p class="detail-note">Near-instant settlement</p>
                 </div>
-                <div class="detail-box">
+                <div class="card detail-box">
                     <div class="detail-icon">💰</div>
                     <h4>Transaction Cost</h4>
                     <p>0.00001 XLM (~$0.000003)</p>
                     <p class="detail-note">Micropayment-friendly</p>
                 </div>
-                <div class="detail-box">
+                <div class="card detail-box">
                     <div class="detail-icon">🌱</div>
                     <h4>Energy Efficiency</h4>
                     <p>Carbon-neutral blockchain</p>
@@ -220,7 +484,7 @@
             </div>
             
             <div class="stellar-benefits">
-                <h3>Why Stellar?</h3>
+                <h3 class="section-title">Why Stellar?</h3>
                 <div class="benefits-grid">
                     <div class="benefit-item">
                         <span class="benefit-icon">🔒</span>
@@ -248,14 +512,14 @@
         
         <!-- Technical Architecture -->
         <div class="protocol-section">
-            <h2>Technical Architecture</h2>
-            <p class="section-intro">
+            <h2 class="section-title">Technical Architecture</h2>
+            <p class="section-description">
                 The UBEC Protocol implements a robust, scalable architecture designed for
                 long-term sustainability and growth.
             </p>
             
             <div class="architecture-components">
-                <div class="component-card">
+                <div class="card component-card">
                     <h4>🏗️ Core Infrastructure</h4>
                     <ul>
                         <li><strong>Database:</strong> PostgreSQL with advanced indexing</li>
@@ -265,7 +529,7 @@
                     </ul>
                 </div>
                 
-                <div class="component-card">
+                <div class="card component-card">
                     <h4>🔄 Service Architecture</h4>
                     <ul>
                         <li><strong>Protocol Services:</strong> One per token element</li>
@@ -275,7 +539,7 @@
                     </ul>
                 </div>
                 
-                <div class="component-card">
+                <div class="card component-card">
                     <h4>🎯 Design Principles</h4>
                     <ul>
                         <li><strong>Async First:</strong> 100% non-blocking operations</li>
@@ -285,7 +549,7 @@
                     </ul>
                 </div>
                 
-                <div class="component-card">
+                <div class="card component-card">
                     <h4>🔐 Security & Performance</h4>
                     <ul>
                         <li><strong>Rate Limiting:</strong> Built-in API protection</li>
@@ -299,8 +563,8 @@
         
         <!-- Call to Action -->
         <div class="protocol-cta">
-            <h2>Explore the UBEC Network</h2>
-            <p class="cta-description">
+            <h2 class="section-title">Explore the UBEC Network</h2>
+            <p class="section-description">
                 Dive deeper into the protocol, view live network data, or integrate with our API
             </p>
             <div class="cta-buttons">
