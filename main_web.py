@@ -30,19 +30,19 @@ Attribution:
     our decisions and recommendations. This project was made possible with 
     the assistance of Claude and Anthropic PBC.
 
-Version: 1.0.0
+Version: 1.0.1
 """
 
 import os
 import sys
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import logging
 
 # FastAPI imports
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -51,7 +51,14 @@ from fastapi.middleware.gzip import GZipMiddleware
 # Local imports
 from config.settings import Settings
 from api.routes import router as api_router
-from utils.backend_client import BackendAPIClient
+
+# Conditional import for backend client
+try:
+    from utils.backend_client import BackendAPIClient
+    BACKEND_CLIENT_AVAILABLE = True
+except ImportError:
+    BACKEND_CLIENT_AVAILABLE = False
+    BackendAPIClient = None
 
 # Configure logging
 logging.basicConfig(
@@ -71,7 +78,7 @@ settings = Settings()
 app = FastAPI(
     title="UBEC Protocol Network",
     description="Ubuntu Bioregional Economic Commons - Four Element Token Ecosystem",
-    version="1.0.0",
+    version="1.0.1",
     docs_url="/api/docs" if settings.ENABLE_API_DOCS else None,
     redoc_url="/api/redoc" if settings.ENABLE_API_DOCS else None
 )
@@ -79,6 +86,25 @@ app = FastAPI(
 # ========================================================================
 # MIDDLEWARE CONFIGURATION
 # ========================================================================
+
+# UTF-8 Charset Middleware (CRITICAL FOR EMOJI DISPLAY)
+@app.middleware("http")
+async def add_utf8_charset(request: Request, call_next):
+    """
+    Ensure all HTML responses include UTF-8 charset.
+    
+    This prevents emoji characters from displaying as garbled text.
+    Without this, browsers may default to ISO-8859-1 or Windows-1252.
+    """
+    response = await call_next(request)
+    
+    # Add charset to HTML responses
+    content_type = response.headers.get("content-type", "")
+    if content_type.startswith("text/html") and "charset" not in content_type.lower():
+        response.headers["content-type"] = "text/html; charset=utf-8"
+        logger.debug(f"Added UTF-8 charset to {request.url.path}")
+    
+    return response
 
 # CORS middleware
 app.add_middleware(
@@ -98,7 +124,10 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Mount static files
 static_path = Path(__file__).parent / "static"
-app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+if static_path.exists():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+else:
+    logger.warning(f"Static directory not found: {static_path}")
 
 # Setup templates
 templates_path = Path(__file__).parent / "templates"
@@ -110,22 +139,102 @@ templates = Jinja2Templates(directory=str(templates_path))
 
 backend_client: Optional[BackendAPIClient] = None
 
-async def get_backend_client() -> BackendAPIClient:
+async def get_backend_client() -> Optional[BackendAPIClient]:
     """
-    Get or create backend API client.
+    Get or create backend API client with error handling.
     
     Principle #4: Single Source of Truth - backend as data source
     Principle #5: Strict Async Operations
+    
+    Returns None if backend client is unavailable or fails.
     """
     global backend_client
     
+    if not BACKEND_CLIENT_AVAILABLE:
+        logger.warning("Backend client module not available")
+        return None
+    
     if backend_client is None:
-        backend_client = BackendAPIClient(
-            base_url=settings.BACKEND_API_URL,
-            api_key=settings.BACKEND_API_KEY
-        )
+        try:
+            backend_client = BackendAPIClient(
+                base_url=settings.BACKEND_API_URL,
+                api_key=settings.BACKEND_API_KEY
+            )
+        except Exception as e:
+            logger.error(f"Failed to initialize backend client: {e}")
+            return None
     
     return backend_client
+
+# ========================================================================
+# FALLBACK DATA FOR OFFLINE MODE
+# ========================================================================
+
+def get_fallback_tokens() -> List[Dict[str, Any]]:
+    """
+    Provide fallback token data when backend is unavailable.
+    
+    This ensures the website remains functional even if backend is down.
+    """
+    return [
+        {
+            "token_code": "UBEC",
+            "element": "Air",
+            "element_symbol": "🌬️",
+            "ubuntu_principle": "Diversity",
+            "description": "Gateway & Universal Access - Like air, freely available to all, supporting diverse participation in the ecosystem.",
+            "total_supply": 152025699,
+            "holders_count": 495,
+            "status": "live",
+            "issuer": "GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        },
+        {
+            "token_code": "UBECrc",
+            "element": "Water",
+            "element_symbol": "💧",
+            "ubuntu_principle": "Reciprocity",
+            "description": "Flow & Exchange - Like water flowing through a watershed, facilitating balanced giving and receiving.",
+            "total_supply": 112000,
+            "holders_count": 3,
+            "status": "live",
+            "issuer": "GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        },
+        {
+            "token_code": "UBECgpi",
+            "element": "Earth",
+            "element_symbol": "🌍",
+            "ubuntu_principle": "Mutualism",
+            "description": "Stability & Value - Like earth providing foundation, enabling stable mutually beneficial relationships.",
+            "total_supply": 110,
+            "holders_count": 2,
+            "status": "live",
+            "issuer": "GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        },
+        {
+            "token_code": "UBECtt",
+            "element": "Fire",
+            "element_symbol": "🔥",
+            "ubuntu_principle": "Regeneration",
+            "description": "Transformation & Action - Like fire catalyzing change, enabling regenerative transformation.",
+            "total_supply": 1000000,
+            "holders_count": 1,
+            "status": "live",
+            "issuer": "GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        }
+    ]
+
+def get_fallback_network_status() -> Dict[str, Any]:
+    """Fallback network status when backend unavailable."""
+    return {
+        "network_health": "healthy",
+        "last_block_time": datetime.now().isoformat(),
+        "total_supply": "152M+",
+        "total_holders": "500+"
+    }
+
+def get_fallback_holonic_scores() -> Optional[Dict[str, float]]:
+    """Fallback holonic scores when backend unavailable."""
+    return None  # Templates handle None gracefully
 
 # ========================================================================
 # LIFECYCLE EVENTS
@@ -140,11 +249,15 @@ async def startup_event():
     logger.info(f"Environment: {settings.APP_ENV}")
     logger.info(f"Backend API: {settings.BACKEND_API_URL}")
     logger.info(f"Host: {settings.APP_HOST}:{settings.APP_PORT}")
+    logger.info(f"UTF-8 Charset Middleware: Enabled")
     logger.info("=" * 70)
     
-    # Initialize backend client
+    # Initialize backend client (with error handling)
     client = await get_backend_client()
-    logger.info("✓ Backend client initialized")
+    if client:
+        logger.info("✓ Backend client initialized")
+    else:
+        logger.warning("⚠ Backend client unavailable - using fallback data")
 
 
 @app.on_event("shutdown")
@@ -156,8 +269,34 @@ async def shutdown_event():
     
     # Close backend client
     if backend_client:
-        await backend_client.close()
-        logger.info("✓ Backend client closed")
+        try:
+            await backend_client.close()
+            logger.info("✓ Backend client closed")
+        except Exception as e:
+            logger.error(f"Error closing backend client: {e}")
+
+# ========================================================================
+# HELPER FUNCTIONS
+# ========================================================================
+
+async def safe_backend_call(func, *args, fallback=None, **kwargs):
+    """
+    Safely call backend functions with fallback on error.
+    
+    Args:
+        func: Async function to call
+        *args: Positional arguments for function
+        fallback: Value to return on error
+        **kwargs: Keyword arguments for function
+    
+    Returns:
+        Result of function call or fallback value
+    """
+    try:
+        return await func(*args, **kwargs)
+    except Exception as e:
+        logger.error(f"Backend call failed: {func.__name__} - {e}")
+        return fallback
 
 # ========================================================================
 # PAGE ROUTES
@@ -177,9 +316,19 @@ async def home(request: Request):
     try:
         client = await get_backend_client()
         
-        # Fetch token data for home page
-        tokens = await client.get_all_tokens()
-        network_status = await client.get_network_status()
+        # Fetch token data with fallback
+        if client:
+            tokens = await safe_backend_call(
+                client.get_all_tokens,
+                fallback=get_fallback_tokens()
+            )
+            network_status = await safe_backend_call(
+                client.get_network_status,
+                fallback=get_fallback_network_status()
+            )
+        else:
+            tokens = get_fallback_tokens()
+            network_status = get_fallback_network_status()
         
         return templates.TemplateResponse(
             "home.html",
@@ -187,20 +336,48 @@ async def home(request: Request):
                 "request": request,
                 "tokens": tokens,
                 "network_status": network_status,
+                "network_stats": network_status,  # Alias for template compatibility
                 "page": "home"
             }
         )
     
     except Exception as e:
-        logger.error(f"Error rendering home page: {e}")
-        return templates.TemplateResponse(
-            "error.html",
-            {
-                "request": request,
-                "error": "Unable to load home page. Please try again later."
-            },
-            status_code=500
-        )
+        logger.error(f"Error rendering home page: {e}", exc_info=True)
+        
+        # Try to return page with fallback data
+        try:
+            return templates.TemplateResponse(
+                "home.html",
+                {
+                    "request": request,
+                    "tokens": get_fallback_tokens(),
+                    "network_status": get_fallback_network_status(),
+                    "network_stats": get_fallback_network_status(),
+                    "page": "home"
+                }
+            )
+        except Exception as template_error:
+            logger.error(f"Template rendering failed: {template_error}", exc_info=True)
+            
+            # Last resort: simple HTML response
+            return HTMLResponse(
+                content=f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>UBEC Protocol - Error</title>
+                </head>
+                <body>
+                    <h1>UBEC Protocol Network</h1>
+                    <p>The website is temporarily unavailable.</p>
+                    <p>Error: {str(e)}</p>
+                    <p><a href="/health">Check system health</a></p>
+                </body>
+                </html>
+                """,
+                status_code=500
+            )
 
 
 @app.get("/protocol", response_class=HTMLResponse, name="protocol")
@@ -217,9 +394,19 @@ async def protocol(request: Request):
     try:
         client = await get_backend_client()
         
-        # Fetch protocol details
-        tokens = await client.get_all_tokens()
-        holonic_scores = await client.get_holonic_scores()
+        # Fetch protocol details with fallback
+        if client:
+            tokens = await safe_backend_call(
+                client.get_all_tokens,
+                fallback=get_fallback_tokens()
+            )
+            holonic_scores = await safe_backend_call(
+                client.get_holonic_scores,
+                fallback=get_fallback_holonic_scores()
+            )
+        else:
+            tokens = get_fallback_tokens()
+            holonic_scores = get_fallback_holonic_scores()
         
         return templates.TemplateResponse(
             "protocol.html",
@@ -232,15 +419,36 @@ async def protocol(request: Request):
         )
     
     except Exception as e:
-        logger.error(f"Error rendering protocol page: {e}")
-        return templates.TemplateResponse(
-            "error.html",
-            {
-                "request": request,
-                "error": "Unable to load protocol information."
-            },
-            status_code=500
-        )
+        logger.error(f"Error rendering protocol page: {e}", exc_info=True)
+        
+        # Try with fallback data
+        try:
+            return templates.TemplateResponse(
+                "protocol.html",
+                {
+                    "request": request,
+                    "tokens": get_fallback_tokens(),
+                    "holonic_scores": get_fallback_holonic_scores(),
+                    "page": "protocol"
+                }
+            )
+        except:
+            return HTMLResponse(
+                content="""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Protocol - UBEC</title>
+                </head>
+                <body>
+                    <h1>Protocol Overview Unavailable</h1>
+                    <p><a href="/">Return to Home</a></p>
+                </body>
+                </html>
+                """,
+                status_code=500
+            )
 
 
 @app.get("/dashboard", response_class=HTMLResponse, name="dashboard")
@@ -259,10 +467,47 @@ async def dashboard(request: Request):
         client = await get_backend_client()
         
         # Fetch dashboard data
-        network_status = await client.get_network_status()
-        holonic_scores = await client.get_holonic_scores()
-        recent_transactions = await client.get_recent_transactions(limit=20)
-        distribution_stats = await client.get_distribution_stats()
+        raw_network_status = await client.get_network_status()
+        raw_holonic_scores = await client.get_holonic_scores()
+        raw_transactions = await client.get_recent_transactions(limit=20)
+        raw_distribution_stats = await client.get_distribution_stats()
+        
+        # Transform network status to match template expectations
+        network_status = {
+            'active_participants': raw_network_status.get('total_holders', 0),
+            'total_transactions_24h': raw_network_status.get('transactions_24h', 0),
+            'bioregions_count': raw_network_status.get('active_bioregions', 0),
+            'average_ubuntu_score': raw_network_status.get('overall_health_score', 0),
+            'last_block_time': raw_network_status.get('timestamp', '')
+        }
+        
+        # Transform holonic scores to match template expectations
+        # Backend returns a list, we need the first item as an object
+        holonic_scores = None
+        if raw_holonic_scores and isinstance(raw_holonic_scores, list) and len(raw_holonic_scores) > 0:
+            raw_scores = raw_holonic_scores[0]
+            holonic_scores = {
+                'overall_network_health': raw_scores.get('overall_health', 0),
+                'autonomy_integration': raw_scores.get('diversity', {}).get('score', 0),
+                'ubuntu_alignment': raw_scores.get('holism', {}).get('score', 0),
+                'reciprocity_health': raw_scores.get('reciprocity', {}).get('score', 0),
+                'mutualism_capacity': raw_scores.get('mutualism', {}).get('score', 0),
+                'regeneration_impact': raw_scores.get('regeneration', {}).get('score', 0)
+            }
+        
+        # Transform transactions to match template expectations
+        recent_transactions = []
+        for tx in raw_transactions:
+            recent_transactions.append({
+                'hash': tx.get('hash', ''),
+                'type': tx.get('element', 'transfer') or 'transfer',
+                'token': tx.get('tokens', 'UBEC') or 'UBEC',
+                'amount': tx.get('operations', 0),
+                'timestamp': tx.get('timestamp', '')
+            })
+        
+        # Distribution stats can be passed as-is
+        distribution_stats = raw_distribution_stats
         
         return templates.TemplateResponse(
             "dashboard.html",
@@ -278,6 +523,8 @@ async def dashboard(request: Request):
     
     except Exception as e:
         logger.error(f"Error rendering dashboard: {e}")
+        import traceback
+        traceback.print_exc()
         return templates.TemplateResponse(
             "error.html",
             {
@@ -303,8 +550,14 @@ async def stories(request: Request):
     try:
         client = await get_backend_client()
         
-        # Fetch token data for stories page
-        tokens = await client.get_all_tokens()
+        # Fetch token data with fallback
+        if client:
+            tokens = await safe_backend_call(
+                client.get_all_tokens,
+                fallback=get_fallback_tokens()
+            )
+        else:
+            tokens = get_fallback_tokens()
         
         return templates.TemplateResponse(
             "stories.html",
@@ -316,15 +569,35 @@ async def stories(request: Request):
         )
     
     except Exception as e:
-        logger.error(f"Error rendering stories page: {e}")
-        return templates.TemplateResponse(
-            "error.html",
-            {
-                "request": request,
-                "error": "Unable to load token stories."
-            },
-            status_code=500
-        )
+        logger.error(f"Error rendering stories page: {e}", exc_info=True)
+        
+        # Try with fallback
+        try:
+            return templates.TemplateResponse(
+                "stories.html",
+                {
+                    "request": request,
+                    "tokens": get_fallback_tokens(),
+                    "page": "stories"
+                }
+            )
+        except:
+            return HTMLResponse(
+                content="""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Stories - UBEC</title>
+                </head>
+                <body>
+                    <h1>Token Stories Unavailable</h1>
+                    <p><a href="/">Return to Home</a></p>
+                </body>
+                </html>
+                """,
+                status_code=500
+            )
 
 
 @app.get("/about", response_class=HTMLResponse, name="about")
@@ -338,13 +611,33 @@ async def about(request: Request):
     - Team and contributors
     - Roadmap and milestones
     """
-    return templates.TemplateResponse(
-        "about.html",
-        {
-            "request": request,
-            "page": "about"
-        }
-    )
+    try:
+        return templates.TemplateResponse(
+            "about.html",
+            {
+                "request": request,
+                "page": "about"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error rendering about page: {e}", exc_info=True)
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>About - UBEC</title>
+            </head>
+            <body>
+                <h1>About UBEC Protocol</h1>
+                <p>Page temporarily unavailable</p>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
 
 
 @app.get("/docs", response_class=HTMLResponse, name="documentation")
@@ -357,20 +650,43 @@ async def documentation(request: Request):
     - Communities (participation guides)
     - Integration partners
     """
-    return templates.TemplateResponse(
-        "docs.html",
-        {
-            "request": request,
-            "page": "docs"
-        }
-    )
+    try:
+        return templates.TemplateResponse(
+            "docs.html",
+            {
+                "request": request,
+                "page": "docs"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error rendering documentation page: {e}", exc_info=True)
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Documentation - UBEC</title>
+            </head>
+            <body>
+                <h1>Documentation</h1>
+                <p>Page temporarily unavailable</p>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
 
 # ========================================================================
 # API ROUTES
 # ========================================================================
 
-# Include API router
-app.include_router(api_router, prefix="/api/v1", tags=["api"])
+# Include API router (with error handling)
+try:
+    app.include_router(api_router, prefix="/api/v1", tags=["api"])
+except Exception as e:
+    logger.warning(f"API router not available: {e}")
 
 # ========================================================================
 # HEALTH CHECK
@@ -386,18 +702,35 @@ async def health_check():
     try:
         client = await get_backend_client()
         
-        # Quick ping to backend
-        network_status = await client.get_network_status()
+        # Quick ping to backend (with timeout)
+        backend_connected = False
+        backend_status = "unavailable"
+        
+        if client:
+            try:
+                network_status = await safe_backend_call(
+                    client.get_network_status,
+                    fallback=None
+                )
+                if network_status:
+                    backend_connected = True
+                    backend_status = "operational"
+            except:
+                pass
+        
+        status = "healthy" if backend_connected else "degraded"
         
         return {
-            "status": "healthy",
+            "status": status,
             "timestamp": datetime.now().isoformat(),
-            "version": "1.0.0",
-            "backend_connected": True,
+            "version": "1.0.1",
+            "backend_connected": backend_connected,
             "services": {
                 "web": "operational",
-                "backend": "operational"
-            }
+                "backend": backend_status,
+                "utf8_charset": "enabled"
+            },
+            "emojis": "🌬️ 💧 🌍 🔥"  # Test emoji encoding
         }
     
     except Exception as e:
@@ -405,9 +738,13 @@ async def health_check():
         return {
             "status": "degraded",
             "timestamp": datetime.now().isoformat(),
-            "version": "1.0.0",
+            "version": "1.0.1",
             "backend_connected": False,
-            "error": str(e)
+            "error": str(e),
+            "services": {
+                "web": "operational",
+                "backend": "error"
+            }
         }
 
 # ========================================================================
@@ -417,30 +754,68 @@ async def health_check():
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc: HTTPException):
     """Handle 404 Not Found errors"""
-    return templates.TemplateResponse(
-        "error.html",
-        {
-            "request": request,
-            "error": "Page not found",
-            "status_code": 404
-        },
-        status_code=404
-    )
+    try:
+        return templates.TemplateResponse(
+            "error.html",
+            {
+                "request": request,
+                "error": "Page not found",
+                "status_code": 404
+            },
+            status_code=404
+        )
+    except:
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>404 - Not Found</title>
+            </head>
+            <body>
+                <h1>404 - Page Not Found</h1>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=404
+        )
 
 
 @app.exception_handler(500)
 async def server_error_handler(request: Request, exc: Exception):
     """Handle 500 Internal Server errors"""
-    logger.error(f"Server error: {exc}")
-    return templates.TemplateResponse(
-        "error.html",
-        {
-            "request": request,
-            "error": "Internal server error",
-            "status_code": 500
-        },
-        status_code=500
-    )
+    logger.error(f"Server error: {exc}", exc_info=True)
+    
+    try:
+        return templates.TemplateResponse(
+            "error.html",
+            {
+                "request": request,
+                "error": "Internal server error",
+                "status_code": 500
+            },
+            status_code=500
+        )
+    except:
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>500 - Server Error</title>
+            </head>
+            <body>
+                <h1>500 - Internal Server Error</h1>
+                <p>Something went wrong. Please try again later.</p>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
 
 # ========================================================================
 # MAIN ENTRY POINT
@@ -451,6 +826,9 @@ if __name__ == "__main__":
     
     # Principle #2: This file can only be run as main entry point
     # No standalone execution for service modules
+    
+    logger.info("Starting UBEC Protocol Website...")
+    logger.info("Emojis test: 🌬️ 💧 🌍 🔥")
     
     uvicorn.run(
         "main_web:app",

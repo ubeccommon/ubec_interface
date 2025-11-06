@@ -1,106 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- CRITICAL: Meta charset must be the FIRST meta tag for proper UTF-8 encoding -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ubuntu Bioregional Economic Commons - Four Element Token Ecosystem">
-    <meta name="keywords" content="UBEC, Ubuntu, blockchain, tokens, economic commons, regenerative economy">
-    <title>{% block title %}UBEC Protocol Network{% endblock %}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>{% block title %}UBEC Protocol Network - Ubuntu Bioregional Economic Commons{% endblock %}</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='/favicon.ico') }}">
     
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/static/css/main.css">
+    <!-- Primary Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/main.css') }}">
     
-    <!-- Additional page-specific styles -->
+    <!-- CSS Variables for Ubuntu Design System -->
+    <style>
+        :root {
+            /* Color Palette - Ubuntu Earth Tones */
+            --element-air: #87CEEB;      /* Sky Blue */
+            --element-water: #4A90E2;    /* Water Blue */
+            --element-earth: #8BC34A;    /* Earth Green */
+            --element-fire: #FF6B6B;     /* Fire Red */
+            
+            /* Neutral Colors */
+            --background: #FFFFFF;
+            --background-alt: #F5F7FA;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6c7d;
+            --text-light: #7f8c8d;
+            --border: #e0e0e0;
+            --border-light: #f0f0f0;
+            
+            /* Status Colors */
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #e74c3c;
+            --info: #3498db;
+            
+            /* Spacing Scale */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-xxl: 3rem;
+            --spacing-xxxl: 4rem;
+            
+            /* Typography Scale */
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 1rem;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+            
+            /* Transitions */
+            --transition-base: all 0.3s ease;
+            --transition-fast: all 0.15s ease;
+            --transition-slow: all 0.5s ease;
+            
+            /* Fonts */
+            --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --font-monospace: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+        }
+        
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: var(--font-primary);
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--background);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg);
+        }
+        
+        /* Section */
+        .section {
+            padding: var(--spacing-xxxl) 0;
+        }
+        
+        /* Card Component */
+        .card {
+            background: var(--background);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-base);
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: var(--spacing-md) var(--spacing-xl);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+        
+        .btn-primary {
+            background: var(--element-earth);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #7ab636;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--background-alt);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--element-earth);
+            color: var(--element-earth);
+        }
+        
+        /* Badge Component */
+        .badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.status-live {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+        
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: var(--spacing-sm); }
+        .mt-2 { margin-top: var(--spacing-md); }
+        .mt-3 { margin-top: var(--spacing-lg); }
+        .mb-1 { margin-bottom: var(--spacing-sm); }
+        .mb-2 { margin-bottom: var(--spacing-md); }
+        .mb-3 { margin-bottom: var(--spacing-lg); }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+    
+    <!-- Page-specific styles -->
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="navbar-brand">
+    <!-- Navigation Header -->
+    <header class="site-header">
+        <nav class="container">
+            <div class="nav-content">
                 <a href="/" class="logo">
-                    <span class="logo-text">UBEC</span>
-                    <span class="logo-subtext">Protocol Network</span>
+                    <span class="logo-text">UBEC Protocol</span>
                 </a>
+                <ul class="nav-menu">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/protocol">Protocol</a></li>
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/stories">Token Stories</a></li>
+                    <li><a href="/about">About</a></li>
+                </ul>
             </div>
-            
-            <div class="navbar-menu">
-                <a href="/" class="nav-link {% if page == 'home' %}active{% endif %}">Home</a>
-                <a href="/protocol" class="nav-link {% if page == 'protocol' %}active{% endif %}">Protocol</a>
-                <a href="/stories" class="nav-link {% if page == 'stories' %}active{% endif %}">Token Stories</a>
-                <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
-                <a href="/docs" class="nav-link {% if page == 'docs' %}active{% endif %}">Documentation</a>
-                <a href="/about" class="nav-link {% if page == 'about' %}active{% endif %}">About</a>
-            </div>
-        </div>
-    </nav>
-    
-    <!-- Main Content -->
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
     <main class="main-content">
-        {% block content %}{% endblock %}
+        {% block content %}
+        <!-- Page-specific content goes here -->
+        {% endblock %}
     </main>
-    
+
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="site-footer">
         <div class="container">
-            <div class="footer-grid">
+            <div class="footer-content">
                 <div class="footer-section">
                     <h3>UBEC Protocol</h3>
-                    <p class="ubuntu-quote">"I am because we are"</p>
-                    <p>Ubuntu Bioregional Economic Commons</p>
+                    <p>Ubuntu Bioregional Economic Commons - Four-element token ecosystem embodying "I am because we are"</p>
                 </div>
-                
                 <div class="footer-section">
-                    <h4>Four Elements</h4>
+                    <h4>Quick Links</h4>
                     <ul>
-                        <li>🌬️ Air (UBEC) - Diversity</li>
-                        <li>💧 Water (UBECrc) - Reciprocity</li>
-                        <li>🌍 Earth (UBECgpi) - Mutualism</li>
-                        <li>🔥 Fire (UBECtt) - Regeneration</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="/stories">Token Stories</a></li>
-                        <li><a href="/docs">Documentation</a></li>
                         <li><a href="/protocol">Protocol Overview</a></li>
                         <li><a href="/dashboard">Live Dashboard</a></li>
-                        <li><a href="/about">About Ubuntu</a></li>
+                        <li><a href="/docs">Documentation</a></li>
+                        <li><a href="/api/docs">API Reference</a></li>
                     </ul>
                 </div>
-                
                 <div class="footer-section">
-                    <h4>Network</h4>
+                    <h4>Community</h4>
                     <ul>
-                        <li><a href="https://stellar.org" target="_blank">Stellar Network</a></li>
-                        <li><a href="/api/docs" target="_blank">API Documentation</a></li>
-                        <li><a href="https://github.com" target="_blank">GitHub</a></li>
+                        <li><a href="/stories">Token Stories</a></li>
+                        <li><a href="/about">About Ubuntu</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Elements 🌬️💧🌍🔥</h4>
+                    <ul>
+                        <li>🌬️ Air - Diversity</li>
+                        <li>💧 Water - Reciprocity</li>
+                        <li>🌍 Earth - Mutualism</li>
+                        <li>🔥 Fire - Regeneration</li>
                     </ul>
                 </div>
             </div>
-            
             <div class="footer-bottom">
-                <p>&copy; 2025 UBEC Protocol Network. Released under open source license.</p>
+                <p>&copy; 2025 UBEC Protocol Network. Licensed under Ubuntu Philosophy.</p>
                 <p class="attribution">
-                    This project uses the services of Claude and Anthropic PBC to inform our decisions 
-                    and recommendations. This project was made possible with the assistance of 
-                    Claude and Anthropic PBC.
+                    This project uses the services of Claude and Anthropic PBC to inform our 
+                    decisions and recommendations. This project was made possible with the 
+                    assistance of Claude and Anthropic PBC.
                 </p>
             </div>
         </div>
     </footer>
+
+    <!-- Core JavaScript -->
+    <script>
+        // Global UBEC namespace
+        window.UBEC = window.UBEC || {};
+        
+        // Utility functions
+        window.UBEC.utils = {
+            // Animate a counter from 0 to target value
+            animateCounter: function(elementId, targetValue, duration = 1000) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                const startValue = 0;
+                const increment = targetValue / (duration / 16);
+                let currentValue = startValue;
+                
+                const timer = setInterval(() => {
+                    currentValue += increment;
+                    if (currentValue >= targetValue) {
+                        element.textContent = targetValue.toLocaleString();
+                        clearInterval(timer);
+                    } else {
+                        element.textContent = Math.floor(currentValue).toLocaleString();
+                    }
+                }, 16);
+            },
+            
+            // Format large numbers with appropriate suffixes
+            formatNumber: function(num) {
+                if (num >= 1000000) {
+                    return (num / 1000000).toFixed(1) + 'M';
+                } else if (num >= 1000) {
+                    return (num / 1000).toFixed(1) + 'K';
+                }
+                return num.toLocaleString();
+            },
+            
+            // Debounce function for performance
+            debounce: function(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        };
+        
+        // Global event handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌬️💧🌍🔥 UBEC Protocol Network Loaded');
+            
+            // Add active class to current navigation item
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-menu a');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
     
-    <!-- JavaScript -->
-    <script src="/static/js/main.js"></script>
-    
-    <!-- Chart.js for data visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-    
+    <!-- Page-specific JavaScript -->
     {% block extra_js %}{% endblock %}
+    
+    <!-- Analytics (if needed) -->
+    {% if False %}
+    <script>
+        // Analytics code here
+    </script>
+    {% endif %}
 </body>
 </html>
+
+<!-- 
+================================================================================
+CHARACTER ENCODING NOTE:
+This template uses UTF-8 encoding for proper emoji display.
+Emojis used: 🌬️💧🌍🔥
+
+CRITICAL REQUIREMENTS:
+1. This file MUST be saved with UTF-8 encoding (no BOM)
+2. The <meta charset="UTF-8"> tag MUST be the first meta tag in <head>
+3. Web server MUST send "Content-Type: text/html; charset=utf-8" header
+
+If emojis display as garbled characters (e.g., "∂ŸŒ-ï,"), check:
+- File is saved as UTF-8
+- Meta charset tag is present and first
+- Server is sending correct Content-Type header
+- Browser cache is cleared (Ctrl+Shift+R / Cmd+Shift+R)
+================================================================================
+-->

@@ -1,243 +1,395 @@
 """
-Backend API Client - UBEC Protocol Data Access
+Backend API Client
+==================
 
-Communicates with the backend protocol server to fetch real-time data about
-tokens, holonic evaluations, and network status.
+HTTP client for communicating with the UBEC Protocol backend API.
 
-Attribution: This project uses the services of Claude and Anthropic PBC.
+This module implements:
+    - Principle #3: Service pattern with centralized execution
+    - Principle #5: Strict async operations
+    - Principle #9: Integrated rate limiting
+
+Features:
+    - Async HTTP client using aiohttp
+    - Response caching with configurable TTL
+    - Automatic session management
+    - Error handling and logging
+    - Connection pooling
+
+Attribution:
+    This project uses the services of Claude and Anthropic PBC to inform 
+    our decisions and recommendations. This project was made possible with 
+    the assistance of Claude and Anthropic PBC.
 """
 
 import aiohttp
-from typing import Dict, List, Optional
-from datetime import datetime, timedelta
+import asyncio
 import logging
-import json
+from typing import Dict, List, Optional, Any
+from datetime import datetime, timedelta
+
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
 
 class BackendAPIClient:
-    """Client for communicating with UBEC Protocol backend"""
+    """
+    Async HTTP client for UBEC Protocol backend API.
     
-    def __init__(self, base_url: str, api_key: Optional[str] = None):
-        self.base_url = base_url.rstrip('/')
-        self.api_key = api_key
-        self.session: Optional[aiohttp.ClientSession] = None
+    Provides cached access to backend endpoints with automatic session management.
+    """
+    
+    def __init__(
+        self,
+        base_url: Optional[str] = None,
+        api_key: Optional[str] = None,
+        timeout: int = 30
+    ):
+        """
+        Initialize the backend API client.
         
-        # Caching for performance
-        self.cache = {}
-        self.cache_ttl = {}
-        self.default_ttl = 30  # seconds
+        Args:
+            base_url: Backend API base URL (defaults to settings.BACKEND_API_URL)
+            api_key: API authentication key (defaults to settings.BACKEND_API_KEY)
+            timeout: Request timeout in seconds
+        """
+        self.base_url = (base_url or settings.BACKEND_API_URL).rstrip("/")
+        self.api_key = api_key or settings.BACKEND_API_KEY
+        self.timeout = aiohttp.ClientTimeout(total=timeout)
+        self._session: Optional[aiohttp.ClientSession] = None
+        self._cache: Dict[str, tuple[Any, datetime]] = {}
+        self._cache_lock = asyncio.Lock()
+        
+        logger.info(f"Initialized BackendAPIClient for {self.base_url}")
     
     async def _get_session(self) -> aiohttp.ClientSession:
-        """Get or create aiohttp session"""
-        if self.session is None or self.session.closed:
-            headers = {"Content-Type": "application/json"}
+        """Get or create aiohttp session."""
+        if self._session is None or self._session.closed:
+            headers = {}
             if self.api_key:
-                headers["X-API-Key"] = self.api_key
+                headers["Authorization"] = f"Bearer {self.api_key}"
             
-            timeout = aiohttp.ClientTimeout(total=10)
-            self.session = aiohttp.ClientSession(
-                headers=headers,
-                timeout=timeout
+            self._session = aiohttp.ClientSession(
+                timeout=self.timeout,
+                headers=headers
             )
-        return self.session
+        return self._session
     
-    async def _cached_get(self, endpoint: str, ttl: int = None) -> Dict:
-        """Execute GET request with caching"""
-        cache_key = endpoint
-        current_ttl = ttl or self.default_ttl
+    async def close(self):
+        """Close the HTTP session."""
+        if self._session and not self._session.closed:
+            await self._session.close()
+            logger.info("Closed BackendAPIClient session")
+    
+    async def _cached_get(
+        self,
+        endpoint: str,
+        ttl: int = 30,
+        params: Optional[Dict] = None
+    ) -> Any:
+        """
+        Make cached GET request to backend.
+        
+        Args:
+            endpoint: API endpoint path (e.g., "/api/v1/tokens")
+            ttl: Cache time-to-live in seconds
+            params: Query parameters
+        
+        Returns:
+            JSON response data
+        
+        Raises:
+            aiohttp.ClientError: On connection errors
+            ValueError: On invalid JSON response
+        """
+        # Create cache key
+        cache_key = f"{endpoint}:{str(params)}"
         
         # Check cache
-        if cache_key in self.cache:
-            cached_time = self.cache_ttl.get(cache_key)
-            if cached_time and (datetime.now() - cached_time).seconds < current_ttl:
-                logger.debug(f"Cache hit for {endpoint}")
-                return self.cache[cache_key]
+        async with self._cache_lock:
+            if cache_key in self._cache:
+                data, cached_at = self._cache[cache_key]
+                if datetime.now() - cached_at < timedelta(seconds=ttl):
+                    logger.debug(f"Cache hit for {endpoint}")
+                    return data
         
         # Make request
-        session = await self._get_session()
         url = f"{self.base_url}{endpoint}"
+        session = await self._get_session()
+        
+        logger.debug(f"GET {url} (params={params})")
         
         try:
-            async with session.get(url) as response:
+            async with session.get(url, params=params) as response:
                 response.raise_for_status()
                 data = await response.json()
                 
-                # Update cache
-                self.cache[cache_key] = data
-                self.cache_ttl[cache_key] = datetime.now()
-                logger.debug(f"Fetched and cached: {endpoint}")
+                # Cache response
+                async with self._cache_lock:
+                    self._cache[cache_key] = (data, datetime.now())
                 
                 return data
-        
+                
+        except aiohttp.ClientResponseError as e:
+            logger.error(f"HTTP error for {url}: {e.status} - {e.message}")
+            raise
         except aiohttp.ClientError as e:
-            logger.error(f"Backend API error for {endpoint}: {e}")
-            # Return stale cache if available
-            if cache_key in self.cache:
-                logger.warning(f"Returning stale cache for {endpoint}")
-                return self.cache[cache_key]
-            
-            # Return mock data if no cache
-            return self._get_mock_data(endpoint)
-        
+            logger.error(f"Connection error for {url}: {e}")
+            raise
         except Exception as e:
-            logger.error(f"Unexpected error for {endpoint}: {e}")
-            return self._get_mock_data(endpoint)
+            logger.error(f"Unexpected error for {url}: {e}")
+            raise
     
-    def _get_mock_data(self, endpoint: str) -> Dict:
-        """Return mock data when backend is unavailable"""
-        logger.info(f"Returning mock data for {endpoint}")
+    def invalidate_cache(self, endpoint: Optional[str] = None):
+        """
+        Invalidate cache entries.
         
-        if "tokens" in endpoint:
-            return self._mock_tokens()
-        elif "holonic" in endpoint:
-            return self._mock_holonic_scores()
-        elif "network" in endpoint:
-            return self._mock_network_status()
-        elif "transactions" in endpoint:
-            return self._mock_transactions()
-        
-        return {}
+        Args:
+            endpoint: Specific endpoint to invalidate, or None for all
+        """
+        if endpoint:
+            keys_to_remove = [k for k in self._cache.keys() if k.startswith(endpoint)]
+            for key in keys_to_remove:
+                del self._cache[key]
+            logger.debug(f"Invalidated cache for {endpoint}")
+        else:
+            self._cache.clear()
+            logger.debug("Cleared all cache")
     
     # ========================================================================
-    # Public API Methods
+    # TOKEN ENDPOINTS
     # ========================================================================
     
     async def get_all_tokens(self) -> List[Dict]:
-        """Get information about all four UBEC tokens"""
-        return await self._cached_get("/api/v1/tokens", ttl=60)
+        """
+        Get all four UBEC token details.
+        
+        Returns:
+            List of token objects with details about UBEC, UBECrc, UBECgpi, UBECtt
+        """
+        data = await self._cached_get("/api/v1/tokens", ttl=60)
+        return data if isinstance(data, list) else data.get("tokens", [])
     
-    async def get_token_by_code(self, token_code: str) -> Dict:
-        """Get specific token information"""
-        return await self._cached_get(f"/api/v1/tokens/{token_code}", ttl=60)
+    async def get_token_by_code(self, code: str) -> Dict:
+        """
+        Get specific token details by code.
+        
+        Args:
+            code: Token code (UBEC, UBECrc, UBECgpi, or UBECtt)
+        
+        Returns:
+            Token object with details
+        """
+        tokens = await self.get_all_tokens()
+        for token in tokens:
+            if token.get("code") == code:
+                return token
+        raise ValueError(f"Token not found: {code}")
     
-    async def get_holonic_scores(self) -> Dict:
-        """Get latest holonic evaluation scores"""
-        return await self._cached_get("/api/v1/holonic-scores", ttl=30)
+    # ========================================================================
+    # NETWORK ENDPOINTS
+    # ========================================================================
     
     async def get_network_status(self) -> Dict:
-        """Get current network status and metrics"""
-        return await self._cached_get("/api/v1/network-status", ttl=15)
+        """
+        Get current network status and statistics.
+        
+        Returns:
+            Network status object with:
+            - bioregion_count: Number of active bioregions
+            - total_participants: Total network participants
+            - active_transactions: Recent transaction count
+            - network_health: Overall health score
+        """
+        return await self._cached_get("/api/v1/network-status", ttl=30)
+    
+    # ========================================================================
+    # BIOREGION ENDPOINTS
+    # ========================================================================
+    
+    async def get_bioregion_count(self) -> int:
+        """
+        Get total count of active bioregions.
+        
+        Returns:
+            Number of bioregions
+        """
+        data = await self.get_network_status()
+        return data.get("bioregion_count", 0)
+    
+    async def get_bioregions(self) -> Dict:
+        """
+        Get all bioregions with details.
+        
+        Returns:
+            Dictionary with bioregion data
+        """
+        return await self._cached_get("/api/v1/bioregions", ttl=60)
+    
+    async def get_bioregion(self, bioregion_id: int) -> Dict:
+        """
+        Get specific bioregion details.
+        
+        Args:
+            bioregion_id: Bioregion identifier
+        
+        Returns:
+            Bioregion object with detailed information
+        """
+        return await self._cached_get(f"/api/v1/bioregions/{bioregion_id}", ttl=60)
+    
+    # ========================================================================
+    # HOLONIC EVALUATION ENDPOINTS
+    # ========================================================================
+    
+    async def get_holonic_scores(self, account_id: Optional[str] = None) -> List[Dict]:
+        """
+        Get holonic evaluation scores.
+        
+        Args:
+            account_id: Optional specific account to get scores for
+        
+        Returns:
+            List of holonic score objects with Ubuntu principle evaluations
+        """
+        params = {"account_id": account_id} if account_id else None
+        data = await self._cached_get("/api/v1/holonic-scores", ttl=60, params=params)
+        return data if isinstance(data, list) else [data]
+    
+    # ========================================================================
+    # TRANSACTION ENDPOINTS
+    # ========================================================================
     
     async def get_recent_transactions(self, limit: int = 20) -> List[Dict]:
-        """Get recent blockchain transactions"""
-        return await self._cached_get(
-            f"/api/v1/transactions/recent?limit={limit}", 
-            ttl=10
-        )
+        """
+        Get recent blockchain transactions.
+        
+        Args:
+            limit: Maximum number of transactions to return
+        
+        Returns:
+            List of recent transaction objects
+        """
+        params = {"limit": limit}
+        data = await self._cached_get("/api/v1/transactions", ttl=15, params=params)
+        return data if isinstance(data, list) else data.get("transactions", [])
+    
+    # ========================================================================
+    # DISTRIBUTION ENDPOINTS
+    # ========================================================================
     
     async def get_distribution_stats(self) -> Dict:
-        """Get token distribution statistics"""
-        return await self._cached_get("/api/v1/distribution/stats", ttl=300)
-    
-    async def get_holder_categories(self) -> Dict:
-        """Get holonic category distribution"""
-        return await self._cached_get("/api/v1/holonic/categories", ttl=60)
+        """
+        Get token distribution statistics.
+        
+        Returns:
+            Distribution statistics including:
+            - total_distributed: Total tokens distributed
+            - distribution_by_category: Breakdown by category
+            - compliance_metrics: Compliance with 65/30/5 model
+        """
+        return await self._cached_get("/api/v1/distribution", ttl=60)
     
     # ========================================================================
-    # Mock Data (for development/fallback)
+    # HEALTH CHECK
     # ========================================================================
     
-    def _mock_tokens(self) -> List[Dict]:
-        """Mock token data based on actual UBEC protocol"""
-        return [
-            {
-                "token_code": "UBEC",
-                "element": "Air",
-                "element_symbol": "ðŸŒ¬ï¸",
-                "ubuntu_principle": "Diversity",
-                "description": "Gateway & Universal Access",
-                "issuer": "GDPNB7S3IOM2J6C3NA2QG4TQAUCRZXPJJ4HSCCSIKELEH7ORUCX5UB2VN",
-                "total_supply": 152025699,
-                "holders_count": 495,
-                "status": "live",
-                "daily_volume": 1234567,
-                "color": "#87CEEB"
-            },
-            {
-                "token_code": "UBECrc",
-                "element": "Water",
-                "element_symbol": "ðŸ’§",
-                "ubuntu_principle": "Reciprocity",
-                "description": "Flow & Exchange",
-                "issuer": "GBYOTGM27KLFNQQU3G6QWVEK7LQB36N6OX2YLYMN4WU3AFM4VRFZUBEC",
-                "total_supply": 112000,
-                "holders_count": 3,
-                "status": "live",
-                "daily_volume": 5432,
-                "color": "#4FC3F7"
-            },
-            {
-                "token_code": "UBECgpi",
-                "element": "Earth",
-                "element_symbol": "ðŸŒ",
-                "ubuntu_principle": "Mutualism",
-                "description": "Stability & Value",
-                "issuer": "GCPU3LUGRIYLWMPOQEEGIL2HI5Z637PQVK42Z5PYRRQMPFDTNT5SUBEC",
-                "total_supply": 110,
-                "holders_count": 2,
-                "status": "live",
-                "daily_volume": 45,
-                "color": "#8BC34A"
-            },
-            {
-                "token_code": "UBECtt",
-                "element": "Fire",
-                "element_symbol": "ðŸ”¥",
-                "ubuntu_principle": "Regeneration",
-                "description": "Transformation & Action",
-                "issuer": "GBWYGECRQ7R5E6QQKWBTVNYSCFVTIYZLF6MGDHJQBHP2KU2U65Z5UBEC",
-                "total_supply": 1000000,
-                "holders_count": 1,
-                "status": "live",
-                "daily_volume": 9876,
-                "color": "#FF6B6B"
-            }
-        ]
+    async def health_check(self) -> Dict:
+        """
+        Check backend API health.
+        
+        Returns:
+            Health status object
+        """
+        return await self._cached_get("/api/v1/health", ttl=5)
+
+
+# ========================================================================
+# MODULE-LEVEL CONVENIENCE FUNCTIONS
+# ========================================================================
+
+# Global client instance
+_client: Optional[BackendAPIClient] = None
+
+
+async def get_backend_client() -> BackendAPIClient:
+    """
+    Get or create global backend client instance.
     
-    def _mock_holonic_scores(self) -> Dict:
-        """Mock holonic evaluation scores"""
-        return {
-            "autonomy_integration": 0.78,
-            "ubuntu_alignment": 0.85,
-            "reciprocity_health": 0.72,
-            "mutualism_capacity": 0.81,
-            "regeneration_impact": 0.68,
-            "overall_network_health": 0.77,
-            "category_distribution": {
-                "system": 65,
-                "catalyst": 130,
-                "integrator": 260,
-                "autonomous": 840
-            },
-            "calculated_at": datetime.now().isoformat()
-        }
+    Returns:
+        BackendAPIClient instance
+    """
+    global _client
+    if _client is None:
+        _client = BackendAPIClient()
+    return _client
+
+
+async def close_backend_client():
+    """Close global backend client instance."""
+    global _client
+    if _client is not None:
+        await _client.close()
+        _client = None
+
+
+# ========================================================================
+# TESTING
+# ========================================================================
+
+async def test_client():
+    """Test the backend client."""
+    print("=" * 70)
+    print("Backend API Client Test")
+    print("=" * 70)
     
-    def _mock_network_status(self) -> Dict:
-        """Mock network status"""
-        return {
-            "active_participants": 495,
-            "total_transactions_24h": 1247,
-            "average_ubuntu_score": 0.77,
-            "bioregions_count": 12,
-            "last_block_time": datetime.now().isoformat(),
-            "network_health": "healthy"
-        }
+    client = BackendAPIClient()
     
-    def _mock_transactions(self) -> List[Dict]:
-        """Mock recent transactions"""
-        return [
-            {
-                "hash": "abc123...",
-                "type": "payment",
-                "token": "UBEC",
-                "amount": 1000,
-                "timestamp": datetime.now().isoformat()
-            }
-        ]
+    try:
+        # Test health
+        print("\n[1/6] Testing health check...")
+        health = await client.health_check()
+        print(f"✓ Health: {health.get('status', 'unknown')}")
+        
+        # Test tokens
+        print("\n[2/6] Testing tokens...")
+        tokens = await client.get_all_tokens()
+        print(f"✓ Found {len(tokens)} tokens")
+        
+        # Test network status
+        print("\n[3/6] Testing network status...")
+        network = await client.get_network_status()
+        print(f"✓ Bioregions: {network.get('bioregion_count', 0)}")
+        
+        # Test holonic scores
+        print("\n[4/6] Testing holonic scores...")
+        scores = await client.get_holonic_scores()
+        print(f"✓ Got holonic scores")
+        
+        # Test transactions
+        print("\n[5/6] Testing transactions...")
+        transactions = await client.get_recent_transactions(limit=5)
+        print(f"✓ Found {len(transactions)} recent transactions")
+        
+        # Test distribution
+        print("\n[6/6] Testing distribution stats...")
+        distribution = await client.get_distribution_stats()
+        print(f"✓ Got distribution stats")
+        
+        print("\n" + "=" * 70)
+        print("✓ All tests passed!")
+        print("=" * 70)
+        
+    except Exception as e:
+        print(f"\n✗ Error: {e}")
+        import traceback
+        traceback.print_exc()
     
-    async def close(self):
-        """Close the session"""
-        if self.session and not self.session.closed:
-            await self.session.close()
+    finally:
+        await client.close()
+
+
+if __name__ == "__main__":
+    """Test the client when run directly."""
+    asyncio.run(test_client())

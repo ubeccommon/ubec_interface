@@ -4,80 +4,482 @@
 
 {% block extra_css %}
 <style>
-    /* Additional page-specific styles */
-    .hero-content {
+    /* ====================================================================
+       HOME PAGE STYLES
+       Character Encoding: UTF-8 (Emojis: 🌬️💧🌍🔥)
+       Ensure base.html includes: <meta charset="UTF-8">
+       ==================================================================== */
+    
+    /* Home Hero - Ubuntu Earth-Tone Gradient */
+    .home-hero {
+        background: linear-gradient(135deg, #8BC34A 0%, #87CEEB 100%);
+        padding: 4rem 0;
+        text-align: center;
+    }
+    
+    .home-hero h1,
+    .home-hero .hero-title {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    .home-hero .hero-subtitle,
+    .home-hero .lead {
+        font-size: 1.25rem;
+        color: #2c3e50;
+    }
+    
+    .home-hero .hero-content {
         animation: fadeIn 1s ease-out;
     }
     
-    .element-card {
-        animation: fadeIn 0.8s ease-out;
-        animation-fill-mode: both;
+    .home-hero .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xxl);
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
     }
     
-    .element-card:nth-child(1) { animation-delay: 0.1s; }
-    .element-card:nth-child(2) { animation-delay: 0.2s; }
-    .element-card:nth-child(3) { animation-delay: 0.3s; }
-    .element-card:nth-child(4) { animation-delay: 0.4s; }
+    .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    
+    .stat-value {
+        font-size: var(--font-size-4xl);
+        font-weight: 700;
+        color: white;
+    }
+    
+    .stat-label {
+        font-size: var(--font-size-sm);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+    }
+    
+    /* Four Elements Section */
+    .four-elements {
+        padding: var(--spacing-xxxl) 0;
+    }
+    
+    .elements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xxl);
+    }
+    
+    .element-card {
+        background: var(--background);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-md);
+        transition: transform var(--transition-base), box-shadow var(--transition-base);
+    }
+    
+    .element-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    /* Element-specific styling */
+    .element-card.element-air { border-top: 4px solid var(--element-air); }
+    .element-card.element-water { border-top: 4px solid var(--element-water); }
+    .element-card.element-earth { border-top: 4px solid var(--element-earth); }
+    .element-card.element-fire { border-top: 4px solid var(--element-fire); }
+    
+    .element-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        text-align: center;
+    }
+    
+    .element-symbol {
+        font-size: var(--font-size-5xl);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .element-name {
+        font-size: var(--font-size-2xl);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .element-body {
+        text-align: center;
+    }
+    
+    .token-code {
+        font-family: var(--font-monospace);
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .ubuntu-principle {
+        color: var(--text-secondary);
+        font-style: italic;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .element-description {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .element-stats {
+        display: flex;
+        justify-content: space-around;
+        margin: var(--spacing-lg) 0;
+        padding: var(--spacing-md) 0;
+        border-top: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+    }
+    
+    .element-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .element-stat .stat-label {
+        font-size: var(--font-size-xs);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-light);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .element-stat .stat-value {
+        font-size: var(--font-size-xl);
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .element-status {
+        display: inline-block;
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .element-status.status-live {
+        background: #e8f5e9;
+        color: var(--success);
+    }
+    
+    /* Philosophy Section */
+    .philosophy-section {
+        padding: var(--spacing-xxxl) 0;
+        background: var(--background-alt);
+    }
+    
+    .philosophy-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xxl);
+        align-items: center;
+    }
+    
+    .philosophy-text h2 {
+        font-size: var(--font-size-4xl);
+        margin-bottom: var(--spacing-lg);
+        color: var(--text-primary);
+    }
+    
+    .philosophy-text p {
+        color: var(--text-secondary);
+        line-height: 1.8;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .philosophy-principles {
+        display: grid;
+        gap: var(--spacing-md);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .principle {
+        padding: var(--spacing-md);
+        background: var(--background);
+        border-radius: var(--radius-md);
+        border-left: 4px solid var(--element-earth);
+    }
+    
+    .principle h4 {
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .principle p {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin: 0;
+    }
+    
+    .philosophy-visual {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .holonic-diagram {
+        width: 100%;
+        max-width: 500px;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .diagram-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(139, 195, 74, 0.1), rgba(135, 206, 235, 0.1));
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-xl);
+        text-align: center;
+        border: 2px dashed var(--border);
+    }
+    
+    /* Ubuntu Philosophy Section */
+    .ubuntu-philosophy {
+        padding: var(--spacing-xxxl) 0;
+        background: var(--background);
+    }
+    
+    .philosophy-grid {
+        display: grid;
+        gap: var(--spacing-xxl);
+    }
+    
+    /* How It Works Section */
+    .how-it-works {
+        padding: var(--spacing-xxxl) 0;
+        background: var(--background-alt);
+    }
+    
+    .section-title {
+        font-size: var(--font-size-4xl);
+        text-align: center;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-primary);
+    }
+    
+    .section-description {
+        text-align: center;
+        font-size: var(--font-size-lg);
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xxl);
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xxl);
+    }
+    
+    .step {
+        background: var(--background);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 48px;
+        height: 48px;
+        background: var(--element-earth);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .step h3 {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-md);
+        color: var(--text-primary);
+    }
+    
+    .step p {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin: 0;
+    }
+    
+    .cta-box {
+        margin-top: var(--spacing-xxxl);
+        padding: var(--spacing-xxl);
+        background: var(--background);
+        border-radius: var(--radius-lg);
+        text-align: center;
+    }
+    
+    .cta-box h3 {
+        font-size: var(--font-size-3xl);
+        margin-bottom: var(--spacing-md);
+        color: var(--text-primary);
+    }
+    
+    .cta-box p {
+        font-size: var(--font-size-lg);
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .cta-buttons {
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: var(--spacing-xl);
+    }
+    
+    /* Network Status Preview */
+    .network-status-preview {
+        padding: var(--spacing-xxxl) 0;
+        background: var(--background);
+    }
+    
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xxl);
+    }
+    
+    .status-card {
+        background: var(--background-alt);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        text-align: center;
+    }
+    
+    .status-card h4 {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-md);
+        color: var(--text-primary);
+    }
+    
+    .health-indicator {
+        display: inline-block;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        font-size: var(--font-size-lg);
+        margin-top: var(--spacing-md);
+    }
+    
+    .health-indicator.healthy {
+        background: #e8f5e9;
+        color: var(--success);
+    }
+    
+    .system-indicators {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+    }
+    
+    .indicator {
+        padding: var(--spacing-xs) var(--spacing-md);
+        background: var(--background);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .indicator.operational {
+        color: var(--success);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .home-hero h1,
+        .home-hero .hero-title {
+            font-size: 2rem;
+        }
+        
+        .philosophy-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .cta-buttons {
+            flex-direction: column;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section with Ubuntu Philosophy -->
-<section class="hero">
+<!-- Hero Section -->
+<section class="home-hero">
     <div class="container">
         <div class="hero-content">
             <h1 class="hero-title">Ubuntu Bioregional Economic Commons</h1>
-            <p class="hero-subtitle">"I am because we are" - Building economic liberation through regenerative design</p>
+            <p class="lead">
+                Four-element token ecosystem embodying Ubuntu philosophy:<br>
+                "I am because we are"
+            </p>
             
             <div class="hero-stats">
-                {% if network_status %}
                 <div class="stat">
-                    <span class="stat-value" id="active-participants">{{ network_status.active_participants|default("0") }}</span>
-                    <span class="stat-label">Active Participants</span>
+                    <span class="stat-value">4</span>
+                    <span class="stat-label">Token Elements</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value" id="transactions-24h">{{ network_status.total_transactions_24h|default("0") }}</span>
-                    <span class="stat-label">Transactions (24h)</span>
+                    <span class="stat-value" id="total-supply">{{ network_stats.total_supply|default('152M+') if network_stats else '152M+' }}</span>
+                    <span class="stat-label">Total Supply</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value">{{ (network_status.average_ubuntu_score * 100)|round|int }}%</span>
-                    <span class="stat-label">Ubuntu Alignment</span>
+                    <span class="stat-value" id="total-holders">{{ network_stats.total_holders|default('500+') if network_stats else '500+' }}</span>
+                    <span class="stat-label">Active Holders</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value" id="bioregions-count">{{ network_status.bioregions_count|default("0") }}</span>
-                    <span class="stat-label">Bioregions</span>
+                    <span class="stat-value">Live</span>
+                    <span class="stat-label">Network Status</span>
                 </div>
-                {% else %}
-                <!-- Fallback stats -->
-                <div class="stat">
-                    <span class="stat-value">495</span>
-                    <span class="stat-label">Active Participants</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value">1,247</span>
-                    <span class="stat-label">Transactions (24h)</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value">77%</span>
-                    <span class="stat-label">Ubuntu Alignment</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value">12</span>
-                    <span class="stat-label">Bioregions</span>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </section>
 
-<!-- Four Elements Section - Core Token Ecosystem -->
+<!-- Four Elements Section -->
 <section class="four-elements">
     <div class="container">
-        <h2 class="section-title">The Four Elements of Economic Cooperation</h2>
+        <h2 class="section-title">Four Elements of Economic Cooperation</h2>
         <p class="section-description">
-            The UBEC protocol implements Ubuntu philosophy through a four-element token ecosystem, 
-            where each element represents a fundamental aspect of healthy economic relationships.
+            Each token represents a fundamental principle of Ubuntu philosophy,
+            creating a holistic ecosystem of cooperation and regeneration
         </p>
         
         <div class="elements-grid">
@@ -85,26 +487,23 @@
                 {% for token in tokens %}
                 <div class="element-card element-{{ token.element|lower }}">
                     <div class="element-header">
-                        <span class="element-symbol">{{ token.element_symbol|default("") }}</span>
+                        <span class="element-symbol">{{ token.element_symbol }}</span>
                         <h3 class="element-name">{{ token.element }}</h3>
                     </div>
-                    
                     <div class="element-body">
                         <div class="token-code">{{ token.token_code }}</div>
                         <div class="ubuntu-principle">{{ token.ubuntu_principle }}</div>
                         <p class="element-description">{{ token.description }}</p>
-                        
                         <div class="element-stats">
                             <div class="element-stat">
                                 <span class="stat-label">Supply</span>
-                                <span class="stat-value">{{ "{:,.0f}".format(token.total_supply) }}</span>
+                                <span class="stat-value">{{ "{:,.0f}".format(token.total_supply) if token.total_supply >= 1000000 else "{:,}".format(token.total_supply|int) }}</span>
                             </div>
                             <div class="element-stat">
                                 <span class="stat-label">Holders</span>
                                 <span class="stat-value">{{ token.holders_count }}</span>
                             </div>
                         </div>
-                        
                         <div class="element-status status-{{ token.status }}">
                             {{ token.status|capitalize }}
                         </div>
@@ -112,7 +511,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <!-- Fallback token cards -->
+                <!-- Fallback token cards with proper UTF-8 emojis -->
                 <div class="element-card element-air">
                     <div class="element-header">
                         <span class="element-symbol">🌬️</span>
@@ -390,3 +789,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+
+<!-- 
+================================================================================
+This project uses the services of Claude and Anthropic PBC to inform our 
+decisions and recommendations. This project was made possible with the 
+assistance of Claude and Anthropic PBC.
+================================================================================
+-->

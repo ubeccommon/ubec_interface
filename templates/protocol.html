@@ -6,8 +6,29 @@
 <style>
     /* ====================================================================
        PROTOCOL PAGE STYLES
+       Character Encoding: UTF-8 (Emojis: 🌬️💧🌍🔥🌐⚡💰🌱🔒🛠️♻️🏗️🔄🎯🔐)
+       Ensure base.html includes: <meta charset="UTF-8">
        All styles inline following about.html pattern
        ==================================================================== */
+    
+    /* Protocol Hero - Ubuntu Earth-Tone Gradient */
+    .protocol-hero {
+        background: linear-gradient(135deg, #8BC34A 0%, #87CEEB 100%);
+        padding: 4rem 0;
+        text-align: center;
+    }
+    
+    .protocol-hero h1,
+    .protocol-hero .hero-title {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    .protocol-hero .lead {
+        font-size: 1.25rem;
+        color: #2c3e50;
+    }
     
     /* Protocol Sections */
     .protocol-section {
@@ -190,34 +211,34 @@
     
     .benefits-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--spacing-lg);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xl);
     }
     
     .benefit-item {
         text-align: center;
-        padding: var(--spacing-lg);
     }
     
     .benefit-icon {
-        font-size: var(--font-size-4xl);
+        font-size: var(--font-size-5xl);
         display: block;
         margin-bottom: var(--spacing-md);
-        line-height: 1;
     }
     
     .benefit-item h5 {
         font-size: var(--font-size-lg);
         margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
     }
     
     .benefit-item p {
         color: var(--text-secondary);
         line-height: 1.6;
-        font-size: var(--font-size-sm);
+        margin: 0;
     }
     
-    /* Technical Architecture */
+    /* Architecture Components */
     .architecture-components {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -225,9 +246,16 @@
         margin-top: var(--spacing-xl);
     }
     
+    .component-card {
+        padding: var(--spacing-xl);
+    }
+    
     .component-card h4 {
         font-size: var(--font-size-xl);
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
     }
     
     .component-card ul {
@@ -240,44 +268,90 @@
         padding: var(--spacing-sm) 0;
         color: var(--text-secondary);
         line-height: 1.6;
-        font-size: var(--font-size-sm);
+        border-bottom: 1px solid var(--border-light);
     }
     
-    .component-card li strong {
+    .component-card li:last-child {
+        border-bottom: none;
+    }
+    
+    .component-card strong {
         color: var(--text-primary);
         font-weight: 600;
     }
     
-    /* Call to Action */
+    /* Protocol CTA */
     .protocol-cta {
-        text-align: center;
+        margin-top: var(--spacing-xxxl);
         padding: var(--spacing-xxl);
+        text-align: center;
         background: var(--background-alt);
         border-radius: var(--radius-lg);
-        margin-top: var(--spacing-xxl);
+    }
+    
+    .protocol-cta .section-title {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .protocol-cta .section-description {
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .protocol-cta .cta-buttons {
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    /* Section Elements */
+    .section-title {
+        font-size: var(--font-size-4xl);
+        margin-bottom: var(--spacing-md);
+        color: var(--text-primary);
+    }
+    
+    .section-description {
+        font-size: var(--font-size-lg);
+        color: var(--text-secondary);
+        line-height: 1.8;
+        max-width: 900px;
     }
     
     /* Responsive Design */
     @media (max-width: 768px) {
+        .protocol-hero h1,
+        .protocol-hero .hero-title {
+            font-size: 2rem;
+        }
+        
         .token-details-grid,
         .integration-details,
         .benefits-grid,
         .architecture-components {
             grid-template-columns: 1fr;
         }
+        
+        .protocol-cta .cta-buttons {
+            flex-direction: column;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Hero uses .hero class from main.css for consistent Ubuntu gradient -->
-<section class="hero">
+<!-- Protocol Hero -->
+<section class="protocol-hero">
     <div class="container">
-        <h1 class="hero-title">UBEC Protocol Architecture</h1>
-        <p class="lead">Technical deep dive into the four-element token ecosystem and holonic evaluation framework</p>
+        <h1 class="hero-title">UBEC Protocol Overview</h1>
+        <p class="lead">
+            A comprehensive guide to the four-element token architecture<br>
+            and Ubuntu-aligned economic principles
+        </p>
     </div>
 </section>
 
+<!-- Main Protocol Content -->
 <section class="section">
     <div class="container">
         <!-- Token Ecosystem Section -->
@@ -315,7 +389,7 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                    <!-- Fallback if tokens not loaded -->
+                    <!-- Fallback if tokens not loaded - with proper UTF-8 emojis -->
                     <div class="card token-detail-card token-air">
                         <div class="token-header">
                             <span class="token-symbol">🌬️</span>
@@ -576,3 +650,11 @@
     </div>
 </section>
 {% endblock %}
+
+<!-- 
+================================================================================
+This project uses the services of Claude and Anthropic PBC to inform our 
+decisions and recommendations. This project was made possible with the 
+assistance of Claude and Anthropic PBC.
+================================================================================
+-->
