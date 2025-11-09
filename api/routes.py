@@ -1,13 +1,13 @@
 """
-UBEC Protocol Website - API Routes
-===================================
+API Routes
+==========
 
-RESTful API endpoints for fetching UBEC Protocol data.
+Frontend API routes that proxy to backend protocol server.
 
-Implements:
-    - Principle #5: Strict Async Operations
-    - Principle #9: Integrated Rate Limiting
-    - Principle #10: Clear Separation of Concerns
+This module implements:
+    - Principle #3: Service pattern with centralized execution
+    - Principle #5: Strict async operations
+    - Principle #8: No duplicate configuration
 
 Attribution:
     This project uses the services of Claude and Anthropic PBC to inform 
@@ -15,34 +15,20 @@ Attribution:
     the assistance of Claude and Anthropic PBC.
 """
 
-from typing import List, Dict, Optional
-from datetime import datetime
 import logging
+from typing import Dict, List, Optional
+from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 
-from utils.backend_client import BackendAPIClient
+from utils.backend_client import BackendAPIClient, get_backend_client
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
-# Create API router
-router = APIRouter()
-
-# ========================================================================
-# DEPENDENCY: Backend Client
-# ========================================================================
-
-async def get_backend_client() -> BackendAPIClient:
-    """
-    Dependency to get backend API client instance.
-    
-    Principle #4: Single source of truth - backend as data source
-    """
-    # This will be provided by the main app
-    from main_web import get_backend_client as get_client
-    return await get_client()
+# Create API router (prefix is added in main_web.py)
+router = APIRouter(tags=["api"])
 
 # ========================================================================
 # TOKEN ENDPOINTS
@@ -56,13 +42,7 @@ async def get_all_tokens(
     Get information about all four UBEC tokens.
     
     Returns:
-        List of token objects containing:
-        - token_code: Token symbol (UBEC, UBECrc, UBECgpi, UBECtt)
-        - element: Associated element (Air, Water, Earth, Fire)
-        - ubuntu_principle: Ubuntu principle represented
-        - total_supply: Current total supply
-        - holders_count: Number of token holders
-        - status: Token status (live, pending, etc.)
+        List of token objects for UBEC, UBECrc, UBECgpi, and UBECtt
     """
     try:
         tokens = await client.get_all_tokens()
@@ -87,8 +67,10 @@ async def get_token_by_code(
         Detailed token object with full information
     """
     try:
-        token = await client.get_token_by_code(token_code.upper())
+        token = await client.get_token_by_code(token_code)
         return token
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error(f"Error fetching token {token_code}: {e}")
         raise HTTPException(status_code=500, detail=f"Unable to fetch token {token_code}")
@@ -120,8 +102,48 @@ async def get_network_status(
         raise HTTPException(status_code=500, detail="Unable to fetch network status")
 
 # ========================================================================
-# BIOREGION ENDPOINTS (NEW!)
+# BIOREGION ENDPOINTS
 # ========================================================================
+
+@router.get("/bioregions/count", response_class=JSONResponse, summary="Get bioregion count")
+async def get_bioregion_count(
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get total count of active bioregions.
+    
+    Returns:
+        Dictionary with bioregion count
+    """
+    try:
+        count = await client.get_bioregion_count()
+        return {"count": count}
+    except Exception as e:
+        logger.error(f"Error fetching bioregion count: {e}")
+        raise HTTPException(status_code=500, detail="Unable to fetch bioregion count")
+
+
+@router.get("/bioregions/summary", response_class=JSONResponse, summary="Get bioregion summary")
+async def get_bioregion_summary(
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get summary statistics for all bioregions.
+    
+    Returns:
+        Dictionary with summary statistics including:
+        - total_count: Number of bioregions
+        - total_members: Total member count
+        - average_scores: Average metrics
+        - geographic_metrics: Geographic distribution
+    """
+    try:
+        summary = await client.get_bioregion_summary()
+        return summary
+    except Exception as e:
+        logger.error(f"Error fetching bioregion summary: {e}")
+        raise HTTPException(status_code=500, detail="Unable to fetch bioregion summary")
+
 
 @router.get("/bioregions", response_class=JSONResponse, summary="Get all bioregions")
 async def get_all_bioregions(
@@ -133,9 +155,8 @@ async def get_all_bioregions(
     Returns:
         Dictionary containing:
         - count: Total number of bioregions
-        - summary: Summary statistics (total members, averages, etc.)
-        - bioregions: List of bioregion objects with details
-        - timestamp: When data was fetched
+        - summary: Summary statistics
+        - bioregions: List of bioregion objects
     """
     try:
         bioregions = await client.get_bioregions()
@@ -145,25 +166,7 @@ async def get_all_bioregions(
         raise HTTPException(status_code=500, detail="Unable to fetch bioregions")
 
 
-@router.get("/bioregions/count", response_class=JSONResponse, summary="Get bioregion count")
-async def get_bioregion_count(
-    client: BackendAPIClient = Depends(get_backend_client)
-) -> Dict:
-    """
-    Get total count of active bioregions.
-    
-    Returns:
-        Dictionary with count field
-    """
-    try:
-        count = await client.get_bioregion_count()
-        return {"count": count}
-    except Exception as e:
-        logger.error(f"Error fetching bioregion count: {e}")
-        raise HTTPException(status_code=500, detail="Unable to fetch bioregion count")
-
-
-@router.get("/bioregions/{bioregion_id}", response_class=JSONResponse, summary="Get specific bioregion")
+@router.get("/bioregions/{bioregion_id}", response_class=JSONResponse, summary="Get bioregion details")
 async def get_bioregion(
     bioregion_id: int,
     client: BackendAPIClient = Depends(get_backend_client)
@@ -172,19 +175,10 @@ async def get_bioregion(
     Get detailed information about a specific bioregion.
     
     Args:
-        bioregion_id: Unique identifier of the bioregion
-    
+        bioregion_id: Bioregion identifier
+        
     Returns:
-        Detailed bioregion object containing:
-        - id: Bioregion identifier
-        - name: Bioregion name
-        - member_count: Number of members
-        - autonomy_score: Autonomy score (0-1)
-        - integration_score: Integration score (0-1)
-        - health_rating: Overall health rating
-        - ubuntu_scores: Ubuntu principle alignment scores
-        - emerged_at: When bioregion was established
-        - status: Current status (active, dissolved, etc.)
+        Bioregion object with detailed information
     """
     try:
         bioregion = await client.get_bioregion(bioregion_id)
@@ -193,55 +187,160 @@ async def get_bioregion(
         logger.error(f"Error fetching bioregion {bioregion_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Unable to fetch bioregion {bioregion_id}")
 
+
+@router.get("/bioregions/{bioregion_id}/health", response_class=JSONResponse, summary="Get bioregion health")
+async def get_bioregion_health(
+    bioregion_id: int,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get health assessment for a specific bioregion.
+    
+    Args:
+        bioregion_id: Bioregion identifier
+        
+    Returns:
+        Health assessment with rating and component scores
+    """
+    try:
+        health = await client.get_bioregion_health(bioregion_id)
+        return health
+    except Exception as e:
+        logger.error(f"Error fetching bioregion health {bioregion_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Unable to fetch bioregion health")
+
+# ========================================================================
+# ECOREGION ENDPOINTS
+# ========================================================================
+
+@router.get("/ecoregions", response_class=JSONResponse, summary="Get ecoregions")
+async def get_ecoregions(
+    limit: int = Query(50, ge=1, le=200),
+    biome: Optional[str] = None,
+    realm: Optional[str] = None,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get ecoregion data from Ecoregions2017 dataset.
+    
+    Query Parameters:
+        - limit: Number of results (default: 50, max: 200)
+        - biome: Filter by biome name
+        - realm: Filter by realm
+    
+    Returns:
+        Dictionary with ecoregion data
+    """
+    try:
+        ecoregions = await client.get_ecoregions(limit=limit, biome=biome, realm=realm)
+        return ecoregions
+    except Exception as e:
+        logger.error(f"Error fetching ecoregions: {e}")
+        raise HTTPException(status_code=500, detail="Unable to fetch ecoregions")
+
+
+@router.get("/ecoregions/{eco_id}", response_class=JSONResponse, summary="Get ecoregion details")
+async def get_ecoregion(
+    eco_id: int,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get detailed information about a specific ecoregion.
+    
+    Args:
+        eco_id: Ecoregion ID
+        
+    Returns:
+        Ecoregion details with geographic and ecological data
+    """
+    try:
+        ecoregion = await client.get_ecoregion(eco_id)
+        return ecoregion
+    except Exception as e:
+        logger.error(f"Error fetching ecoregion {eco_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Unable to fetch ecoregion {eco_id}")
+
+# ========================================================================
+# WATERSHED ENDPOINTS
+# ========================================================================
+
+@router.get("/watersheds", response_class=JSONResponse, summary="Get watersheds")
+async def get_watersheds(
+    limit: int = Query(50, ge=1, le=200),
+    min_area: Optional[float] = None,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get watershed data from FEOW HydroSHEDS dataset.
+    
+    Query Parameters:
+        - limit: Number of results (default: 50, max: 200)
+        - min_area: Minimum area in square kilometers
+    
+    Returns:
+        Dictionary with watershed data
+    """
+    try:
+        watersheds = await client.get_watersheds(limit=limit, min_area=min_area)
+        return watersheds
+    except Exception as e:
+        logger.error(f"Error fetching watersheds: {e}")
+        raise HTTPException(status_code=500, detail="Unable to fetch watersheds")
+
+
+@router.get("/watersheds/{feow_id}", response_class=JSONResponse, summary="Get watershed details")
+async def get_watershed(
+    feow_id: int,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get specific watershed by FEOW ID.
+    
+    Args:
+        feow_id: FEOW watershed identifier
+        
+    Returns:
+        Watershed details with geographic data
+    """
+    try:
+        watershed = await client.get_watershed(feow_id)
+        return watershed
+    except Exception as e:
+        logger.error(f"Error fetching watershed {feow_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Unable to fetch watershed {feow_id}")
+
 # ========================================================================
 # HOLONIC EVALUATION ENDPOINTS
 # ========================================================================
 
 @router.get("/holonic/scores", response_class=JSONResponse, summary="Get holonic scores")
 async def get_holonic_scores(
+    category: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=200),
+    min_score: float = Query(0.0, ge=0.0, le=1.0),
     client: BackendAPIClient = Depends(get_backend_client)
 ) -> Dict:
     """
-    Get latest holonic evaluation scores.
+    Get holonic evaluation scores for accounts.
+    
+    Query Parameters:
+        - category: Filter by holonic category (observer, participant, contributor, integrator, exemplar)
+        - limit: Number of results (default: 50, max: 200)
+        - min_score: Minimum composite score threshold (0.0-1.0)
     
     Returns:
-        Holonic scores object containing:
-        - autonomy_integration: Autonomy integration score (0-1)
-        - ubuntu_alignment: Ubuntu alignment score (0-1)
-        - reciprocity_health: Reciprocity health score (0-1)
-        - mutualism_capacity: Mutualism capacity score (0-1)
-        - regeneration_impact: Regeneration impact score (0-1)
-        - overall_network_health: Overall network health score (0-1)
-        - category_distribution: Distribution across holonic categories
+        Dictionary with summary statistics and list of account evaluations
     """
     try:
-        scores = await client.get_holonic_scores()
+        scores = await client.get_holonic_scores(
+            category=category,
+            limit=limit,
+            min_score=min_score
+        )
         return scores
     except Exception as e:
         logger.error(f"Error fetching holonic scores: {e}")
         raise HTTPException(status_code=500, detail="Unable to fetch holonic scores")
-
-
-@router.get("/holonic/categories", response_class=JSONResponse, summary="Get holonic categories")
-async def get_holder_categories(
-    client: BackendAPIClient = Depends(get_backend_client)
-) -> Dict:
-    """
-    Get holonic category distribution.
-    
-    Returns:
-        Distribution of participants across holonic categories:
-        - system: System-level participants
-        - catalyst: Catalyst participants
-        - integrator: Integrator participants
-        - autonomous: Autonomous participants
-    """
-    try:
-        categories = await client.get_holder_categories()
-        return categories
-    except Exception as e:
-        logger.error(f"Error fetching holonic categories: {e}")
-        raise HTTPException(status_code=500, detail="Unable to fetch holonic categories")
 
 # ========================================================================
 # TRANSACTION ENDPOINTS
@@ -249,17 +348,17 @@ async def get_holder_categories(
 
 @router.get("/transactions/recent", response_class=JSONResponse, summary="Get recent transactions")
 async def get_recent_transactions(
-    limit: int = Query(default=20, ge=1, le=100, description="Number of transactions to return"),
+    limit: int = Query(20, ge=1, le=100),
     client: BackendAPIClient = Depends(get_backend_client)
-) -> List[Dict]:
+) -> Dict:
     """
     Get recent blockchain transactions.
     
-    Args:
-        limit: Maximum number of transactions to return (1-100)
+    Query Parameters:
+        - limit: Maximum number of transactions to return (default: 20, max: 100)
     
     Returns:
-        List of recent transaction objects
+        Dictionary with list of recent transaction operations
     """
     try:
         transactions = await client.get_recent_transactions(limit=limit)
@@ -272,18 +371,18 @@ async def get_recent_transactions(
 # DISTRIBUTION ENDPOINTS
 # ========================================================================
 
-@router.get("/distribution/stats", response_class=JSONResponse, summary="Get distribution statistics")
+@router.get("/distributions/stats", response_class=JSONResponse, summary="Get distribution statistics")
 async def get_distribution_stats(
     client: BackendAPIClient = Depends(get_backend_client)
 ) -> Dict:
     """
-    Get token distribution statistics.
+    Get token distribution statistics for 75/20/5 compliance.
     
     Returns:
         Distribution statistics including:
-        - Total tokens distributed
-        - Distribution across categories
-        - Compliance with 65/30/5 model
+        - total_distributed: Total tokens distributed
+        - distribution_by_category: Breakdown by category
+        - compliance_status: Compliance with distribution model
     """
     try:
         stats = await client.get_distribution_stats()
@@ -330,7 +429,7 @@ async def get_system_health(
     """
     try:
         # Test backend connectivity
-        await client.get_network_status()
+        await client.health_check()
         backend_status = "operational"
     except Exception as e:
         logger.error(f"Backend health check failed: {e}")

@@ -169,10 +169,7 @@ class BackendAPIClient:
             List of token objects with details about UBEC, UBECrc, UBECgpi, UBECtt
         """
         data = await self._cached_get("/api/v1/tokens", ttl=60)
-        # Backend returns {"tokens": [...], "count": 4, "timestamp": "..."}
-        if isinstance(data, dict) and "tokens" in data:
-            return data["tokens"]
-        return data if isinstance(data, list) else []
+        return data if isinstance(data, list) else data.get("tokens", [])
     
     async def get_token_by_code(self, code: str) -> Dict:
         """
@@ -186,7 +183,7 @@ class BackendAPIClient:
         """
         tokens = await self.get_all_tokens()
         for token in tokens:
-            if token.get("asset_code") == code:
+            if token.get("code") == code:
                 return token
         raise ValueError(f"Token not found: {code}")
     
