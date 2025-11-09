@@ -116,13 +116,9 @@
                     Guides for organizers, bioregional coordinators, and community participants.
                 </p>
                 <div class="doc-links">
-                    <a href="/docs/guides/participation-guide" class="doc-link">
+                    <a href="#participation-guide" class="doc-link">
                         <strong>Participation Guide</strong>
-                        <span>Discover your pathway into the UBEC ecosystem - farmers, communities, token holders, and more</span>
-                    </a>
-                    <a href="/docs/guides/" class="doc-link">
-                        <strong>All User Guides</strong>
-                        <span>Complete collection of guides for every participant type</span>
+                        <span>How to get involved in the UBEC ecosystem</span>
                     </a>
                     <a href="#ubuntu-principles" class="doc-link">
                         <strong>Ubuntu Principles</strong>

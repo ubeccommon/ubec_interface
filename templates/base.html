@@ -8,20 +8,29 @@
     
     <title>{% block title %}UBEC Protocol Network - Ubuntu Bioregional Economic Commons{% endblock %}</title>
     
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Ubuntu Bioregional Economic Commons - Four-element token ecosystem embodying Ubuntu philosophy: I am because we are">
+    <meta name="keywords" content="UBEC, Ubuntu, blockchain, tokens, economic commons, regenerative economy, bioregional">
+    
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='/favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
     
-    <!-- Primary Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/main.css') }}">
+    <!-- Primary Stylesheet -->
+    <link rel="stylesheet" href="/static/css/main.css">
     
-    <!-- CSS Variables for Ubuntu Design System -->
+    <!-- Inline Critical CSS for Navigation (Fallback + Performance) -->
     <style>
         :root {
             /* Color Palette - Ubuntu Earth Tones */
-            --element-air: #87CEEB;      /* Sky Blue */
-            --element-water: #4A90E2;    /* Water Blue */
-            --element-earth: #8BC34A;    /* Earth Green */
-            --element-fire: #FF6B6B;     /* Fire Red */
+            --element-air: #87CEEB;      /* Sky Blue - Diversity */
+            --element-water: #4A90E2;    /* Water Blue - Reciprocity */
+            --element-earth: #8BC34A;    /* Earth Green - Mutualism */
+            --element-fire: #FF6B6B;     /* Fire Red - Regeneration */
+            
+            /* Primary Gradients */
+            --primary-gradient-start: #667eea;
+            --primary-gradient-end: #764ba2;
             
             /* Neutral Colors */
             --background: #FFFFFF;
@@ -31,6 +40,7 @@
             --text-light: #7f8c8d;
             --border: #e0e0e0;
             --border-light: #f0f0f0;
+            --surface-hover: #f8f9fa;
             
             /* Status Colors */
             --success: #27ae60;
@@ -65,21 +75,26 @@
             --radius-full: 9999px;
             
             /* Shadows */
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
             
             /* Transitions */
-            --transition-base: all 0.3s ease;
+            --transition-base: all 0.2s ease;
             --transition-fast: all 0.15s ease;
             --transition-slow: all 0.5s ease;
             
+            /* Z-index Scale */
+            --z-sticky: 1020;
+            --z-modal: 1050;
+            
             /* Fonts */
-            --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
             --font-monospace: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
         }
         
-        /* Base Styles */
+        /* Base Reset */
         * {
             margin: 0;
             padding: 0;
@@ -89,6 +104,8 @@
         html {
             font-size: 16px;
             scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         body {
@@ -96,8 +113,9 @@
             line-height: 1.6;
             color: var(--text-primary);
             background: var(--background);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         /* Container */
@@ -106,6 +124,99 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 var(--spacing-lg);
+        }
+        
+        /* Navigation Bar - CRITICAL STYLES */
+        .navbar {
+            background: var(--background);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+        }
+        
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand .logo {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: var(--transition-base);
+        }
+        
+        .navbar-brand .logo:hover {
+            color: var(--primary-gradient-start);
+        }
+        
+        .logo-text {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+        
+        .logo-subtext {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            gap: var(--spacing-lg);
+            align-items: center;
+            list-style: none;
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: var(--font-size-base);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-sm);
+            transition: var(--transition-base);
+            text-decoration: none;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            background: var(--surface-hover);
+            color: var(--primary-gradient-start);
+        }
+        
+        .nav-link.active {
+            color: var(--primary-gradient-start);
+            font-weight: 600;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: var(--spacing-md);
+            right: var(--spacing-md);
+            height: 2px;
+            background: var(--primary-gradient-start);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-top: 0;
         }
         
         /* Section */
@@ -124,6 +235,7 @@
         
         .card:hover {
             box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
         }
         
         /* Button Styles */
@@ -138,6 +250,7 @@
             text-align: center;
             cursor: pointer;
             transition: var(--transition-base);
+            line-height: 1;
         }
         
         .btn-primary {
@@ -148,6 +261,7 @@
         .btn-primary:hover {
             background: #7ab636;
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         
         .btn-secondary {
@@ -177,14 +291,97 @@
             color: var(--success);
         }
         
+        .badge.status-pending {
+            background: #fff3e0;
+            color: var(--warning);
+        }
+        
+        /* Footer */
+        .site-footer {
+            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+            color: white;
+            margin-top: auto;
+        }
+        
+        .site-footer .container {
+            padding-top: var(--spacing-xxxl);
+            padding-bottom: var(--spacing-xl);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-xxl);
+            margin-bottom: var(--spacing-xxl);
+        }
+        
+        .footer-section h3,
+        .footer-section h4 {
+            margin-bottom: var(--spacing-md);
+            font-weight: 600;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: var(--transition-base);
+        }
+        
+        .footer-section a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: var(--spacing-lg);
+            text-align: center;
+        }
+        
+        .footer-bottom p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .attribution {
+            font-size: var(--font-size-xs);
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
+        
         /* Utility Classes */
         .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        
         .mt-1 { margin-top: var(--spacing-sm); }
         .mt-2 { margin-top: var(--spacing-md); }
         .mt-3 { margin-top: var(--spacing-lg); }
+        .mt-4 { margin-top: var(--spacing-xl); }
+        
         .mb-1 { margin-bottom: var(--spacing-sm); }
         .mb-2 { margin-bottom: var(--spacing-md); }
         .mb-3 { margin-bottom: var(--spacing-lg); }
+        .mb-4 { margin-bottom: var(--spacing-xl); }
+        
+        .p-0 { padding: 0; }
+        .p-1 { padding: var(--spacing-sm); }
+        .p-2 { padding: var(--spacing-md); }
+        .p-3 { padding: var(--spacing-lg); }
         
         /* Animations */
         @keyframes fadeIn {
@@ -198,8 +395,357 @@
             }
         }
         
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
         .fade-in {
             animation: fadeIn 0.6s ease-out;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        /* Element Cards Grid - Always Side by Side - CRITICAL OVERRIDE */
+        .elements-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-xxl);
+        }
+        
+        .element-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-base);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 0 !important; /* Allow cards to shrink below content size */
+        }
+        
+        .element-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* Element Card Border Colors */
+        .element-card.air {
+            border-top: 4px solid var(--element-air);
+        }
+        
+        .element-card.water {
+            border-top: 4px solid var(--element-water);
+        }
+        
+        .element-card.earth {
+            border-top: 4px solid var(--element-earth);
+        }
+        
+        .element-card.fire {
+            border-top: 4px solid var(--element-fire);
+        }
+        
+        .element-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            line-height: 1;
+        }
+        
+        .element-symbol {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            display: block;
+        }
+        
+        .element-header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .element-name,
+        .element-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+            word-wrap: break-word;
+        }
+        
+        .element-token,
+        .token-code {
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .element-principle,
+        .ubuntu-principle {
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .element-description {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.5;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+        
+        .element-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+            width: 100%;
+            margin-top: auto;
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--border-light);
+        }
+        
+        .element-stat {
+            text-align: center;
+            min-width: 0;
+        }
+        
+        .element-stat-label,
+        .stat-label {
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--spacing-xs);
+            display: block;
+        }
+        
+        .element-stat-value,
+        .stat-value {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--text-primary);
+            word-wrap: break-word;
+            display: block;
+        }
+        
+        .element-status {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        
+        .element-status.status-live,
+        .status-live {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+        
+        .element-body {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* ===================================================================
+           ABOUT PAGE - GRID FIXES
+           Keep philosophy cards, values, and participation grids side by side
+           =================================================================== */
+        
+        .philosophy-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: var(--spacing-xl);
+        }
+        
+        .values-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: var(--spacing-xl);
+        }
+        
+        .participation-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: var(--spacing-xl);
+        }
+        
+        .contact-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: var(--spacing-xl);
+        }
+        
+        /* ===================================================================
+           PROTOCOL PAGE - GRID FIXES
+           Keep token details and architecture grids side by side
+           =================================================================== */
+        
+        .token-details-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: var(--spacing-xl);
+        }
+        
+        .integration-details {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: var(--spacing-xl);
+        }
+        
+        .benefits-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: var(--spacing-lg);
+        }
+        
+        .architecture-components {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: var(--spacing-xl);
+        }
+        
+        /* Ensure all cards can shrink */
+        .philosophy-card,
+        .value-card,
+        .participation-card,
+        .contact-card,
+        .token-detail-card,
+        .detail-box,
+        .benefit-item,
+        .component-card {
+            min-width: 0 !important;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .elements-grid,
+            .philosophy-grid,
+            .values-grid,
+            .token-details-grid,
+            .integration-details,
+            .architecture-components,
+            .contact-grid {
+                gap: var(--spacing-md);
+            }
+            
+            .element-card,
+            .philosophy-card,
+            .value-card,
+            .token-detail-card,
+            .detail-box,
+            .component-card,
+            .contact-card {
+                padding: var(--spacing-lg);
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            /* Still keep 4 columns but with smaller padding and text */
+            .element-card,
+            .philosophy-card,
+            .value-card,
+            .token-detail-card,
+            .detail-box,
+            .component-card,
+            .contact-card {
+                padding: var(--spacing-md);
+                font-size: 0.9rem;
+            }
+            
+            .element-icon,
+            .philosophy-icon {
+                font-size: 2.5rem;
+            }
+            
+            .element-title {
+                font-size: var(--font-size-xl);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            /* Switch to 2 columns for most grids */
+            .elements-grid,
+            .philosophy-grid,
+            .values-grid,
+            .token-details-grid,
+            .integration-details,
+            .architecture-components,
+            .contact-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: var(--spacing-lg);
+            }
+            
+            /* Benefits stay at 3 but go to 2 */
+            .benefits-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            /* Participation already 2, stays the same */
+            
+            .element-card,
+            .philosophy-card,
+            .value-card,
+            .token-detail-card,
+            .component-card {
+                padding: var(--spacing-lg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar .container {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                padding-top: var(--spacing-sm);
+                padding-bottom: var(--spacing-sm);
+            }
+            
+            .navbar-menu {
+                flex-direction: column;
+                width: 100%;
+                gap: var(--spacing-sm);
+            }
+            
+            .nav-link {
+                width: 100%;
+                text-align: center;
+            }
+            
+            /* Single column for all grids on mobile */
+            .elements-grid,
+            .philosophy-grid,
+            .values-grid,
+            .token-details-grid,
+            .integration-details,
+            .benefits-grid,
+            .architecture-components,
+            .participation-grid,
+            .contact-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-xl);
+            }
         }
     </style>
     
@@ -208,38 +754,45 @@
 </head>
 <body>
     <!-- Navigation Header -->
-    <header class="site-header">
-        <nav class="container">
-            <div class="nav-content">
-                <a href="/" class="logo">
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <div class="navbar-brand">
+                <a href="/" class="logo" aria-label="UBEC Protocol Home">
                     <span class="logo-text">UBEC Protocol</span>
+                    <span class="logo-subtext">Ubuntu Bioregional Commons</span>
                 </a>
-                <ul class="nav-menu">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/protocol">Protocol</a></li>
-                    <li><a href="/dashboard">Dashboard</a></li>
-                    <li><a href="/stories">Token Stories</a></li>
-                    <li><a href="/about">About</a></li>
-                </ul>
             </div>
-        </nav>
-    </header>
+            
+            <div class="navbar-menu">
+                <a href="/" class="nav-link {% if page == 'home' %}active{% endif %}">Home</a>
+                <a href="/about" class="nav-link {% if page == 'about' %}active{% endif %}">About</a>
+                <a href="/stories" class="nav-link {% if page == 'stories' %}active{% endif %}">Token Stories</a>
+                <a href="/protocol" class="nav-link {% if page == 'protocol' %}active{% endif %}">Protocol</a>
+                <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/docs" class="nav-link {% if page == 'docs' %}active{% endif %}">Documents</a>
+            </div>
+        </div>
+    </nav>
 
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="main-content" role="main">
         {% block content %}
         <!-- Page-specific content goes here -->
         {% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="site-footer">
+    <footer class="site-footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>UBEC Protocol</h3>
-                    <p>Ubuntu Bioregional Economic Commons - Four-element token ecosystem embodying "I am because we are"</p>
+                    <p class="ubuntu-quote" style="font-style: italic; border-left: 3px solid rgba(255,255,255,0.5); padding-left: 1rem; margin: 1rem 0;">
+                        "I am because we are"
+                    </p>
+                    <p>Ubuntu Bioregional Economic Commons - Four-element token ecosystem embodying Ubuntu philosophy</p>
                 </div>
+                
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
@@ -249,24 +802,28 @@
                         <li><a href="/api/docs">API Reference</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-section">
                     <h4>Community</h4>
                     <ul>
                         <li><a href="/stories">Token Stories</a></li>
                         <li><a href="/about">About Ubuntu</a></li>
                         <li><a href="/contact">Contact</a></li>
+                        <li><a href="https://ubeccommon.github.io/" target="_blank" rel="noopener">GitHub</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-section">
-                    <h4>Elements 🌬️💧🌍🔥</h4>
+                    <h4>Four Elements</h4>
                     <ul>
-                        <li>🌬️ Air - Diversity</li>
-                        <li>💧 Water - Reciprocity</li>
-                        <li>🌍 Earth - Mutualism</li>
-                        <li>🔥 Fire - Regeneration</li>
+                        <li>🌬️ Air (UBEC) - Diversity</li>
+                        <li>💧 Water (UBECrc) - Reciprocity</li>
+                        <li>🌍 Earth (UBECgpi) - Mutualism</li>
+                        <li>🔥 Fire (UBECtt) - Regeneration</li>
                     </ul>
                 </div>
             </div>
+            
             <div class="footer-bottom">
                 <p>&copy; 2025 UBEC Protocol Network. Licensed under Ubuntu Philosophy.</p>
                 <p class="attribution">
@@ -283,9 +840,21 @@
         // Global UBEC namespace
         window.UBEC = window.UBEC || {};
         
+        // Configuration
+        window.UBEC.config = {
+            apiBaseUrl: '/api/v1',
+            refreshInterval: 30000, // 30 seconds
+            debug: false
+        };
+        
         // Utility functions
         window.UBEC.utils = {
-            // Animate a counter from 0 to target value
+            /**
+             * Animate a counter from 0 to target value
+             * @param {string} elementId - ID of the element to animate
+             * @param {number} targetValue - Target number to count to
+             * @param {number} duration - Animation duration in milliseconds
+             */
             animateCounter: function(elementId, targetValue, duration = 1000) {
                 const element = document.getElementById(elementId);
                 if (!element) return;
@@ -305,9 +874,15 @@
                 }, 16);
             },
             
-            // Format large numbers with appropriate suffixes
+            /**
+             * Format large numbers with appropriate suffixes (K, M, B)
+             * @param {number} num - Number to format
+             * @returns {string} Formatted number string
+             */
             formatNumber: function(num) {
-                if (num >= 1000000) {
+                if (num >= 1000000000) {
+                    return (num / 1000000000).toFixed(1) + 'B';
+                } else if (num >= 1000000) {
                     return (num / 1000000).toFixed(1) + 'M';
                 } else if (num >= 1000) {
                     return (num / 1000).toFixed(1) + 'K';
@@ -315,7 +890,12 @@
                 return num.toLocaleString();
             },
             
-            // Debounce function for performance
+            /**
+             * Debounce function for performance optimization
+             * @param {Function} func - Function to debounce
+             * @param {number} wait - Wait time in milliseconds
+             * @returns {Function} Debounced function
+             */
             debounce: function(func, wait) {
                 let timeout;
                 return function executedFunction(...args) {
@@ -326,6 +906,24 @@
                     clearTimeout(timeout);
                     timeout = setTimeout(later, wait);
                 };
+            },
+            
+            /**
+             * Fetch data from API endpoint
+             * @param {string} endpoint - API endpoint path
+             * @returns {Promise} Promise resolving to API response
+             */
+            fetchAPI: async function(endpoint) {
+                try {
+                    const response = await fetch(`${window.UBEC.config.apiBaseUrl}${endpoint}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('API fetch error:', error);
+                    throw error;
+                }
             }
         };
         
@@ -335,42 +933,74 @@
             
             // Add active class to current navigation item
             const currentPath = window.location.pathname;
-            const navLinks = document.querySelectorAll('.nav-menu a');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
             navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
+                // Get the href and normalize it
+                const href = link.getAttribute('href');
+                
+                // Exact match for home
+                if (href === '/' && currentPath === '/') {
+                    link.classList.add('active');
+                }
+                // Partial match for other pages
+                else if (href !== '/' && currentPath.startsWith(href)) {
                     link.classList.add('active');
                 }
             });
+            
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Add fade-in animation to sections
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
         });
+        
+        // Handle navigation on window resize
+        window.addEventListener('resize', window.UBEC.utils.debounce(function() {
+            // Handle responsive navigation adjustments if needed
+            if (window.UBEC.config.debug) {
+                console.log('Window resized');
+            }
+        }, 250));
     </script>
     
     <!-- Page-specific JavaScript -->
     {% block extra_js %}{% endblock %}
     
-    <!-- Analytics (if needed) -->
-    {% if False %}
+    <!-- Analytics (conditional) -->
+    {% if config and config.ENABLE_ANALYTICS %}
     <script>
         // Analytics code here
+        console.log('Analytics enabled');
     </script>
     {% endif %}
 </body>
 </html>
-
-<!-- 
-================================================================================
-CHARACTER ENCODING NOTE:
-This template uses UTF-8 encoding for proper emoji display.
-Emojis used: 🌬️💧🌍🔥
-
-CRITICAL REQUIREMENTS:
-1. This file MUST be saved with UTF-8 encoding (no BOM)
-2. The <meta charset="UTF-8"> tag MUST be the first meta tag in <head>
-3. Web server MUST send "Content-Type: text/html; charset=utf-8" header
-
-If emojis display as garbled characters (e.g., "∂ŸŒ-ï,"), check:
-- File is saved as UTF-8
-- Meta charset tag is present and first
-- Server is sending correct Content-Type header
-- Browser cache is cleared (Ctrl+Shift+R / Cmd+Shift+R)
-================================================================================
--->

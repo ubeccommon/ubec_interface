@@ -215,8 +215,21 @@ class BackendAPIClient:
         Returns:
             Number of bioregions
         """
-        data = await self.get_network_status()
-        return data.get("bioregion_count", 0)
+        data = await self._cached_get("/api/v1/bioregions/count", ttl=30)
+        return data.get("count", 0)
+    
+    async def get_bioregion_summary(self) -> Dict:
+        """
+        Get summary statistics for all bioregions.
+        
+        Returns:
+            Dictionary with summary statistics including:
+            - total_count: Number of bioregions
+            - total_members: Total member count
+            - average_scores: Average metrics
+            - geographic_metrics: Geographic distribution
+        """
+        return await self._cached_get("/api/v1/bioregions/summary", ttl=60)
     
     async def get_bioregions(self) -> Dict:
         """
@@ -239,41 +252,138 @@ class BackendAPIClient:
         """
         return await self._cached_get(f"/api/v1/bioregions/{bioregion_id}", ttl=60)
     
+    async def get_bioregion_health(self, bioregion_id: int) -> Dict:
+        """
+        Get health assessment for a specific bioregion.
+        
+        Args:
+            bioregion_id: Bioregion identifier
+        
+        Returns:
+            Health assessment with rating (excellent/good/fair/poor)
+            and component scores
+        """
+        return await self._cached_get(f"/api/v1/bioregions/{bioregion_id}/health", ttl=30)
+    
+    # ========================================================================
+    # ECOREGION ENDPOINTS
+    # ========================================================================
+    
+    async def get_ecoregions(
+        self,
+        limit: int = 50,
+        biome: Optional[str] = None,
+        realm: Optional[str] = None
+    ) -> Dict:
+        """
+        Get ecoregion data from Ecoregions2017 dataset.
+        
+        Args:
+            limit: Number of results (max: 200)
+            biome: Filter by biome name
+            realm: Filter by realm
+        
+        Returns:
+            Dictionary with ecoregion data
+        """
+        params = {"limit": limit}
+        if biome:
+            params["biome"] = biome
+        if realm:
+            params["realm"] = realm
+        return await self._cached_get("/api/v1/ecoregions", ttl=300, params=params)
+    
+    async def get_ecoregion(self, eco_id: int) -> Dict:
+        """
+        Get detailed information about a specific ecoregion.
+        
+        Args:
+            eco_id: Ecoregion ID
+        
+        Returns:
+            Ecoregion details with geographic and ecological data
+        """
+        return await self._cached_get(f"/api/v1/ecoregions/{eco_id}", ttl=300)
+    
+    # ========================================================================
+    # WATERSHED ENDPOINTS
+    # ========================================================================
+    
+    async def get_watersheds(
+        self,
+        limit: int = 50,
+        min_area: Optional[float] = None
+    ) -> Dict:
+        """
+        Get watershed data from FEOW HydroSHEDS dataset.
+        
+        Args:
+            limit: Number of results (max: 200)
+            min_area: Minimum area in square kilometers
+        
+        Returns:
+            Dictionary with watershed data
+        """
+        params = {"limit": limit}
+        if min_area is not None:
+            params["min_area"] = min_area
+        return await self._cached_get("/api/v1/watersheds", ttl=300, params=params)
+    
+    async def get_watershed(self, feow_id: int) -> Dict:
+        """
+        Get specific watershed by FEOW ID.
+        
+        Args:
+            feow_id: FEOW watershed identifier
+        
+        Returns:
+            Watershed details with geographic data
+        """
+        return await self._cached_get(f"/api/v1/watersheds/{feow_id}", ttl=300)
+    
     # ========================================================================
     # HOLONIC EVALUATION ENDPOINTS
     # ========================================================================
     
-    async def get_holonic_scores(self, account_id: Optional[str] = None) -> List[Dict]:
+    async def get_holonic_scores(
+        self,
+        category: Optional[str] = None,
+        limit: int = 50,
+        min_score: float = 0.0
+    ) -> Dict:
         """
-        Get holonic evaluation scores.
+        Get holonic evaluation scores for accounts.
         
         Args:
-            account_id: Optional specific account to get scores for
+            category: Filter by holonic category (observer, participant, 
+                     contributor, integrator, exemplar)
+            limit: Number of results (max: 200)
+            min_score: Minimum composite score threshold (0.0-1.0)
         
         Returns:
-            List of holonic score objects with Ubuntu principle evaluations
+            Dictionary with summary statistics and list of account evaluations
         """
-        params = {"account_id": account_id} if account_id else None
-        data = await self._cached_get("/api/v1/holonic-scores", ttl=60, params=params)
-        return data if isinstance(data, list) else [data]
+        params = {"limit": limit, "min_score": min_score}
+        if category:
+            params["category"] = category
+        return await self._cached_get("/api/v1/holonic-scores", ttl=60, params=params)
     
     # ========================================================================
     # TRANSACTION ENDPOINTS
     # ========================================================================
     
-    async def get_recent_transactions(self, limit: int = 20) -> List[Dict]:
+    async def get_recent_transactions(self, limit: int = 20) -> Dict:
         """
         Get recent blockchain transactions.
         
         Args:
-            limit: Maximum number of transactions to return
+            limit: Maximum number of transactions to return (max: 100)
         
         Returns:
-            List of recent transaction objects
+            Dictionary with list of recent transaction operations
         """
-        params = {"limit": limit}
-        data = await self._cached_get("/api/v1/transactions", ttl=15, params=params)
-        return data if isinstance(data, list) else data.get("transactions", [])
+        params = {"limit": min(limit, 100)}
+        return await self._cached_get("/api/v1/transactions", ttl=15, params=params)
     
     # ========================================================================
     # DISTRIBUTION ENDPOINTS
@@ -281,13 +391,13 @@ class BackendAPIClient:
     
     async def get_distribution_stats(self) -> Dict:
         """
-        Get token distribution statistics.
+        Get token distribution statistics for 75/20/5 compliance.
         
         Returns:
             Distribution statistics including:
             - total_distributed: Total tokens distributed
             - distribution_by_category: Breakdown by category
-            - compliance_metrics: Compliance with 65/30/5 model
+            - compliance_status: Compliance with distribution model
         """
         return await self._cached_get("/api/v1/distribution", ttl=60)
     
@@ -348,34 +458,54 @@ async def test_client():
     
     try:
         # Test health
-        print("\n[1/6] Testing health check...")
+        print("\n[1/10] Testing health check...")
         health = await client.health_check()
         print(f"✓ Health: {health.get('status', 'unknown')}")
         
         # Test tokens
-        print("\n[2/6] Testing tokens...")
+        print("\n[2/10] Testing tokens...")
         tokens = await client.get_all_tokens()
         print(f"✓ Found {len(tokens)} tokens")
         
         # Test network status
-        print("\n[3/6] Testing network status...")
+        print("\n[3/10] Testing network status...")
         network = await client.get_network_status()
         print(f"✓ Bioregions: {network.get('bioregion_count', 0)}")
         
+        # Test bioregion count
+        print("\n[4/10] Testing bioregion count...")
+        count = await client.get_bioregion_count()
+        print(f"✓ Bioregion count: {count}")
+        
+        # Test bioregion summary
+        print("\n[5/10] Testing bioregion summary...")
+        summary = await client.get_bioregion_summary()
+        print(f"✓ Got bioregion summary")
+        
         # Test holonic scores
-        print("\n[4/6] Testing holonic scores...")
-        scores = await client.get_holonic_scores()
+        print("\n[6/10] Testing holonic scores...")
+        scores = await client.get_holonic_scores(limit=5)
         print(f"✓ Got holonic scores")
         
         # Test transactions
-        print("\n[5/6] Testing transactions...")
+        print("\n[7/10] Testing transactions...")
         transactions = await client.get_recent_transactions(limit=5)
-        print(f"✓ Found {len(transactions)} recent transactions")
+        print(f"✓ Got recent transactions")
         
         # Test distribution
-        print("\n[6/6] Testing distribution stats...")
+        print("\n[8/10] Testing distribution stats...")
         distribution = await client.get_distribution_stats()
         print(f"✓ Got distribution stats")
+        
+        # Test ecoregions
+        print("\n[9/10] Testing ecoregions...")
+        ecoregions = await client.get_ecoregions(limit=5)
+        print(f"✓ Got ecoregions")
+        
+        # Test watersheds
+        print("\n[10/10] Testing watersheds...")
+        watersheds = await client.get_watersheds(limit=5)
+        print(f"✓ Got watersheds")
         
         print("\n" + "=" * 70)
         print("✓ All tests passed!")
