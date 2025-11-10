@@ -122,6 +122,158 @@
             </div>
         </div>
         
+        <!-- Ecoregions & Watersheds Overview -->
+        <div class="dashboard-section">
+            <div class="geo-overview-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                
+                <!-- Ecoregions Section -->
+                <div class="geo-section">
+                    <h2 style="color: #2c3e50; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        🌿 Ecoregions Overview
+                    </h2>
+                    
+                    {% if ecoregions %}
+                    <!-- Summary Stats -->
+                    <div class="geo-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #8BC34A;">{{ ecoregions.total_count }}</div>
+                            <div style="font-size: 0.875rem; color: #7f8c8d; text-transform: uppercase; margin-top: 0.5rem;">Total Ecoregions</div>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #4CAF50;">{{ ecoregions.biome_count }}</div>
+                            <div style="font-size: 0.875rem; color: #7f8c8d; text-transform: uppercase; margin-top: 0.5rem;">Biome Types</div>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #66BB6A;">{{ ecoregions.realm_count }}</div>
+                            <div style="font-size: 0.875rem; color: #7f8c8d; text-transform: uppercase; margin-top: 0.5rem;">Biogeographic Realms</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Ecoregions -->
+                    <div class="ecoregions-list" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="color: #2c3e50; font-size: 1.125rem; margin-bottom: 1rem;">Top Ecoregions</h3>
+                        <div class="ecoregion-items">
+                            {% for eco in ecoregions.top_ecoregions %}
+                            <div class="ecoregion-item" style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">
+                                        {{ eco.eco_name if eco.eco_name else 'Ecoregion #' + eco.eco_id|string }}
+                                    </div>
+                                    <div style="font-size: 0.875rem; color: #7f8c8d;">
+                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.5rem;">
+                                            {{ eco.biome if eco.biome else 'Unknown Biome' }}
+                                        </span>
+                                        <span style="background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                            {{ eco.realm if eco.realm else 'Unknown Realm' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right; color: #8BC34A; font-weight: 600;">
+                                    ID: {{ eco.eco_id }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Biome Distribution -->
+                    {% if ecoregions.biomes %}
+                    <div class="biomes-tags" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 1rem;">
+                        <h3 style="color: #2c3e50; font-size: 1.125rem; margin-bottom: 1rem;">Major Biomes</h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            {% for biome in ecoregions.biomes %}
+                            <span style="background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">
+                                {{ biome }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="no-data" style="background: white; border-radius: 12px; padding: 2rem; text-align: center; color: #7f8c8d;">
+                        <p>Ecoregion data is currently unavailable.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Watersheds Section -->
+                <div class="geo-section">
+                    <h2 style="color: #2c3e50; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        💧 Watersheds Overview
+                    </h2>
+                    
+                    {% if watersheds %}
+                    <!-- Summary Stats -->
+                    <div class="geo-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #4A90E2;">{{ watersheds.total_count }}</div>
+                            <div style="font-size: 0.875rem; color: #7f8c8d; text-transform: uppercase; margin-top: 0.5rem;">Total Watersheds</div>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #42A5F5;">{{ "{:,.0f}".format(watersheds.total_area_sqkm) }}</div>
+                            <div style="font-size: 0.875rem; color: #7f8c8d; text-transform: uppercase; margin-top: 0.5rem;">Total Area (km²)</div>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #64B5F6;">{{ "{:,.0f}".format(watersheds.average_area) }}</div>
+                            <div style="font-size: 0.875rem; color: #7f8c8d; text-transform: uppercase; margin-top: 0.5rem;">Avg. Area (km²)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Major Watersheds -->
+                    <div class="watersheds-list" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="color: #2c3e50; font-size: 1.125rem; margin-bottom: 1rem;">Major Watersheds</h3>
+                        <div class="watershed-items">
+                            {% for watershed in watersheds.major_watersheds %}
+                            <div class="watershed-item" style="padding: 1rem; border-bottom: 1px solid #f0f0f0;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                    <div style="font-weight: 600; color: #2c3e50; flex: 1;">
+                                        {{ watershed.hybas_name if watershed.hybas_name else 'Watershed #' + watershed.hybas_id|string }}
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 1.125rem; font-weight: 700; color: #4A90E2;">
+                                            {{ "{:,.0f}".format(watershed.area_sqkm) }} km²
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.875rem; color: #7f8c8d;">
+                                    <span style="background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.5rem;">
+                                        ID: {{ watershed.hybas_id }}
+                                    </span>
+                                    {% if watershed.pfaf_id %}
+                                    <span style="background: #f3e5f5; color: #6a1b9a; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                        Pfafstetter: {{ watershed.pfaf_id }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Watershed Size Distribution -->
+                    <div class="watershed-info" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 1rem;">
+                        <h3 style="color: #2c3e50; font-size: 1.125rem; margin-bottom: 1rem;">Coverage Information</h3>
+                        <div style="background: linear-gradient(135deg, #E3F2FD 0%, #90CAF9 100%); padding: 1rem; border-radius: 8px;">
+                            <div style="font-size: 0.875rem; color: #1565c0; margin-bottom: 0.5rem;">
+                                🌊 Displaying major watersheds (&gt; 1,000 km²)
+                            </div>
+                            <div style="font-size: 0.875rem; color: #1976d2;">
+                                📊 Total coverage: {{ "{:,.0f}".format(watersheds.total_area_sqkm) }} km² across {{ watersheds.total_count }} watersheds
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% else %}
+                    <div class="no-data" style="background: white; border-radius: 12px; padding: 2rem; text-align: center; color: #7f8c8d;">
+                        <p>Watershed data is currently unavailable.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+            </div>
+        </div>
+        
         <!-- Distribution Statistics -->
         <div class="dashboard-section">
             <h2>Token Distribution</h2>
@@ -490,6 +642,12 @@
     }
     
     /* Responsive Design */
+    @media (max-width: 1200px) {
+        .geo-overview-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    
     @media (max-width: 768px) {
         .dashboard-header h1 {
             font-size: 2rem;
@@ -509,6 +667,10 @@
         
         .transactions-table table {
             min-width: 600px;
+        }
+        
+        .geo-stats-grid {
+            grid-template-columns: 1fr !important;
         }
     }
 </style>

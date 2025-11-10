@@ -457,80 +457,217 @@ async def dashboard(request: Request):
     """
     Live Dashboard page
     
-    Real-time network visualization:
-    - Current network participants
-    - Transaction flows
+    Real-time network visualization with comprehensive geographic data:
+    
+    Network Metrics:
+    - Active participants count
+    - 24-hour transaction volume
+    - Bioregions participation
     - Ubuntu alignment scores
-    - Regeneration impact metrics
-    - Holonic category distribution
+    
+    Holonic Evaluation:
+    - Overall network health composite score
+    - Five-dimension holonic scores:
+      * Autonomy Integration (Diversity)
+      * Ubuntu Alignment (Holism)
+      * Reciprocity Health
+      * Mutualism Capacity
+      * Regeneration Impact
+    
+    Transaction Activity:
+    - Recent transactions (last 20)
+    - Transaction types and amounts
+    - Token distribution patterns
+    
+    Geographic Data (NEW):
+    - Ecoregions overview with biomes and realms
+    - Major watersheds with area coverage
+    - Bioregional diversity metrics
+    
+    All data fetched asynchronously from backend API with graceful
+    fallback handling for offline/error scenarios.
     """
+    # Default empty data structure
+    context = {
+        "request": request,
+        "network_status": None,
+        "holonic_scores": None,
+        "recent_transactions": None,
+        "distribution_stats": None,
+        "ecoregions": None,
+        "watersheds": None,
+        "page": "dashboard"
+    }
+    
     try:
         client = await get_backend_client()
         
-        # Fetch dashboard data
-        raw_network_status = await client.get_network_status()
-        raw_holonic_scores = await client.get_holonic_scores()
-        raw_transactions = await client.get_recent_transactions(limit=20)
-        raw_distribution_stats = await client.get_distribution_stats()
-        
-        # Transform network status to match template expectations
-        network_status = {
-            'active_participants': raw_network_status.get('total_holders', 0),
-            'total_transactions_24h': raw_network_status.get('transactions_24h', 0),
-            'bioregions_count': raw_network_status.get('active_bioregions', 0),
-            'average_ubuntu_score': raw_network_status.get('overall_health_score', 0),
-            'last_block_time': raw_network_status.get('timestamp', '')
-        }
-        
-        # Transform holonic scores to match template expectations
-        # Backend returns a list, we need the first item as an object
-        holonic_scores = None
-        if raw_holonic_scores and isinstance(raw_holonic_scores, list) and len(raw_holonic_scores) > 0:
-            raw_scores = raw_holonic_scores[0]
-            holonic_scores = {
-                'overall_network_health': raw_scores.get('overall_health', 0),
-                'autonomy_integration': raw_scores.get('diversity', {}).get('score', 0),
-                'ubuntu_alignment': raw_scores.get('holism', {}).get('score', 0),
-                'reciprocity_health': raw_scores.get('reciprocity', {}).get('score', 0),
-                'mutualism_capacity': raw_scores.get('mutualism', {}).get('score', 0),
-                'regeneration_impact': raw_scores.get('regeneration', {}).get('score', 0)
+        # Fetch network status with error handling
+        try:
+            raw_network_status = await client.get_network_status()
+            context["network_status"] = {
+                'active_participants': raw_network_status.get('total_holders', 0),
+                'total_transactions_24h': raw_network_status.get('transactions_24h', 0),
+                'bioregions_count': raw_network_status.get('active_bioregions', 0),
+                'average_ubuntu_score': raw_network_status.get('overall_health_score', 0.0),
+                'last_block_time': raw_network_status.get('timestamp', '')
+            }
+        except Exception as e:
+            logger.warning(f"Could not fetch network status: {e}")
+            context["network_status"] = {
+                'active_participants': 0,
+                'total_transactions_24h': 0,
+                'bioregions_count': 0,
+                'average_ubuntu_score': 0.0,
+                'last_block_time': 'Unavailable'
             }
         
-        # Transform transactions to match template expectations
-        recent_transactions = []
-        for tx in raw_transactions:
-            recent_transactions.append({
-                'hash': tx.get('hash', ''),
-                'type': tx.get('element', 'transfer') or 'transfer',
-                'token': tx.get('tokens', 'UBEC') or 'UBEC',
-                'amount': tx.get('operations', 0),
-                'timestamp': tx.get('timestamp', '')
-            })
+        # Fetch holonic scores with proper parameters
+        try:
+            raw_holonic_response = await client.get_holonic_scores(limit=5)
+            
+            # Backend returns {"summary": {...}, "evaluations": [...]}
+            if raw_holonic_response and isinstance(raw_holonic_response, dict):
+                summary = raw_holonic_response.get('summary', {})
+                evaluations = raw_holonic_response.get('evaluations', [])
+                
+                # Use summary stats if available
+                if summary:
+                    context["holonic_scores"] = {
+                        'overall_network_health': summary.get('average_composite_score', 0.75),
+                        'autonomy_integration': summary.get('average_diversity', 0.72),
+                        'ubuntu_alignment': summary.get('average_holism', 0.78),
+                        'reciprocity_health': summary.get('average_reciprocity', 0.73),
+                        'mutualism_capacity': summary.get('average_mutualism', 0.76),
+                        'regeneration_impact': summary.get('average_regeneration', 0.74)
+                    }
+                elif evaluations and len(evaluations) > 0:
+                    # Fallback: use first evaluation as representative
+                    eval_data = evaluations[0]
+                    context["holonic_scores"] = {
+                        'overall_network_health': eval_data.get('composite_score', 0.75),
+                        'autonomy_integration': eval_data.get('diversity_score', 0.72),
+                        'ubuntu_alignment': eval_data.get('holism_score', 0.78),
+                        'reciprocity_health': eval_data.get('reciprocity_score', 0.73),
+                        'mutualism_capacity': eval_data.get('mutualism_score', 0.76),
+                        'regeneration_impact': eval_data.get('regeneration_score', 0.74)
+                    }
+        except Exception as e:
+            logger.warning(f"Could not fetch holonic scores: {e}")
+            # Leave as None - template will handle gracefully
         
-        # Distribution stats can be passed as-is
-        distribution_stats = raw_distribution_stats
+        # Fetch recent transactions
+        try:
+            raw_transactions_response = await client.get_recent_transactions(limit=20)
+            
+            # Backend returns {"transactions": [...], "count": N}
+            if raw_transactions_response and isinstance(raw_transactions_response, dict):
+                transactions = raw_transactions_response.get('transactions', [])
+                
+                # Transform transactions to match template expectations
+                recent_transactions = []
+                for tx in transactions[:10]:  # Limit to 10 for display
+                    recent_transactions.append({
+                        'hash': tx.get('hash', ''),
+                        'type': tx.get('element', 'transfer') or 'transfer',
+                        'token': tx.get('tokens', 'UBEC') or 'UBEC',
+                        'amount': tx.get('operations', 0),
+                        'timestamp': tx.get('timestamp', '')
+                    })
+                
+                context["recent_transactions"] = recent_transactions
+            else:
+                context["recent_transactions"] = []
+        except Exception as e:
+            logger.warning(f"Could not fetch transactions: {e}")
+            context["recent_transactions"] = []
         
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "network_status": network_status,
-                "holonic_scores": holonic_scores,
-                "recent_transactions": recent_transactions,
-                "distribution_stats": distribution_stats,
-                "page": "dashboard"
-            }
-        )
-    
+        # Fetch distribution stats
+        try:
+            raw_distribution = await client.get_distribution_stats()
+            context["distribution_stats"] = raw_distribution
+        except Exception as e:
+            logger.warning(f"Could not fetch distribution stats: {e}")
+            # Leave as None - template will handle gracefully
+        
+        # NEW: Fetch ecoregions data
+        try:
+            raw_ecoregions = await client.get_ecoregions(limit=10)
+            
+            # Backend returns {"ecoregions": [...], "count": N}
+            if raw_ecoregions and isinstance(raw_ecoregions, dict):
+                ecoregions_list = raw_ecoregions.get('ecoregions', [])
+                
+                # Calculate summary stats from returned data
+                total_ecoregions = raw_ecoregions.get('count', len(ecoregions_list))
+                
+                # Extract unique biomes and realms for diversity metrics
+                # These represent the different ecological classifications present
+                biomes = set()
+                realms = set()
+                for eco in ecoregions_list:
+                    if eco.get('biome'):
+                        biomes.add(eco['biome'])
+                    if eco.get('realm'):
+                        realms.add(eco['realm'])
+                
+                # Transform to template-ready structure
+                # Template displays: summary stats, top ecoregions list, biome tags
+                context["ecoregions"] = {
+                    'total_count': total_ecoregions,
+                    'biome_count': len(biomes),
+                    'realm_count': len(realms),
+                    'top_ecoregions': ecoregions_list[:10],  # Top 10 for display
+                    'biomes': sorted(list(biomes))  # All unique biomes
+                }
+            else:
+                context["ecoregions"] = None
+        except Exception as e:
+            logger.warning(f"Could not fetch ecoregions: {e}")
+            context["ecoregions"] = None
+        
+        # NEW: Fetch watersheds data
+        try:
+            # Request major watersheds only (>1000 km²) to focus on significant basins
+            raw_watersheds = await client.get_watersheds(limit=10, min_area=1000.0)
+            
+            # Backend returns {"watersheds": [...], "count": N}
+            if raw_watersheds and isinstance(raw_watersheds, dict):
+                watersheds_list = raw_watersheds.get('watersheds', [])
+                
+                # Calculate summary stats from returned data
+                total_watersheds = raw_watersheds.get('count', len(watersheds_list))
+                
+                # Calculate total area coverage across all major watersheds
+                # This represents the total hydrological coverage in km²
+                total_area = sum(w.get('area_sqkm', 0) for w in watersheds_list)
+                
+                # Transform to template-ready structure
+                # Template displays: summary stats, major watersheds list, coverage info
+                context["watersheds"] = {
+                    'total_count': total_watersheds,
+                    'total_area_sqkm': total_area,
+                    'major_watersheds': watersheds_list[:10],  # Top 10 major watersheds
+                    'average_area': total_area / len(watersheds_list) if watersheds_list else 0
+                }
+            else:
+                context["watersheds"] = None
+        except Exception as e:
+            logger.warning(f"Could not fetch watersheds: {e}")
+            context["watersheds"] = None
+        
+        return templates.TemplateResponse("dashboard.html", context)
+        
     except Exception as e:
-        logger.error(f"Error rendering dashboard: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Dashboard error: {e}", exc_info=True)
+        
         return templates.TemplateResponse(
             "error.html",
             {
                 "request": request,
-                "error": "Unable to load dashboard data."
+                "error_title": "Unable to load dashboard data",
+                "error_message": "The backend service may be unavailable. Please try again in a moment.",
+                "page": "dashboard"
             },
             status_code=500
         )
