@@ -365,10 +365,10 @@
             <div class="token-details-grid">
                 {% if tokens %}
                     {% for token in tokens %}
-                    <div class="card token-detail-card token-{{ token.element|lower }}">
+                    <div class="card token-detail-card token-{{ token.get('element', 'Unknown')|lower }}">
                         <div class="token-header">
-                            <span class="token-symbol">{{ token.element_symbol }}</span>
-                            <h3>{{ token.token_code }} - {{ token.element }}</h3>
+                            <span class="token-symbol">{{ token.get('element_symbol', 'Unknown') }}</span>
+                            <h3>{{ token.token_code }} - {{ token.get('element', 'Unknown') }}</h3>
                         </div>
                         <dl class="token-specs">
                             <dt>Ubuntu Principle:</dt>
@@ -458,9 +458,9 @@
                 <div class="card dimension-card">
                     <h4>Autonomy Integration</h4>
                     <div class="score-bar">
-                        <div class="score-fill" style="width: {{ (holonic_scores.get("autonomy_integration", 0) * 100)|round }}%"></div>
+                        <div class="score-fill" style="width: {{ (holonic_scores.autonomy_integration * 100)|round }}%"></div>
                     </div>
-                    <span class="score-value">{{ (holonic_scores.get("autonomy_integration", 0) * 100)|round }}%</span>
+                    <span class="score-value">{{ (holonic_scores.autonomy_integration * 100)|round }}%</span>
                     <p class="dimension-description">
                         Measures the balance between individual autonomy and collective integration,
                         reflecting how participants maintain their unique identity while contributing to the whole.
@@ -470,9 +470,9 @@
                 <div class="card dimension-card">
                     <h4>Ubuntu Alignment</h4>
                     <div class="score-bar">
-                        <div class="score-fill" style="width: {{ (holonic_scores.get("ubuntu_alignment", 0) * 100)|round }}%"></div>
+                        <div class="score-fill" style="width: {{ (holonic_scores.ubuntu_alignment * 100)|round }}%"></div>
                     </div>
-                    <span class="score-value">{{ (holonic_scores.get("ubuntu_alignment", 0) * 100)|round }}%</span>
+                    <span class="score-value">{{ (holonic_scores.ubuntu_alignment * 100)|round }}%</span>
                     <p class="dimension-description">
                         Evaluates adherence to Ubuntu principles of interconnectedness, mutual support,
                         and recognition that "I am because we are."
@@ -482,9 +482,9 @@
                 <div class="card dimension-card">
                     <h4>Reciprocity Health</h4>
                     <div class="score-bar">
-                        <div class="score-fill" style="width: {{ (holonic_scores.get("reciprocity_health", 0) * 100)|round }}%"></div>
+                        <div class="score-fill" style="width: {{ (holonic_scores.reciprocity_health * 100)|round }}%"></div>
                     </div>
-                    <span class="score-value">{{ (holonic_scores.get("reciprocity_health", 0) * 100)|round }}%</span>
+                    <span class="score-value">{{ (holonic_scores.reciprocity_health * 100)|round }}%</span>
                     <p class="dimension-description">
                         Assesses the balance of giving and receiving, tracking the health of reciprocal
                         relationships within the network.
@@ -494,9 +494,9 @@
                 <div class="card dimension-card">
                     <h4>Mutualism Capacity</h4>
                     <div class="score-bar">
-                        <div class="score-fill" style="width: {{ (holonic_scores.get("mutualism_capacity", 0) * 100)|round }}%"></div>
+                        <div class="score-fill" style="width: {{ (holonic_scores.mutualism_capacity * 100)|round }}%"></div>
                     </div>
-                    <span class="score-value">{{ (holonic_scores.get("mutualism_capacity", 0) * 100)|round }}%</span>
+                    <span class="score-value">{{ (holonic_scores.mutualism_capacity * 100)|round }}%</span>
                     <p class="dimension-description">
                         Measures the ability to form and maintain mutually beneficial relationships
                         where all parties gain value.
@@ -506,9 +506,9 @@
                 <div class="card dimension-card">
                     <h4>Regeneration Impact</h4>
                     <div class="score-bar">
-                        <div class="score-fill" style="width: {{ (holonic_scores.get("regeneration_impact", 0) * 100)|round }}%"></div>
+                        <div class="score-fill" style="width: {{ (holonic_scores.regeneration_impact * 100)|round }}%"></div>
                     </div>
-                    <span class="score-value">{{ (holonic_scores.get("regeneration_impact", 0) * 100)|round }}%</span>
+                    <span class="score-value">{{ (holonic_scores.regeneration_impact * 100)|round }}%</span>
                     <p class="dimension-description">
                         Tracks contributions to ecosystem healing and renewal, recognizing actions
                         that transform and regenerate the commons.

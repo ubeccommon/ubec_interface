@@ -365,10 +365,10 @@
             <div class="token-details-grid">
                 {% if tokens %}
                     {% for token in tokens %}
-                    <div class="card token-detail-card token-{{ token.element|lower }}">
+                    <div class="card token-detail-card token-{{ token.get('element', 'Unknown')|lower }}">
                         <div class="token-header">
-                            <span class="token-symbol">{{ token.element_symbol }}</span>
-                            <h3>{{ token.token_code }} - {{ token.element }}</h3>
+                            <span class="token-symbol">{{ token.get('element_symbol', 'Unknown') }}</span>
+                            <h3>{{ token.token_code }} - {{ token.get('element', 'Unknown') }}</h3>
                         </div>
                         <dl class="token-specs">
                             <dt>Ubuntu Principle:</dt>

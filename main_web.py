@@ -665,8 +665,8 @@ async def dashboard(request: Request):
             "error.html",
             {
                 "request": request,
-                "error_title": "Unable to load dashboard data",
-                "error_message": "The backend service may be unavailable. Please try again in a moment.",
+                "status_code": 500,
+                "error_message": "The backend service is unavailable at the moment. Please try again in a moment.",
                 "page": "dashboard"
             },
             status_code=500

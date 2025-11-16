@@ -485,10 +485,10 @@
         <div class="elements-grid">
             {% if tokens %}
                 {% for token in tokens %}
-                <div class="element-card element-{{ token.element|lower }}">
+                <div class="element-card element-{{ token.get('element', 'Unknown')|lower }}">
                     <div class="element-header">
-                        <span class="element-symbol">{{ token.element_symbol }}</span>
-                        <h3 class="element-name">{{ token.element }}</h3>
+                        <span class="element-symbol">{{ token.get('element_symbol', 'Unknown') }}</span>
+                        <h3 class="element-name">{{ token.get('element', 'Unknown') }}</h3>
                     </div>
                     <div class="element-body">
                         <div class="token-code">{{ token.token_code }}</div>

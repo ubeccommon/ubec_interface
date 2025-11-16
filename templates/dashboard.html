@@ -21,25 +21,25 @@
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-icon">👥</div>
-                    <div class="metric-value">{{ network_status.active_participants if network_status else "0" }}</div>
+                    <div class="metric-value">{{ network_status.get("active_participants", 0) if network_status else "0" }}</div>
                     <div class="metric-label">Active Participants</div>
                 </div>
                 
                 <div class="metric-card">
                     <div class="metric-icon">🔄</div>
-                    <div class="metric-value">{{ network_status.total_transactions_24h if network_status else "0" }}</div>
+                    <div class="metric-value">{{ network_status.get("total_transactions_24h", 0) if network_status else "0" }}</div>
                     <div class="metric-label">Transactions (24h)</div>
                 </div>
                 
                 <div class="metric-card">
                     <div class="metric-icon">🌍</div>
-                    <div class="metric-value">{{ network_status.bioregions_count if network_status else "0" }}</div>
+                    <div class="metric-value">{{ network_status.get("bioregions_count", 0) if network_status else "0" }}</div>
                     <div class="metric-label">Bioregions</div>
                 </div>
                 
                 <div class="metric-card">
                     <div class="metric-icon">💚</div>
-                    <div class="metric-value">{{ (network_status.average_ubuntu_score * 100)|round|int if network_status else "0" }}%</div>
+                    <div class="metric-value">{{ (network_status.get("average_ubuntu_score", 0) * 100)|round|int if network_status else "0" }}%</div>
                     <div class="metric-label">Ubuntu Score</div>
                 </div>
             </div>
@@ -52,9 +52,9 @@
             <div class="holonic-grid">
                 <div class="holonic-card">
                     <h4>Overall Network Health</h4>
-                    <div class="large-score">{{ (holonic_scores.overall_network_health * 100)|round|int }}%</div>
+                    <div class="large-score">{{ (holonic_scores.get("overall_network_health", 0) * 100)|round|int }}%</div>
                     <div class="score-indicator">
-                        <div class="indicator-bar" style="width: {{ (holonic_scores.overall_network_health * 100)|round }}%"></div>
+                        <div class="indicator-bar" style="width: {{ (holonic_scores.get("overall_network_health", 0) * 100)|round }}%"></div>
                     </div>
                 </div>
                 
@@ -63,23 +63,23 @@
                     <div class="dimensions-list">
                         <div class="dimension-item">
                             <span class="dimension-name">Autonomy Integration</span>
-                            <span class="dimension-score">{{ (holonic_scores.autonomy_integration * 100)|round }}%</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("autonomy_integration", 0) * 100)|round }}%</span>
                         </div>
                         <div class="dimension-item">
                             <span class="dimension-name">Ubuntu Alignment</span>
-                            <span class="dimension-score">{{ (holonic_scores.ubuntu_alignment * 100)|round }}%</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("ubuntu_alignment", 0) * 100)|round }}%</span>
                         </div>
                         <div class="dimension-item">
                             <span class="dimension-name">Reciprocity Health</span>
-                            <span class="dimension-score">{{ (holonic_scores.reciprocity_health * 100)|round }}%</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("reciprocity_health", 0) * 100)|round }}%</span>
                         </div>
                         <div class="dimension-item">
                             <span class="dimension-name">Mutualism Capacity</span>
-                            <span class="dimension-score">{{ (holonic_scores.mutualism_capacity * 100)|round }}%</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("mutualism_capacity", 0) * 100)|round }}%</span>
                         </div>
                         <div class="dimension-item">
                             <span class="dimension-name">Regeneration Impact</span>
-                            <span class="dimension-score">{{ (holonic_scores.regeneration_impact * 100)|round }}%</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("regeneration_impact", 0) * 100)|round }}%</span>
                         </div>
                     </div>
                 </div>
@@ -105,11 +105,11 @@
                         {% if recent_transactions %}
                             {% for tx in recent_transactions[:10] %}
                             <tr>
-                                <td class="hash">{{ tx.hash[:12] }}...</td>
-                                <td><span class="badge tx-{{ tx.type }}">{{ tx.type }}</span></td>
+                                <td class="hash">{{ tx.get('hash', '')[:12] }}...</td>
+                                <td><span class="badge tx-{{ tx.get('type', 'unknown') }}">{{ tx.get('type', 'unknown') }}</span></td>
                                 <td><span class="token-badge">{{ tx.token }}</span></td>
-                                <td class="amount">{{ "{:,.2f}".format(tx.amount) }}</td>
-                                <td class="timestamp">{{ tx.timestamp[:19] }}</td>
+                                <td class="amount">{{ "{:,.2f}".format(tx.get("amount", 0)) }}</td>
+                                <td class="timestamp">{{ tx.get('timestamp', '')[:19] }}</td>
                             </tr>
                             {% endfor %}
                         {% else %}
@@ -122,14 +122,14 @@
             </div>
         </div>
         
-        <!-- Ecoregions & Watersheds Overview -->
+        <!-- Bioregions & Watersheds Overview -->
         <div class="dashboard-section">
             <div class="geo-overview-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 2rem; margin-top: 2rem;">
                 
-                <!-- Ecoregions Section -->
+                <!-- Bioregions Section -->
                 <div class="geo-section">
                     <h2 style="color: #2c3e50; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        🌿 Ecoregions Overview
+                        🌿 Bioregions Overview
                     </h2>
                     
                     {% if ecoregions %}
@@ -232,7 +232,7 @@
                                     </div>
                                     <div style="text-align: right;">
                                         <div style="font-size: 1.125rem; font-weight: 700; color: #4A90E2;">
-                                            {{ "{:,.0f}".format(watershed.area_sqkm) }} km²
+                                            {{ "{:,.0f}".format(watershed.get("area_sqkm", 0)) }} km²
                                         </div>
                                     </div>
                                 </div>

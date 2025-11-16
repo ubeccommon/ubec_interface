@@ -240,20 +240,43 @@ Work with your core group to identify:
    - Coastlines or major water bodies
    - Historic migration patterns of wildlife
 
-#### Create a Bioregional Map
+#### Use the UBEC Mapping Interface
 
-Document your bioregion with:
-- Satellite imagery showing natural boundaries
-- Elevation maps and topography
-- Land use patterns (agricultural, urban, wild)
-- Key ecological features
-- Existing communities and settlements
+**→ [Complete Bioregion Mapping Guide →](UBEC_Bioregion_Mapping_Guide.md)**
 
-**Tools that help**:
-- OpenStreetMap
-- Google Earth
-- Local GIS data from government sources
-- Indigenous land maps (where appropriate)
+The UBEC Protocol provides a professional mapping interface powered by Mapbender WMS to help you accurately define bioregion boundaries based on natural features:
+
+**What the Interface Provides:**
+- 🌊 **Watershed Boundaries**: Visualize major river basins and drainage areas from authoritative FEOW HydroSHEDS datasets
+- 🌍 **Ecoregion Data**: Access Ecoregions2017 classification showing ecological zones (14 distinct biomes)
+- 🏔️ **Terrain Analysis**: View elevation, slope, and topographic features
+- ✏️ **Digitizer Tool**: Draw bioregion boundaries directly on the interactive map
+- 📋 **Metadata Forms**: Complete submission details for bioregion approval workflow
+
+**Quick Start**:
+1. **Visit the mapping interface**: [https://mapbender.ubec.network/application/ubec_bioregions](https://mapbender.ubec.network/application/ubec_bioregions)
+2. **Enable base layers**: Turn on watershed and ecoregion layers to see natural boundaries
+3. **Locate your area**: Use the search function to find your region
+4. **Identify boundaries**: Follow watershed divides and ecoregion transitions
+5. **Draw your boundary**: Use the "Bioregion Mapping" digitizer to draw your polygon
+6. **Submit for review**: Fill in metadata form and submit for community approval
+
+**For complete step-by-step instructions** including layer-by-layer guidance, drawing techniques, and best practices, see the **[Complete Bioregion Mapping Guide](UBEC_Bioregion_Mapping_Guide.md)**.
+
+#### Document Your Bioregion
+
+After mapping with the interface, create supplementary documentation:
+- **Narrative description**: Explain your boundary rationale and ecological reasoning
+- **Visual evidence**: Photos of key ecological features, watersheds, or natural landmarks
+- **Land use analysis**: Current patterns of agriculture, urban areas, and wilderness
+- **Community input**: Notes from listening sessions and stakeholder consultations
+- **Traditional knowledge**: Indigenous perspectives on territorial boundaries (where appropriate)
+
+**Additional Reference Tools** (for supplementary context):
+- **OpenStreetMap**: Community infrastructure and local features
+- **Google Earth**: Historical satellite imagery
+- **Government GIS Data**: Environmental agency datasets
+- **Indigenous Land Maps**: Where appropriate and available
 
 ### Step 2: Build Your Core Team
 
@@ -751,7 +774,7 @@ As you join or establish a bioregion, support is available:
 ### If Establishing a New Bioregion
 
 1. ☑️ Gather a core team (3-5 people)
-2. ☑️ Map your bioregion boundaries
+2. ☑️ [Map your bioregion boundaries →](UBEC_Bioregion_Mapping_Guide.md)
 3. ☑️ Conduct community listening sessions
 4. ☑️ Submit bioregion application
 5. ☑️ Launch with founding participants
@@ -778,6 +801,7 @@ As you step into this work, remember: you are part of a global movement of peopl
 
 ## Related Guides
 
+- [**Bioregion Mapping Guide** →](UBEC_Bioregion_Mapping_Guide.md) - **Using the UBEC Mapbender WMS Interface**
 - [Farmer Onboarding Guide →](farmer-guide.md)
 - [Community Onboarding Guide →](community-guide.md)
 - [Community Activator Guide →](activator-guide.md)

@@ -20,6 +20,8 @@ Attribution:
     This project uses the services of Claude and Anthropic PBC to inform 
     our decisions and recommendations. This project was made possible with 
     the assistance of Claude and Anthropic PBC.
+
+Version: 2.1.0 - Aligned with Backend API v2.3.0
 """
 
 import aiohttp
@@ -38,6 +40,7 @@ class BackendAPIClient:
     Async HTTP client for UBEC Protocol backend API.
     
     Provides cached access to backend endpoints with automatic session management.
+    Aligned with Backend API v2.2.2 OpenAPI specification.
     """
     
     def __init__(
@@ -165,6 +168,18 @@ class BackendAPIClient:
         """
         Get all four UBEC token details.
         
+        ENHANCED v2.2.0: Now includes human-readable name and total_supply
+        from database for each token.
+        
+        Each token includes:
+        - name: Human-readable token name
+        - total_supply: Current total supply from database
+        - asset_code: Token code
+        - element: Associated element
+        - ubuntu_principle: Ubuntu principle represented
+        - issuer: Stellar issuer address
+        - description: Token purpose description
+        
         Returns:
             List of token objects with details about UBEC, UBECrc, UBECgpi, UBECtt
         """
@@ -183,6 +198,9 @@ class BackendAPIClient:
         
         Returns:
             Token object with details
+        
+        Raises:
+            ValueError: If token not found
         """
         tokens = await self.get_all_tokens()
         for token in tokens:
@@ -196,14 +214,16 @@ class BackendAPIClient:
     
     async def get_network_status(self) -> Dict:
         """
-        Get current network status and statistics.
+        Get current network status and health metrics.
         
         Returns:
             Network status object with:
-            - bioregion_count: Number of active bioregions
-            - total_participants: Total network participants
-            - active_transactions: Recent transaction count
-            - network_health: Overall health score
+            - total_supply: Total token supply across all elements
+            - total_holders: Total unique holders
+            - bioregion_count: Active bioregion count
+            - health_score: Overall health score from holonic metrics
+            - recent_transactions: Recent transaction activity count
+            - timestamp: When this data was retrieved
         """
         return await self._cached_get("/api/v1/network-status", ttl=30)
     
@@ -225,21 +245,36 @@ class BackendAPIClient:
         """
         Get summary statistics for all bioregions.
         
+        This method transforms the full bioregions data into summary statistics.
+        
         Returns:
             Dictionary with summary statistics including:
             - total_count: Number of bioregions
-            - total_members: Total member count
-            - average_scores: Average metrics
-            - geographic_metrics: Geographic distribution
+            - bioregions: List of bioregion summaries
+            - timestamp: When this data was retrieved
         """
-        return await self._cached_get("/api/v1/bioregions/summary", ttl=60)
+        # FIXED: Backend doesn't have /api/v1/bioregions/summary endpoint
+        # Instead, we transform data from the full bioregions list
+        data = await self.get_bioregions()
+        
+        # Transform full data into summary format
+        summary = {
+            "total_count": data.get("count", 0),
+            "bioregions": data.get("bioregions", []),
+            "timestamp": data.get("timestamp", datetime.now().isoformat())
+        }
+        
+        return summary
     
     async def get_bioregions(self) -> Dict:
         """
-        Get all bioregions with details.
+        Get list of all active bioregions with details.
         
         Returns:
-            Dictionary with bioregion data
+            Dictionary with:
+            - bioregions: List of bioregion objects with names, locations, etc.
+            - count: Total number of bioregions
+            - timestamp: When this data was retrieved
         """
         return await self._cached_get("/api/v1/bioregions", ttl=60)
     
@@ -269,7 +304,7 @@ class BackendAPIClient:
         return await self._cached_get(f"/api/v1/bioregions/{bioregion_id}/health", ttl=30)
     
     # ========================================================================
-    # ECOREGION ENDPOINTS
+    # GEOGRAPHIC DATA ENDPOINTS (FUTURE)
     # ========================================================================
     
     async def get_ecoregions(
@@ -280,6 +315,9 @@ class BackendAPIClient:
     ) -> Optional[Dict]:
         """
         Get ecoregion data from Ecoregions2017 dataset.
+        
+        AVAILABLE v2.3.0: Now fully implemented in Backend API v2.3.0.
+        Returns None if endpoint is unavailable (graceful degradation).
         
         Args:
             limit: Number of results (max: 200)
@@ -312,17 +350,30 @@ class BackendAPIClient:
             logger.warning(f"Could not fetch ecoregions: {e}")
             return None
     
-    async def get_ecoregion(self, eco_id: int) -> Dict:
+    async def get_ecoregion(self, eco_id: int) -> Optional[Dict]:
         """
         Get detailed information about a specific ecoregion.
+        
+        AVAILABLE v2.3.0: Now fully implemented in Backend API v2.3.0.
         
         Args:
             eco_id: Ecoregion ID
         
         Returns:
-            Ecoregion details with geographic and ecological data
+            Ecoregion details with geographic data, or None if unavailable
         """
-        return await self._cached_get(f"/api/v1/ecoregions/{eco_id}", ttl=300)
+        try:
+            return await self._cached_get(f"/api/v1/ecoregions/{eco_id}", ttl=300)
+        except aiohttp.ClientResponseError as e:
+            if e.status == 404:
+                logger.info(f"Ecoregion {eco_id} not found or endpoint not implemented")
+                return None
+            else:
+                logger.error(f"Error fetching ecoregion {eco_id}: {e.status}")
+                return None
+        except Exception as e:
+            logger.warning(f"Could not fetch ecoregion {eco_id}: {e}")
+            return None
     
     # ========================================================================
     # WATERSHED ENDPOINTS
@@ -335,6 +386,9 @@ class BackendAPIClient:
     ) -> Optional[Dict]:
         """
         Get watershed data from FEOW HydroSHEDS dataset.
+        
+        AVAILABLE v2.3.0: Now fully implemented in Backend API v2.3.0.
+        Returns None if endpoint is unavailable (graceful degradation).
         
         Args:
             limit: Number of results (max: 200)
@@ -364,17 +418,30 @@ class BackendAPIClient:
             logger.warning(f"Could not fetch watersheds: {e}")
             return None
     
-    async def get_watershed(self, feow_id: int) -> Dict:
+    async def get_watershed(self, feow_id: int) -> Optional[Dict]:
         """
         Get specific watershed by FEOW ID.
+        
+        AVAILABLE v2.3.0: Now fully implemented in Backend API v2.3.0.
         
         Args:
             feow_id: FEOW watershed identifier
         
         Returns:
-            Watershed details with geographic data
+            Watershed details with geographic data, or None if unavailable
         """
-        return await self._cached_get(f"/api/v1/watersheds/{feow_id}", ttl=300)
+        try:
+            return await self._cached_get(f"/api/v1/watersheds/{feow_id}", ttl=300)
+        except aiohttp.ClientResponseError as e:
+            if e.status == 404:
+                logger.info(f"Watershed {feow_id} not found or endpoint not implemented")
+                return None
+            else:
+                logger.error(f"Error fetching watershed {feow_id}: {e.status}")
+                return None
+        except Exception as e:
+            logger.warning(f"Could not fetch watershed {feow_id}: {e}")
+            return None
     
     # ========================================================================
     # HOLONIC EVALUATION ENDPOINTS
@@ -383,42 +450,79 @@ class BackendAPIClient:
     async def get_holonic_scores(
         self,
         category: Optional[str] = None,
-        limit: int = 50,
-        min_score: float = 0.0
+        limit: int = 100,
+        min_score: Optional[float] = None
     ) -> Dict:
         """
-        Get holonic evaluation scores for accounts.
+        Get holonic evaluation scores for network accounts.
+        
+        ENHANCED v2.2.0: Now includes reciprocity_health and mutualism_capacity
+        metrics for Ubuntu principle alignment.
+        
+        Holonic categories represent Ubuntu principle alignment levels:
+        - observer: Basic network presence (0.0-0.2)
+        - participant: Regular engagement (0.2-0.4)
+        - contributor: Active value creation (0.4-0.6)
+        - integrator: Cross-network collaboration (0.6-0.8)
+        - exemplar: Ubuntu principle embodiment (0.8-1.0)
+        
+        New metrics in v2.2.0:
+        - reciprocity_health: Water element alignment (UBECrc flows)
+        - mutualism_capacity: Earth element alignment (UBECgpi stability)
         
         Args:
             category: Filter by holonic category (observer, participant, 
                      contributor, integrator, exemplar)
-            limit: Number of results (max: 200)
+            limit: Number of results (max: 500)
             min_score: Minimum composite score threshold (0.0-1.0)
         
         Returns:
-            Dictionary with summary statistics and list of account evaluations
+            Dictionary with:
+            - summary: Overall statistics and averages
+            - category_distribution: Counts by holonic category
+            - accounts: Detailed account scores with Ubuntu metrics
+            - timestamp: When this data was retrieved
         """
-        params = {"limit": limit, "min_score": min_score}
+        params = {"limit": min(limit, 500)}
         if category:
             params["category"] = category
+        if min_score is not None:
+            params["min_score"] = min_score
+        
         return await self._cached_get("/api/v1/holonic-scores", ttl=60, params=params)
     
     # ========================================================================
     # TRANSACTION ENDPOINTS
     # ========================================================================
     
-    async def get_recent_transactions(self, limit: int = 20) -> Dict:
+    async def get_recent_transactions(
+        self,
+        limit: int = 20,
+        offset: int = 0
+    ) -> Dict:
         """
-        Get recent blockchain transactions.
+        Get recent blockchain transactions across all UBEC tokens.
+        
+        CRITICAL FIX: Endpoint path corrected to /api/v1/transactions/recent
         
         Args:
-            limit: Maximum number of transactions to return (max: 100)
+            limit: Maximum number of transactions to return (default 20, max 100)
+            offset: Number of transactions to skip for pagination
         
         Returns:
-            Dictionary with list of recent transaction operations
+            Dictionary with:
+            - transactions: List of recent transaction objects
+            - count: Number of transactions returned
+            - total: Total number of transactions in database
+            - timestamp: When this data was retrieved
         """
-        params = {"limit": min(limit, 100)}
-        return await self._cached_get("/api/v1/transactions", ttl=15, params=params)
+        params = {
+            "limit": min(limit, 100),
+            "offset": offset
+        }
+        # FIXED: Endpoint was /api/v1/transactions (404)
+        # Now correctly using /api/v1/transactions/recent
+        return await self._cached_get("/api/v1/transactions/recent", ttl=15, params=params)
     
     # ========================================================================
     # DISTRIBUTION ENDPOINTS
@@ -428,11 +532,18 @@ class BackendAPIClient:
         """
         Get token distribution statistics for 75/20/5 compliance.
         
+        Returns distribution breakdown by category:
+        - General Circulation (75%)
+        - Stewardship (20%)
+        - Administration (5%)
+        
+        Shows compliance status for each token.
+        
         Returns:
             Distribution statistics including:
-            - total_distributed: Total tokens distributed
-            - distribution_by_category: Breakdown by category
-            - compliance_status: Compliance with distribution model
+            - tokens: Distribution data for each token
+            - compliance_summary: Overall compliance status
+            - timestamp: When this data was retrieved
         """
         return await self._cached_get("/api/v1/distribution", ttl=60)
     
@@ -445,7 +556,10 @@ class BackendAPIClient:
         Check backend API health.
         
         Returns:
-            Health status object
+            Health status object with:
+            - status: Health status string
+            - timestamp: Current timestamp
+            - version: API version
         """
         return await self._cached_get("/api/v1/health", ttl=5)
 
@@ -484,74 +598,93 @@ async def close_backend_client():
 # ========================================================================
 
 async def test_client():
-    """Test the backend client."""
+    """Test the backend client against all available API endpoints."""
     print("=" * 70)
-    print("Backend API Client Test")
+    print("Backend API Client Test - v2.1.0")
+    print("Testing against Backend API v2.3.0")
     print("=" * 70)
     
     client = BackendAPIClient()
     
     try:
-        # Test health
+        # Test 1: Health check
         print("\n[1/10] Testing health check...")
         health = await client.health_check()
         print(f"✓ Health: {health.get('status', 'unknown')}")
         
-        # Test tokens
-        print("\n[2/10] Testing tokens...")
+        # Test 2: Tokens
+        print("\n[2/10] Testing tokens endpoint...")
         tokens = await client.get_all_tokens()
         print(f"✓ Found {len(tokens)} tokens")
+        for token in tokens:
+            name = token.get('name', token.get('asset_code', 'Unknown'))
+            supply = token.get('total_supply', 0)
+            print(f"  - {name}: {supply:,} tokens")
         
-        # Test network status
+        # Test 3: Network status
         print("\n[3/10] Testing network status...")
         network = await client.get_network_status()
-        print(f"✓ Bioregions: {network.get('bioregion_count', 0)}")
+        print(f"✓ Active bioregions: {network.get('bioregion_count', 0)}")
+        print(f"  Total holders: {network.get('total_holders', 0)}")
+        print(f"  Health score: {network.get('health_score', 'N/A')}")
         
-        # Test bioregion count
+        # Test 4: Bioregion count
         print("\n[4/10] Testing bioregion count...")
         count = await client.get_bioregion_count()
         print(f"✓ Bioregion count: {count}")
         
-        # Test bioregion summary
-        print("\n[5/10] Testing bioregion summary...")
+        # Test 5: Bioregions list
+        print("\n[5/10] Testing bioregions list...")
+        bioregions_data = await client.get_bioregions()
+        bio_count = bioregions_data.get('count', 0)
+        print(f"✓ Retrieved {bio_count} bioregions")
+        
+        # Test 6: Bioregion summary
+        print("\n[6/10] Testing bioregion summary...")
         summary = await client.get_bioregion_summary()
-        print(f"✓ Got bioregion summary")
+        print(f"✓ Summary total: {summary.get('total_count', 0)}")
         
-        # Test holonic scores
-        print("\n[6/10] Testing holonic scores...")
+        # Test 7: Holonic scores
+        print("\n[7/10] Testing holonic scores...")
         scores = await client.get_holonic_scores(limit=5)
-        print(f"✓ Got holonic scores")
+        if 'summary' in scores:
+            print(f"✓ Average score: {scores['summary'].get('average_score', 'N/A')}")
+        if 'category_distribution' in scores:
+            print(f"  Category distribution: {scores['category_distribution']}")
         
-        # Test transactions
-        print("\n[7/10] Testing transactions...")
+        # Test 8: Recent transactions - CRITICAL FIX
+        print("\n[8/10] Testing recent transactions (CRITICAL FIX)...")
         transactions = await client.get_recent_transactions(limit=5)
-        print(f"✓ Got recent transactions")
+        tx_count = transactions.get('count', 0)
+        tx_total = transactions.get('total', 0)
+        print(f"✓ Retrieved {tx_count} of {tx_total} total transactions")
+        print(f"  ✨ Transaction endpoint FIXED - now using /recent path")
         
-        # Test distribution
-        print("\n[8/10] Testing distribution stats...")
+        # Test 9: Distribution stats
+        print("\n[9/10] Testing distribution stats...")
         distribution = await client.get_distribution_stats()
-        print(f"✓ Got distribution stats")
+        print(f"✓ Got distribution compliance data")
+        if 'tokens' in distribution:
+            print(f"  Tracking {len(distribution['tokens'])} token distributions")
         
-        # Test ecoregions
-        print("\n[9/10] Testing ecoregions...")
-        ecoregions = await client.get_ecoregions(limit=5)
+        # Test 10: Geographic endpoints (v2.3.0)
+        print("\n[10/10] Testing geographic endpoints (v2.3.0)...")
+        ecoregions = await client.get_ecoregions(limit=3)
         if ecoregions:
             eco_count = ecoregions.get('count', 0)
-            print(f"✓ Got {eco_count} ecoregions")
+            print(f"✓ Ecoregions (v2.3.0): {eco_count} found")
         else:
-            print("⚠ Ecoregions endpoint not available (expected if not implemented yet)")
+            print("⚠ Ecoregions endpoint not available")
         
-        # Test watersheds
-        print("\n[10/10] Testing watersheds...")
-        watersheds = await client.get_watersheds(limit=5)
+        watersheds = await client.get_watersheds(limit=3)
         if watersheds:
             ws_count = watersheds.get('count', 0)
-            print(f"✓ Got {ws_count} watersheds")
+            print(f"✓ Watersheds (v2.3.0): {ws_count} found")
         else:
-            print("⚠ Watersheds endpoint not available (expected if not implemented yet)")
+            print("⚠ Watersheds endpoint not available")
         
         print("\n" + "=" * 70)
-        print("✓ All tests passed!")
+        print("✓ All tests completed successfully!")
         print("=" * 70)
         
     except Exception as e:
