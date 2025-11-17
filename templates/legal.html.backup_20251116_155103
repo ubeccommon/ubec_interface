@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Legal Notice - UBEC Protocol Network{% endblock %}
+
+{% block content %}
+<!-- Legal Hero - Ubuntu Earth-Tone Gradient -->
+<section class="hero" style="background: linear-gradient(135deg, #8BC34A 0%, #87CEEB 100%); padding: 4rem 0; text-align: center; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none;"></div>
+    <div class="container" style="position: relative; z-index: 1;">
+        <div class="hero-content">
+            <h1 style="font-size: 3rem; margin-bottom: 1rem; color: #2c3e50; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Legal Notice (Impressum)</h1>
+            <p style="font-size: 1.25rem; color: #2c3e50; opacity: 0.95; font-weight: 300; max-width: 800px; margin: 0 auto;">
+                ⚖️ Legal information and regulatory disclosures for transparency
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Legal Content -->
+<section style="padding: 4rem 0;">
+    <div class="container">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <!-- Provider Information -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem; font-size: 1.75rem; font-weight: 600;">
+                    Information according to § 5 TMG
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="margin-bottom: 0.5rem; color: #2c3e50;"><strong>Provider:</strong></p>
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1.5rem;">
+                        UBEC Protocol Network<br>
+                        [Legal Entity Name]<br>
+                        [Street Address]<br>
+                        [Postal Code] [City]<br>
+                        [Country]
+                    </p>
+                    
+                    <p style="margin-bottom: 0.5rem; color: #2c3e50;"><strong>Contact:</strong></p>
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1.5rem;">
+                        Email: <a href="mailto:legal@ubec.network" style="color: #8BC34A; text-decoration: none;">legal@ubec.network</a><br>
+                        Phone: [Phone Number]<br>
+                        Website: <a href="https://ubec.network" style="color: #8BC34A; text-decoration: none;">https://ubec.network</a>
+                    </p>
+                    
+                    <p style="margin-bottom: 0.5rem; color: #2c3e50;"><strong>Authorized Representative:</strong></p>
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1.5rem;">
+                        [Name of Director/CEO]<br>
+                        [Title/Position]
+                    </p>
+                    
+                    <p style="margin-bottom: 0.5rem; color: #2c3e50;"><strong>Commercial Register:</strong></p>
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1.5rem;">
+                        Register Court: [Court Name]<br>
+                        Registration Number: [HRB Number or equivalent]<br>
+                        VAT ID: [VAT Identification Number if applicable]
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Responsible for Content -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    Responsible for Content (§ 55 Abs. 2 RStV)
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #666; line-height: 1.8;">
+                        [Name of Responsible Person]<br>
+                        [Address]<br>
+                        [Postal Code] [City]<br>
+                        [Country]
+                    </p>
+                </div>
+            </div>
+            
+            <!-- EU Dispute Resolution -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    EU Dispute Resolution
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1rem;">
+                        The European Commission provides a platform for online dispute resolution (ODR): 
+                        <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener" style="color: #8BC34A; text-decoration: none;">
+                            https://ec.europa.eu/consumers/odr/
+                        </a>
+                    </p>
+                    <p style="color: #666; line-height: 1.8;">
+                        Our email address can be found above in the legal notice.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Consumer Dispute Resolution -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    Consumer Dispute Resolution/Universal Arbitration Board
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #666; line-height: 1.8;">
+                        We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Liability for Content -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    Liability for Content
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1rem;">
+                        As a service provider, we are responsible for our own content on these pages in accordance with § 7 para.1 TMG (German Telemedia Act) under general law. According to §§ 8 to 10 TMG, however, we are not obligated as a service provider to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.
+                    </p>
+                    <p style="color: #666; line-height: 1.8;">
+                        Obligations to remove or block the use of information under general law remain unaffected. However, liability in this regard is only possible from the time of knowledge of a concrete infringement. Upon becoming aware of corresponding legal violations, we will remove this content immediately.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Liability for Links -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    Liability for Links
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1rem;">
+                        Our website contains links to external third-party websites over whose content we have no influence. Therefore, we cannot assume any liability for this third-party content. The respective provider or operator of the pages is always responsible for the content of the linked pages.
+                    </p>
+                    <p style="color: #666; line-height: 1.8;">
+                        The linked pages were checked for possible legal violations at the time of linking. Illegal content was not recognizable at the time of linking. However, permanent monitoring of the content of the linked pages is not reasonable without concrete evidence of an infringement. Upon becoming aware of legal violations, we will remove such links immediately.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Copyright -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    Copyright
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 1rem;">
+                        The content and works on these pages created by the site operators are subject to copyright law. Duplication, processing, distribution, and any kind of exploitation outside the limits of copyright law require the written consent of the respective author or creator.
+                    </p>
+                    <p style="color: #666; line-height: 1.8;">
+                        Downloads and copies of this site are only permitted for private, non-commercial use. Insofar as the content on this site was not created by the operator, the copyrights of third parties are respected. In particular, third-party content is marked as such. Should you nevertheless become aware of a copyright infringement, please inform us accordingly. Upon becoming aware of legal violations, we will remove such content immediately.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Attribution -->
+            <div style="margin-bottom: 3rem;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #8AA67E; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    Attribution
+                </h2>
+                <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <p style="color: #666; line-height: 1.8; font-style: italic;">
+                        This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Last Updated -->
+            <div style="text-align: center; color: #888; font-size: 0.9rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e0e0e0;">
+                <p>Last updated: November 16, 2025</p>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+{% endblock %}

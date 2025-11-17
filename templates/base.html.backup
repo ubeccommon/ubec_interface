@@ -781,132 +781,59 @@
         {% endblock %}
     </main>
 
-<!-- UPDATED FOOTER SECTION FOR base.html -->
-<!-- Replace the existing footer section with this updated version -->
-
-<footer class="site-footer" role="contentinfo">
-    <div class="container">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>UBEC Protocol</h3>
-                <p class="ubuntu-quote" style="font-style: italic; border-left: 3px solid rgba(255,255,255,0.5); padding-left: 1rem; margin: 1rem 0;">
-                    "I am because we are"
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>UBEC Protocol</h3>
+                    <p class="ubuntu-quote" style="font-style: italic; border-left: 3px solid rgba(255,255,255,0.5); padding-left: 1rem; margin: 1rem 0;">
+                        "I am because we are"
+                    </p>
+                    <p>Ubuntu Bioregional Economic Commons - Four-element token ecosystem embodying Ubuntu philosophy</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/protocol">Protocol Overview</a></li>
+                        <li><a href="/dashboard">Live Dashboard</a></li>
+                        <li><a href="/docs">Documentation</a></li>
+                        <li><a href="/api/docs">API Reference</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="/stories">Token Stories</a></li>
+                        <li><a href="/about">About Ubuntu</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="https://ubeccommon.github.io/" target="_blank" rel="noopener">GitHub</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Four Elements</h4>
+                    <ul>
+                        <li>🌬️ Air (UBEC) - Diversity</li>
+                        <li>💧 Water (UBECrc) - Reciprocity</li>
+                        <li>🌍 Earth (UBECgpi) - Mutualism</li>
+                        <li>🔥 Fire (UBECtt) - Regeneration</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 UBEC Protocol Network. Licensed under Ubuntu Philosophy.</p>
+                <p class="attribution">
+                    This project uses the services of Claude and Anthropic PBC to inform our 
+                    decisions and recommendations. This project was made possible with the 
+                    assistance of Claude and Anthropic PBC.
                 </p>
-                <p>Ubuntu Bioregional Economic Commons - Four-element token ecosystem embodying Ubuntu philosophy</p>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="/protocol">Protocol Overview</a></li>
-                    <li><a href="/dashboard">Live Dashboard</a></li>
-                    <li><a href="/docs">Documentation</a></li>
-                    <li><a href="/api/docs">API Reference</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Community</h4>
-                <ul>
-                    <li><a href="/stories">Token Stories</a></li>
-                    <li><a href="/about">About Ubuntu</a></li>
-                    <li><a href="/contact">Contact</a></li>
-                    <li><a href="https://ubeccommon.github.io/" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Legal & Privacy</h4>
-                <ul>
-                    <li><a href="/legal">Legal Notice (Impressum)</a></li>
-                    <li><a href="/privacy-policy">Privacy Policy</a></li>
-                    <li><a href="/privacy-settings">Privacy Settings</a></li>
-                    <li><a href="/contact">Contact Us</a></li>
-                </ul>
             </div>
         </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2025 UBEC Protocol Network. All rights reserved.</p>
-            <p style="margin-top: 0.5rem;">
-                <a href="/legal" style="color: rgba(255,255,255,0.9); text-decoration: none; margin: 0 0.5rem;">Legal Notice</a> | 
-                <a href="/privacy-policy" style="color: rgba(255,255,255,0.9); text-decoration: none; margin: 0 0.5rem;">Privacy Policy</a> | 
-                <a href="/privacy-settings" style="color: rgba(255,255,255,0.9); text-decoration: none; margin: 0 0.5rem;">Privacy Settings</a> | 
-                <a href="/contact" style="color: rgba(255,255,255,0.9); text-decoration: none; margin: 0 0.5rem;">Contact</a>
-            </p>
-            <p class="attribution">
-                This project uses the services of Claude and Anthropic PBC to inform our 
-                decisions and recommendations. This project was made possible with the 
-                assistance of Claude and Anthropic PBC.
-            </p>
-        </div>
-    </div>
-</footer>
-
-<!-- Cookie Consent Banner (Add this before closing </body> tag) -->
-<div id="cookie-banner" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 1.5rem; z-index: 9999; box-shadow: 0 -4px 12px rgba(0,0,0,0.2);">
-    <div class="container" style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 300px;">
-            <h4 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">🍪 Cookie Notice</h4>
-            <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.9);">
-                We use cookies to enhance your experience, analyze site usage, and personalize content. 
-                By clicking "Accept All", you consent to our use of cookies. 
-                <a href="/privacy-policy" style="color: #87CEEB; text-decoration: underline;">Learn more</a>
-            </p>
-        </div>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <button onclick="acceptCookies()" style="padding: 0.75rem 1.5rem; background: #8BC34A; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap;">
-                Accept All
-            </button>
-            <button onclick="rejectNonEssential()" style="padding: 0.75rem 1.5rem; background: transparent; color: white; border: 2px solid rgba(255,255,255,0.3); border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap;">
-                Reject Non-Essential
-            </button>
-            <a href="/privacy-settings" style="padding: 0.75rem 1.5rem; background: transparent; color: white; border: 2px solid rgba(255,255,255,0.3); border-radius: 6px; font-weight: 600; text-decoration: none; white-space: nowrap; display: inline-block;">
-                Customize
-            </a>
-        </div>
-    </div>
-</div>
-
-<script>
-// Cookie consent management
-function checkCookieConsent() {
-    const consent = localStorage.getItem('cookie_consent');
-    const consentDate = localStorage.getItem('cookie_consent_date');
-    
-    // Show banner if no consent or consent is older than 1 year
-    if (!consent || !consentDate) {
-        document.getElementById('cookie-banner').style.display = 'block';
-    } else {
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-        if (new Date(consentDate) < oneYearAgo) {
-            document.getElementById('cookie-banner').style.display = 'block';
-        }
-    }
-}
-
-function acceptCookies() {
-    localStorage.setItem('cookie_consent', 'all');
-    localStorage.setItem('cookie_consent_date', new Date().toISOString());
-    localStorage.setItem('cookie_functional', 'true');
-    localStorage.setItem('cookie_analytics', 'true');
-    localStorage.setItem('cookie_marketing', 'true');
-    document.getElementById('cookie-banner').style.display = 'none';
-}
-
-function rejectNonEssential() {
-    localStorage.setItem('cookie_consent', 'essential');
-    localStorage.setItem('cookie_consent_date', new Date().toISOString());
-    localStorage.setItem('cookie_functional', 'false');
-    localStorage.setItem('cookie_analytics', 'false');
-    localStorage.setItem('cookie_marketing', 'false');
-    document.getElementById('cookie-banner').style.display = 'none';
-}
-
-// Check on page load
-document.addEventListener('DOMContentLoaded', checkCookieConsent);
-</script>
+    </footer>
 
     <!-- Core JavaScript -->
     <script>

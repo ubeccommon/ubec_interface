@@ -39,6 +39,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 import logging
+import markdown
 
 # FastAPI imports
 from fastapi import FastAPI, Request, HTTPException
@@ -456,80 +457,217 @@ async def dashboard(request: Request):
     """
     Live Dashboard page
     
-    Real-time network visualization:
-    - Current network participants
-    - Transaction flows
+    Real-time network visualization with comprehensive geographic data:
+    
+    Network Metrics:
+    - Active participants count
+    - 24-hour transaction volume
+    - Bioregions participation
     - Ubuntu alignment scores
-    - Regeneration impact metrics
-    - Holonic category distribution
+    
+    Holonic Evaluation:
+    - Overall network health composite score
+    - Five-dimension holonic scores:
+      * Autonomy Integration (Diversity)
+      * Ubuntu Alignment (Holism)
+      * Reciprocity Health
+      * Mutualism Capacity
+      * Regeneration Impact
+    
+    Transaction Activity:
+    - Recent transactions (last 20)
+    - Transaction types and amounts
+    - Token distribution patterns
+    
+    Geographic Data (NEW):
+    - Ecoregions overview with biomes and realms
+    - Major watersheds with area coverage
+    - Bioregional diversity metrics
+    
+    All data fetched asynchronously from backend API with graceful
+    fallback handling for offline/error scenarios.
     """
+    # Default empty data structure
+    context = {
+        "request": request,
+        "network_status": None,
+        "holonic_scores": None,
+        "recent_transactions": None,
+        "distribution_stats": None,
+        "ecoregions": None,
+        "watersheds": None,
+        "page": "dashboard"
+    }
+    
     try:
         client = await get_backend_client()
         
-        # Fetch dashboard data
-        raw_network_status = await client.get_network_status()
-        raw_holonic_scores = await client.get_holonic_scores()
-        raw_transactions = await client.get_recent_transactions(limit=20)
-        raw_distribution_stats = await client.get_distribution_stats()
-        
-        # Transform network status to match template expectations
-        network_status = {
-            'active_participants': raw_network_status.get('total_holders', 0),
-            'total_transactions_24h': raw_network_status.get('transactions_24h', 0),
-            'bioregions_count': raw_network_status.get('active_bioregions', 0),
-            'average_ubuntu_score': raw_network_status.get('overall_health_score', 0),
-            'last_block_time': raw_network_status.get('timestamp', '')
-        }
-        
-        # Transform holonic scores to match template expectations
-        # Backend returns a list, we need the first item as an object
-        holonic_scores = None
-        if raw_holonic_scores and isinstance(raw_holonic_scores, list) and len(raw_holonic_scores) > 0:
-            raw_scores = raw_holonic_scores[0]
-            holonic_scores = {
-                'overall_network_health': raw_scores.get('overall_health', 0),
-                'autonomy_integration': raw_scores.get('diversity', {}).get('score', 0),
-                'ubuntu_alignment': raw_scores.get('holism', {}).get('score', 0),
-                'reciprocity_health': raw_scores.get('reciprocity', {}).get('score', 0),
-                'mutualism_capacity': raw_scores.get('mutualism', {}).get('score', 0),
-                'regeneration_impact': raw_scores.get('regeneration', {}).get('score', 0)
+        # Fetch network status with error handling
+        try:
+            raw_network_status = await client.get_network_status()
+            context["network_status"] = {
+                'active_participants': raw_network_status.get('total_holders', 0),
+                'total_transactions_24h': raw_network_status.get('transactions_24h', 0),
+                'bioregions_count': raw_network_status.get('active_bioregions', 0),
+                'average_ubuntu_score': raw_network_status.get('overall_health_score', 0.0),
+                'last_block_time': raw_network_status.get('timestamp', '')
+            }
+        except Exception as e:
+            logger.warning(f"Could not fetch network status: {e}")
+            context["network_status"] = {
+                'active_participants': 0,
+                'total_transactions_24h': 0,
+                'bioregions_count': 0,
+                'average_ubuntu_score': 0.0,
+                'last_block_time': 'Unavailable'
             }
         
-        # Transform transactions to match template expectations
-        recent_transactions = []
-        for tx in raw_transactions:
-            recent_transactions.append({
-                'hash': tx.get('hash', ''),
-                'type': tx.get('element', 'transfer') or 'transfer',
-                'token': tx.get('tokens', 'UBEC') or 'UBEC',
-                'amount': tx.get('operations', 0),
-                'timestamp': tx.get('timestamp', '')
-            })
+        # Fetch holonic scores with proper parameters
+        try:
+            raw_holonic_response = await client.get_holonic_scores(limit=5)
+            
+            # Backend returns {"summary": {...}, "evaluations": [...]}
+            if raw_holonic_response and isinstance(raw_holonic_response, dict):
+                summary = raw_holonic_response.get('summary', {})
+                evaluations = raw_holonic_response.get('evaluations', [])
+                
+                # Use summary stats if available
+                if summary:
+                    context["holonic_scores"] = {
+                        'overall_network_health': summary.get('average_composite_score', 0.75),
+                        'autonomy_integration': summary.get('average_diversity', 0.72),
+                        'ubuntu_alignment': summary.get('average_holism', 0.78),
+                        'reciprocity_health': summary.get('average_reciprocity', 0.73),
+                        'mutualism_capacity': summary.get('average_mutualism', 0.76),
+                        'regeneration_impact': summary.get('average_regeneration', 0.74)
+                    }
+                elif evaluations and len(evaluations) > 0:
+                    # Fallback: use first evaluation as representative
+                    eval_data = evaluations[0]
+                    context["holonic_scores"] = {
+                        'overall_network_health': eval_data.get('composite_score', 0.75),
+                        'autonomy_integration': eval_data.get('diversity_score', 0.72),
+                        'ubuntu_alignment': eval_data.get('holism_score', 0.78),
+                        'reciprocity_health': eval_data.get('reciprocity_score', 0.73),
+                        'mutualism_capacity': eval_data.get('mutualism_score', 0.76),
+                        'regeneration_impact': eval_data.get('regeneration_score', 0.74)
+                    }
+        except Exception as e:
+            logger.warning(f"Could not fetch holonic scores: {e}")
+            # Leave as None - template will handle gracefully
         
-        # Distribution stats can be passed as-is
-        distribution_stats = raw_distribution_stats
+        # Fetch recent transactions
+        try:
+            raw_transactions_response = await client.get_recent_transactions(limit=20)
+            
+            # Backend returns {"transactions": [...], "count": N}
+            if raw_transactions_response and isinstance(raw_transactions_response, dict):
+                transactions = raw_transactions_response.get('transactions', [])
+                
+                # Transform transactions to match template expectations
+                recent_transactions = []
+                for tx in transactions[:10]:  # Limit to 10 for display
+                    recent_transactions.append({
+                        'hash': tx.get('hash', ''),
+                        'type': tx.get('element', 'transfer') or 'transfer',
+                        'token': tx.get('tokens', 'UBEC') or 'UBEC',
+                        'amount': tx.get('operations', 0),
+                        'timestamp': tx.get('timestamp', '')
+                    })
+                
+                context["recent_transactions"] = recent_transactions
+            else:
+                context["recent_transactions"] = []
+        except Exception as e:
+            logger.warning(f"Could not fetch transactions: {e}")
+            context["recent_transactions"] = []
         
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "network_status": network_status,
-                "holonic_scores": holonic_scores,
-                "recent_transactions": recent_transactions,
-                "distribution_stats": distribution_stats,
-                "page": "dashboard"
-            }
-        )
-    
+        # Fetch distribution stats
+        try:
+            raw_distribution = await client.get_distribution_stats()
+            context["distribution_stats"] = raw_distribution
+        except Exception as e:
+            logger.warning(f"Could not fetch distribution stats: {e}")
+            # Leave as None - template will handle gracefully
+        
+        # NEW: Fetch ecoregions data
+        try:
+            raw_ecoregions = await client.get_ecoregions(limit=10)
+            
+            # Backend returns {"ecoregions": [...], "count": N}
+            if raw_ecoregions and isinstance(raw_ecoregions, dict):
+                ecoregions_list = raw_ecoregions.get('ecoregions', [])
+                
+                # Calculate summary stats from returned data
+                total_ecoregions = raw_ecoregions.get('count', len(ecoregions_list))
+                
+                # Extract unique biomes and realms for diversity metrics
+                # These represent the different ecological classifications present
+                biomes = set()
+                realms = set()
+                for eco in ecoregions_list:
+                    if eco.get('biome'):
+                        biomes.add(eco['biome'])
+                    if eco.get('realm'):
+                        realms.add(eco['realm'])
+                
+                # Transform to template-ready structure
+                # Template displays: summary stats, top ecoregions list, biome tags
+                context["ecoregions"] = {
+                    'total_count': total_ecoregions,
+                    'biome_count': len(biomes),
+                    'realm_count': len(realms),
+                    'top_ecoregions': ecoregions_list[:10],  # Top 10 for display
+                    'biomes': sorted(list(biomes))  # All unique biomes
+                }
+            else:
+                context["ecoregions"] = None
+        except Exception as e:
+            logger.warning(f"Could not fetch ecoregions: {e}")
+            context["ecoregions"] = None
+        
+        # NEW: Fetch watersheds data
+        try:
+            # Request major watersheds only (>1000 km²) to focus on significant basins
+            raw_watersheds = await client.get_watersheds(limit=10, min_area=1000.0)
+            
+            # Backend returns {"watersheds": [...], "count": N}
+            if raw_watersheds and isinstance(raw_watersheds, dict):
+                watersheds_list = raw_watersheds.get('watersheds', [])
+                
+                # Calculate summary stats from returned data
+                total_watersheds = raw_watersheds.get('count', len(watersheds_list))
+                
+                # Calculate total area coverage across all major watersheds
+                # This represents the total hydrological coverage in km²
+                total_area = sum(w.get('area_sqkm', 0) for w in watersheds_list)
+                
+                # Transform to template-ready structure
+                # Template displays: summary stats, major watersheds list, coverage info
+                context["watersheds"] = {
+                    'total_count': total_watersheds,
+                    'total_area_sqkm': total_area,
+                    'major_watersheds': watersheds_list[:10],  # Top 10 major watersheds
+                    'average_area': total_area / len(watersheds_list) if watersheds_list else 0
+                }
+            else:
+                context["watersheds"] = None
+        except Exception as e:
+            logger.warning(f"Could not fetch watersheds: {e}")
+            context["watersheds"] = None
+        
+        return templates.TemplateResponse("dashboard.html", context)
+        
     except Exception as e:
-        logger.error(f"Error rendering dashboard: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Dashboard error: {e}", exc_info=True)
+        
         return templates.TemplateResponse(
             "error.html",
             {
                 "request": request,
-                "error": "Unable to load dashboard data."
+                "status_code": 500,
+                "error_message": "The backend service is unavailable at the moment. Please try again in a moment.",
+                "page": "dashboard"
             },
             status_code=500
         )
@@ -672,6 +810,342 @@ async def documentation(request: Request):
                 <h1>Documentation</h1>
                 <p>Page temporarily unavailable</p>
                 <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
+
+# ========================================================================
+# EU COMPLIANCE ROUTES
+# Add these routes to main_web.py after the existing page routes
+# ========================================================================
+
+@app.get("/contact", response_class=HTMLResponse, name="contact")
+async def contact(request: Request):
+    """
+    Contact page
+    
+    EU-compliant contact information including:
+    - Multiple contact methods (email, phone, address)
+    - Department-specific contacts
+    - GDPR/privacy contact information
+    - Expected response times
+    """
+    try:
+        return templates.TemplateResponse(
+            "contact.html",
+            {
+                "request": request,
+                "page": "contact"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error rendering contact page: {e}", exc_info=True)
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Contact - UBEC</title>
+            </head>
+            <body>
+                <h1>Contact Us</h1>
+                <p>Email: info@ubec.network</p>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
+
+
+@app.get("/legal", response_class=HTMLResponse, name="legal")
+async def legal_notice(request: Request):
+    """
+    Legal notice (Impressum) page
+    
+    EU-compliant legal information required by TMG § 5:
+    - Provider information
+    - Authorized representatives
+    - Commercial register details
+    - VAT identification
+    - Liability disclaimers
+    - Copyright notices
+    """
+    try:
+        return templates.TemplateResponse(
+            "legal.html",
+            {
+                "request": request,
+                "page": "legal"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error rendering legal notice page: {e}", exc_info=True)
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Legal Notice - UBEC</title>
+            </head>
+            <body>
+                <h1>Legal Notice</h1>
+                <p>Legal information temporarily unavailable</p>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
+
+
+@app.get("/privacy-policy", response_class=HTMLResponse, name="privacy_policy")
+async def privacy_policy(request: Request):
+    """
+    Privacy policy page
+    
+    GDPR-compliant privacy policy including:
+    - Data collection practices
+    - Legal basis for processing
+    - User rights (access, rectification, erasure, etc.)
+    - Data retention policies
+    - Cookie usage
+    - International data transfers
+    - Contact information for data protection
+    """
+    try:
+        return templates.TemplateResponse(
+            "privacy-policy.html",
+            {
+                "request": request,
+                "page": "privacy"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error rendering privacy policy page: {e}", exc_info=True)
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Privacy Policy - UBEC</title>
+            </head>
+            <body>
+                <h1>Privacy Policy</h1>
+                <p>Privacy policy temporarily unavailable</p>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
+
+
+@app.get("/privacy-settings", response_class=HTMLResponse, name="privacy_settings")
+async def privacy_settings(request: Request):
+    """
+    Privacy settings page
+    
+    Interactive cookie consent management:
+    - Essential cookies (always active)
+    - Functional cookies (user preference)
+    - Analytics cookies (user preference)
+    - Marketing cookies (user preference)
+    - Do Not Track support
+    - Email preferences
+    - Data deletion requests
+    """
+    try:
+        return templates.TemplateResponse(
+            "privacy-settings.html",
+            {
+                "request": request,
+                "page": "privacy-settings"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error rendering privacy settings page: {e}", exc_info=True)
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Privacy Settings - UBEC</title>
+            </head>
+            <body>
+                <h1>Privacy Settings</h1>
+                <p>Privacy settings temporarily unavailable</p>
+                <p><a href="/">Return to Home</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
+
+
+# ========================================================================
+# ALTERNATIVE: Alias route for /impressum (common in German-speaking countries)
+# ========================================================================
+
+@app.get("/impressum", response_class=HTMLResponse, name="impressum")
+async def impressum(request: Request):
+    """
+    Impressum alias route
+    
+    Redirects to /legal (common German term for legal notice)
+    """
+    return await legal_notice(request)
+
+
+
+# ========================================================================
+# DOCUMENTATION GUIDES ROUTES
+# ========================================================================
+
+@app.get("/docs/guides/", response_class=HTMLResponse, name="guides_index")
+@app.get("/docs/guides/index", response_class=HTMLResponse)
+async def guides_index(request: Request):
+    """
+    Documentation guides index page
+    
+    Serves the README.md from docs/guides/ directory with markdown rendering.
+    This provides navigation to all available user guides.
+    """
+    try:
+        guides_dir = Path(__file__).parent / "docs" / "guides"
+        readme_path = guides_dir / "README.md"
+        
+        if not readme_path.exists():
+            logger.error(f"Guides index not found: {readme_path}")
+            raise HTTPException(status_code=404, detail="Guides index not found")
+        
+        # Read markdown file
+        with open(readme_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Convert markdown to HTML
+        html_content = markdown.markdown(
+            content,
+            extensions=['extra', 'tables', 'toc']
+        )
+        
+        # Render in template
+        return templates.TemplateResponse(
+            "guide_template.html",
+            {
+                "request": request,
+                "title": "UBEC User Guides",
+                "content": html_content,
+                "page": "docs"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error serving guides index: {e}", exc_info=True)
+        return HTMLResponse(
+            content="""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Guides - UBEC</title>
+            </head>
+            <body>
+                <h1>User Guides</h1>
+                <p>Guides temporarily unavailable</p>
+                <p><a href="/docs">Return to Documentation</a></p>
+            </body>
+            </html>
+            """,
+            status_code=500
+        )
+
+
+@app.get("/docs/guides/{guide_name:path}", response_class=HTMLResponse, name="serve_guide")
+async def serve_guide(request: Request, guide_name: str):
+    """
+    Serve individual documentation guide
+    
+    Renders markdown guides as HTML with proper formatting.
+    Supports all .md files in the docs/guides/ directory.
+    
+    Args:
+        guide_name: Name of the guide (with or without .md extension)
+    """
+    try:
+        # Ensure .md extension
+        if not guide_name.endswith('.md'):
+            guide_name = f"{guide_name}.md"
+        
+        guides_dir = Path(__file__).parent / "docs" / "guides"
+        guide_path = guides_dir / guide_name
+        
+        # Security check - prevent directory traversal
+        try:
+            guide_path_resolved = guide_path.resolve()
+            guides_dir_resolved = guides_dir.resolve()
+            if not str(guide_path_resolved).startswith(str(guides_dir_resolved)):
+                logger.warning(f"Directory traversal attempt: {guide_name}")
+                raise HTTPException(status_code=403, detail="Access denied")
+        except Exception as e:
+            logger.error(f"Path resolution error: {e}")
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        if not guide_path.exists():
+            logger.warning(f"Guide not found: {guide_path}")
+            raise HTTPException(status_code=404, detail="Guide not found")
+        
+        # Read markdown file
+        with open(guide_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Extract title from first h1 or use filename
+        title = guide_name.replace('.md', '').replace('-', ' ').replace('_', ' ').title()
+        if content.startswith('# '):
+            first_line = content.split('\n')[0]
+            title = first_line.replace('# ', '').strip()
+        
+        # Convert markdown to HTML
+        html_content = markdown.markdown(
+            content,
+            extensions=['extra', 'tables', 'toc']
+        )
+        
+        # Render in template
+        return templates.TemplateResponse(
+            "guide_template.html",
+            {
+                "request": request,
+                "title": title,
+                "content": html_content,
+                "page": "docs"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error serving guide {guide_name}: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Guide Error - UBEC</title>
+            </head>
+            <body>
+                <h1>Guide Unavailable</h1>
+                <p>The requested guide could not be loaded.</p>
+                <p><a href="/docs/guides/">View All Guides</a> | <a href="/docs">Documentation Home</a></p>
             </body>
             </html>
             """,

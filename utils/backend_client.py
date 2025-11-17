@@ -304,7 +304,7 @@ class BackendAPIClient:
         return await self._cached_get(f"/api/v1/bioregions/{bioregion_id}/health", ttl=30)
     
     # ========================================================================
-    # GEOGRAPHIC DATA ENDPOINTS (FUTURE)
+    # GEOGRAPHIC DATA ENDPOINTS (v2.3.0)
     # ========================================================================
     
     async def get_ecoregions(
@@ -376,7 +376,7 @@ class BackendAPIClient:
             return None
     
     # ========================================================================
-    # WATERSHED ENDPOINTS
+    # WATERSHED ENDPOINTS (v2.3.0)
     # ========================================================================
     
     async def get_watersheds(
