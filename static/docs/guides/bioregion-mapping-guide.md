@@ -4,13 +4,13 @@
 
 **Purpose:** This guide helps you use the UBEC Mapping Interface to identify, define, and document your bioregion boundaries based on natural ecological features.
 
-**Tool:** UBEC Mapbender Interface  
-**URL:** [https://mapbender.ubec.network/application/ubec_bioregions](https://mapbender.ubec.network/application/ubec_bioregions)
+**Tool:** UBEC Mapservice Interface  
+**URL:** [https://mapservice.ubec.network](https://mapbender.ubec.network)
 
 **Time Needed:** 2-4 hours (depending on complexity)  
 **Prerequisites:** 
 - Basic understanding of your local geography
-- Access to the UBEC mapping interface
+- Access to the UBEC mapservice interface
 - Core team members ready to collaborate
 
 > *"A bioregion is defined not by political boundaries, but by the natural contours of water, soil, wind, and life itself."*
@@ -20,7 +20,7 @@
 ## What You'll Learn
 
 By the end of this guide, you will be able to:
-- ✅ Navigate the UBEC mapping interface
+- ✅ Navigate the UBEC mapservice interface
 - ✅ Identify natural boundaries (watersheds, ecosystems, climate zones)
 - ✅ Draw and save your bioregion boundaries
 - ✅ Upload existing geographic data
@@ -85,7 +85,7 @@ Before opening the mapping tool, it's crucial to understand what makes a meaning
    - Ensure you have a stable internet connection
 
 2. **Navigate to the mapping tool**
-   - Visit: [https://mapbender.ubec.network/application/ubec_bioregions](https://mapbender.ubec.network/application/ubec_bioregions)
+   - Visit: [https://mapservice.ubec.network](https://mapservice.ubec.network)
    - The interface will load with a base map
 
 3. **Familiarize yourself with the layout**

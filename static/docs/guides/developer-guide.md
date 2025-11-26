@@ -1,4 +1,4 @@
-# UBEC Protocol Suite Developer Onboarding Guide
+# UBEC DAO Protocol Suite Developer Onboarding Guide
 
 **Version:** 1.0  
 **Last Updated:** November 2, 2025  

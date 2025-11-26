@@ -1,8 +1,8 @@
 # UBEC Protocol Participation Guide
 ## How to Get Involved in the Ubuntu Bioregional Economic Commons
 
-**Document Version:** 1.1  
-**Date:** November 9, 2025  
+**Document Version:** 1.2  
+**Date:** November 26, 2025  
 **Purpose:** Welcome guide for all prospective UBEC participants
 
 ---
@@ -82,7 +82,7 @@ UBEC welcomes diverse forms of participation. Here are the main pathways:
 3. Connect with your bioregional community
 4. Begin transacting and building relationships
 
-**📖 Detailed Guide:** [Token Holder User Guide](../guides/UBEC_Token_Holders_User_Guides.md)
+**📖 Detailed Guide:** [Token Holder User Guide](/docs/guides/token-holders-guide)
 
 ---
 
@@ -112,7 +112,7 @@ These four special categories receive **65% of UBEC token allocation** as grants
 3. Demonstrate commitment to regenerative principles
 4. Participate in evaluation process (30-60 days)
 
-**📖 Detailed Guide:** [Farmer Onboarding Guide](../guides/UBEC_Farmer_Onboarding_Guide.md)
+**📖 Detailed Guide:** [Farmer Onboarding Guide](/docs/guides/farmer-onboarding-guide)
 
 ---
 
@@ -145,7 +145,7 @@ These four special categories receive **65% of UBEC token allocation** as grants
 3. Submit detailed community application
 4. Engage in evaluation process (45-75 days)
 
-**📖 Detailed Guide:** [Community Onboarding Guide](../guides/UBEC_Community_Onboarding_Guide.md)
+**📖 Detailed Guide:** [Community Onboarding Guide](/docs/guides/community-onboarding-guide)
 
 ---
 
@@ -177,9 +177,9 @@ These four special categories receive **65% of UBEC token allocation** as grants
 3. Participate in comprehensive evaluation (45-75 days)
 4. Complete 90-day onboarding program
 
-**📖 Detailed Guide:** [Community Activator Onboarding Guide](../guides/UBEC_Community_Activator_Onboarding_Guide.md)
+**📖 Detailed Guide:** [Community Activator Onboarding Guide](/docs/guides/community-activator-guide)
 
-**📋 Quick Start:** [Community Organizer Checklist](../guides/UBEC_Community_Organizer_Quick_Start_Checklist.md)
+**📋 Quick Start:** [Community Organizer Checklist](/docs/guides/community-organizer-checklist)
 
 ---
 
@@ -214,119 +214,86 @@ These four special categories receive **65% of UBEC token allocation** as grants
 - Commitment to citizen science and data quality
 - Technical capacity or willingness to develop it
 - Student/community engagement capacity
-- Willingness to share data publicly
 
 **How to Apply:**
-1. Submit living lab application with site details
-2. Describe educational integration plan
-3. Demonstrate technical readiness or development plan
-4. Participate in site assessment and evaluation (45-60 days)
-5. Complete equipment setup and training (30-45 days)
+1. Review the Living Lab requirements
+2. Assess your site suitability
+3. Submit detailed application with site assessment
+4. Participate in evaluation process (45-75 days)
 
-**📖 Detailed Guide:** [Living Lab Onboarding Guide](../guides/UBEC_Living_Lab_Onboarding_Guide.md)
-
-**Special Note:** Living labs demonstrate that technology and nature are not opposites but complementary expressions of creative forces. Students develop "ecological-digital fluency" by observing with both human senses and digital sensors, creating next-generation understanding of environmental stewardship.
+**📖 Detailed Guide:** [Living Lab Onboarding Guide](/docs/guides/living-lab-guide)
 
 ---
 
 ### 3. Community Organizers
 
-**Who:** Local leaders helping establish UBEC in their bioregions
+**Who:** People who help grow UBEC in their local area
 
 **What You Do:**
-- Onboard new users in your area
-- Facilitate local gatherings and education
+- Introduce UBEC to potential participants
+- Facilitate local gatherings and learning circles
+- Support onboarding of new participants
 - Build bioregional networks
-- Support adoption and engagement
-
-**What You Receive:**
-- Organizer training and resources
-- Access to bulk onboarding tools
-- Community metrics dashboard
-- Connection to organizer network
 
 **Who This Is For:**
-- Natural community connectors
-- Local food system advocates
-- Sustainability coordinators
-- Cooperative developers
+- Passionate advocates for regenerative economics
+- People with community organizing experience
+- Anyone with strong local networks
+- Those committed to Ubuntu principles
 
 **How to Start:**
-1. Review the Community Organizer Guide
-2. Complete organizer training
-3. Connect with your regional coordinator
-4. Begin local outreach and education
+1. Deeply understand UBEC and Ubuntu philosophy
+2. Connect with existing organizers
+3. Identify potential participants in your area
+4. Begin hosting introduction sessions
 
-**📖 Detailed Guide:** [Community Organizer Guide](../guides/UBEC_Community_Organizer_Guide.md)
+**📖 Detailed Guide:** [Community Organizer Guide](/docs/guides/community-organizer-guide)
 
 ---
 
 ### 4. Developers & Technical Contributors
 
-**Who:** Software developers, blockchain engineers, and technical innovators
+**Who:** Software developers, technical architects, and data scientists
 
 **What You Do:**
-- Build applications on UBEC Protocol
-- Contribute to core codebase
-- Create tools and integrations
-- Improve technical infrastructure
-- Document systems and APIs
-
-**What You Receive:**
-- Technical documentation and SDKs
-- Developer community support
-- Recognition for contributions
-- Potential token incentives for significant contributions
-
-**Who This Is For:**
-- Blockchain developers (especially Stellar network)
-- Full-stack web developers
-- Data scientists and analysts
-- DevOps and infrastructure engineers
-- UX/UI designers
-- Technical writers
+- Contribute to UBEC Protocol codebase
+- Build applications on the UBEC platform
+- Improve infrastructure and tools
+- Analyze data and provide insights
 
 **How to Start:**
-1. Review the Developer Onboarding Guide
-2. Explore the GitHub repository
-3. Set up your development environment
-4. Join developer community channels
-5. Start with "good first issue" contributions
+1. Review technical documentation
+2. Set up development environment
+3. Join developer community channels
+4. Pick an issue or propose improvements
 
-**📖 Detailed Guide:** [Developer Onboarding Guide](../guides/UBEC_Developer_Onboarding_Guide.md)
+**📖 Detailed Guide:** [Developer Onboarding Guide](/docs/guides/developer-guide)
 
 ---
 
 ### 5. Governance Participants
 
-**Who:** Community members who help guide UBEC's evolution
+**Who:** Anyone who wants to participate in guiding UBEC's evolution
 
 **What You Do:**
-- Participate in governance proposals and voting
-- Shape protocol parameters and policies
-- Represent community interests
-- Facilitate collective decision-making
+- Participate in decision-making processes
+- Propose improvements and changes
+- Vote on governance proposals
+- Serve in governance roles as elected
 
-**What You Receive:**
-- Voice in system direction
-- Access to governance forums and processes
-- Recognition as system steward
-- Deeper understanding of decentralized governance
-
-**Who This Is For:**
-- Token holders interested in system governance
-- Community representatives
-- Those with expertise in relevant domains
-- Anyone committed to Ubuntu principles
+**Eligibility:**
+- Token holders may participate in governance
+- Higher holonic scores unlock greater participation
+- Deep familiarity with Ubuntu principles expected
+- Commitment to collective benefit over individual gain
 
 **How to Start:**
-1. Become a token holder
-2. Review the Governance Framework
-3. Observe governance discussions
-4. Participate in votes
-5. Eventually submit proposals
+1. Hold UBEC tokens and build holonic score
+2. Study governance documentation
+3. Observe governance processes
+4. Begin participating in discussions and votes
 
-**📖 Detailed Guide:** [Governance Participant Guide](../guides/UBEC_Governance_Participant_Guide.md)
+**📖 Detailed Guide:** [Governance Participant Guide](/docs/guides/governance-guide)
 
 ---
 
@@ -335,153 +302,89 @@ These four special categories receive **65% of UBEC token allocation** as grants
 **Who:** Technical professionals managing UBEC infrastructure
 
 **What You Do:**
-- Maintain servers and databases
-- Monitor system health and performance
-- Implement security protocols
-- Manage backups and disaster recovery
-- Deploy updates and patches
-
-**What You Receive:**
-- Comprehensive system documentation
-- Monitoring and alerting tools
-- Technical support network
-- Professional development opportunities
-
-**Who This Is For:**
-- System administrators
-- DevOps engineers
-- Database administrators
-- Security specialists
-- Network engineers
+- Maintain and monitor system infrastructure
+- Ensure security and reliability
+- Deploy updates and improvements
+- Support technical operations
 
 **How to Start:**
-1. Review technical infrastructure documentation
-2. Complete security training
+1. Review system architecture documentation
+2. Complete technical operator training
 3. Shadow experienced administrators
-4. Gain access to monitoring systems
-5. Begin with supervised maintenance tasks
+4. Take on increasing responsibilities
 
-**📖 Detailed Guides:**
-- [System Administrator Guide](../guides/SYSTEM_ADMINISTRATOR_ONBOARDING_GUIDE.md)
-- [Technical Operator Guide](../guides/TECHNICAL_OPERATOR_ONBOARDING_GUIDE.md)
+**📖 Detailed Guide:** [System Administrator Guide](/docs/guides/system-administrator-guide)
 
----
-
-### 7. Researchers & Analysts
-
-**Who:** Academics and practitioners studying regenerative economics
-
-**What You Do:**
-- Research UBEC's impact and effectiveness
-- Analyze network dynamics and patterns
-- Study holonic evaluation systems
-- Publish findings and insights
-- Contribute to theoretical development
-
-**What You Receive:**
-- Access to anonymized network data
-- Research partnerships and collaboration
-- Platform for sharing findings
-- Recognition in academic communities
-
-**Who This Is For:**
-- Economics researchers
-- Social scientists
-- Data analysts
-- Policy researchers
-- Graduate students
-
-**How to Start:**
-1. Review available research on UBEC
-2. Submit research proposal
-3. Complete data ethics training
-4. Gain appropriate data access
-5. Connect with research network
-
-**📖 Research Resources:** [Research Hub](https://research.ubec.protocol)
+**📖 Detailed Guide:** [Technical Operator Guide](/docs/guides/technical-operator-guide)
 
 ---
 
-### 8. General Public (Learners & Observers)
+### 7. General Public
 
 **Who:** Anyone curious about UBEC and Ubuntu economics
 
-**What You Do:**
-- Learn about regenerative economics
-- Explore Ubuntu philosophy
-- Follow UBEC developments
-- Attend public events and webinars
-- Consider future participation
-
-**What You Receive:**
-- Educational resources and materials
-- Access to public forums and content
-- Invitations to community events
-- Understanding of alternative economic systems
-
-**Who This Is For:**
-- Students and educators
-- Journalists and writers
-- Policy makers
-- Anyone interested in systemic change
-- Future participants exploring options
+**What You Can Do:**
+- Learn about Ubuntu philosophy and UBEC
+- Attend public events and educational sessions
+- Follow UBEC progress and stories
+- Support UBEC participants you know
+- Prepare for future participation
 
 **How to Start:**
-1. Read the Public Guide
-2. Subscribe to newsletter
-3. Attend public webinars
-4. Explore educational resources
-5. Join community forums as observer
+1. Read this guide and explore the website
+2. Watch educational videos
+3. Attend public events
+4. Follow community updates
 
-**📖 Detailed Guide:** [Public Guide](../guides/UBEC_Public_Guide.md)
+**📖 Detailed Guide:** [Public Guide](/docs/guides/public-guide)
 
 ---
 
 ## Frequently Asked Questions
 
-**Q: Do I need cryptocurrency experience to participate?**  
-A: No! While UBEC uses blockchain technology, we provide comprehensive onboarding. Many successful participants started with zero crypto experience.
+### Getting Started
 
-**Q: How much does it cost to participate?**  
-A: Participation pathways vary. Token holders purchase tokens. Core beneficiaries receive grants. Many participation forms (governance, organizing, learning) are free.
+**Q: Do I need cryptocurrency experience to participate?**
+A: No! While UBEC uses blockchain technology (Stellar), you don't need prior crypto experience. Guides walk you through wallet setup and basic transactions.
 
-**Q: Is UBEC only for rural/agricultural communities?**  
-A: No! While we focus on food systems, UBEC welcomes urban communities, suburban initiatives, and diverse contexts. Food sovereignty looks different in different places.
+**Q: How do I get my first tokens?**
+A: Token acquisition varies by pathway. Token holders can acquire through supported exchanges or community members. Core beneficiaries receive grants through the application process.
 
-**Q: What if I don't live near other UBEC participants?**  
-A: You can still participate! Start by becoming a token holder, join online communities, and consider becoming a Community Organizer to grow UBEC in your bioregion.
+**Q: Is there a cost to participate?**
+A: Basic participation has no fees. Stellar network transactions have tiny fees (~0.00001 XLM). Core beneficiary applications are free.
 
-**Q: How long does the application process take for core beneficiaries?**  
-A: 
-- Farmers: 30-60 days
-- Communities: 60-90 days
-- Community Activators: 45-75 days
-- Living Labs: 45-60 days (plus 30-45 days equipment setup)
+### About the System
 
-**Q: Can I participate in multiple ways?**  
-A: Absolutely! Many farmers are also token holders. Community Activators often participate in governance. Living labs may spawn Community Organizers. Multi-dimensional participation strengthens the ecosystem.
+**Q: What's the difference between the four tokens?**
+A: Each token serves a different purpose: UBEC (Air) is the gateway token, UBECrc (Water) flows through transactions, UBECgpi (Earth) provides stability, and UBECtt (Fire) rewards regeneration.
 
-**Q: How do you ensure the system stays aligned with Ubuntu principles?**  
-A: Multiple mechanisms:
-- Holonic evaluation rewards Ubuntu-aligned behavior
-- Governance participation by diverse stakeholders
-- Community accountability and transparency
-- Regular reflection and adaptation
-- Emphasis on relationship over transaction
+**Q: How does the holonic evaluation work?**
+A: Your holonic score is calculated from five dimensions: transaction patterns, reciprocity, network diversity, balance stability, and regenerative impact. It updates automatically based on your activity.
 
-**Q: What if I have a great idea but it doesn't fit these categories?**  
-A: Reach out! UBEC is evolving. New participation pathways emerge as the ecosystem grows. Your idea might inspire a new category.
+**Q: What happens if my holonic score decreases?**
+A: Score fluctuation is normal. Decreased scores reflect patterns that may need attention—perhaps over-extraction without reciprocity, or narrowing network diversity. It's feedback, not punishment.
 
-**Q: How do you prevent abuse or bad actors?**  
-A: Multiple safeguards:
-- Holonic evaluation rewards good behavior
-- Community accountability and transparency
-- Rate limiting and monitoring
-- Graduated responses to issues
-- Governance participation in major decisions
+### For Potential Beneficiaries
 
-**Q: Can businesses participate?**  
-A: Yes! Small businesses aligned with regenerative principles can be token holders. However, the focus is human-scaled operations. Large corporations would need to demonstrate genuine Ubuntu alignment.
+**Q: How competitive is the application process?**
+A: UBEC aims to support all qualifying applicants, not create artificial scarcity. Applications are evaluated on Ubuntu alignment and commitment, not competition against others.
+
+**Q: How long does the application process take?**
+A: Typically 30-75 days depending on category. This includes initial review, evaluation conversations, and onboarding planning.
+
+**Q: Can I apply for multiple categories?**
+A: Generally, you'd choose the primary category that best fits your situation. However, roles can evolve—a farmer might eventually become a community activator, for example.
+
+### Technical Questions
+
+**Q: Which blockchain does UBEC use?**
+A: UBEC Protocol is built on the Stellar network, chosen for its low fees, fast transactions, and environmental efficiency.
+
+**Q: Do I need technical skills?**
+A: Basic participation requires minimal technical skills—just enough to manage a digital wallet. Developer and administrator roles require appropriate technical backgrounds.
+
+**Q: Is my data secure and private?**
+A: Blockchain transactions are public by nature, but personal information in applications is protected. See our privacy documentation for details.
 
 ---
 
@@ -509,23 +412,23 @@ Each pathway has comprehensive documentation:
 
 | Pathway | Detailed Documentation |
 |---------|----------------------|
-| Token Holders | [Token Holder User Guide](../guides/UBEC_Token_Holders_User_Guides.md) |
-| Farmers | [Farmer Onboarding Guide](../guides/UBEC_Farmer_Onboarding_Guide.md) |
-| Communities | [Community Onboarding Guide](../guides/UBEC_Community_Onboarding_Guide.md) |
-| Community Activators | [Community Activator Onboarding Guide](../guides/UBEC_Community_Activator_Onboarding_Guide.md) |
-| Living Labs | [Living Lab Onboarding Guide](../guides/UBEC_Living_Lab_Onboarding_Guide.md) |
-| Community Organizers | [Community Organizer Guide](../guides/UBEC_Community_Organizer_Guide.md) |
-| Developers | [Developer Onboarding Guide](../guides/UBEC_Developer_Onboarding_Guide.md) |
-| Governance | [Governance Participant Guide](../guides/UBEC_Governance_Participant_Guide.md) |
-| System Administrators | [System Administrator Guide](../guides/SYSTEM_ADMINISTRATOR_ONBOARDING_GUIDE.md) |
-| Technical Operators | [Technical Operator Guide](../guides/TECHNICAL_OPERATOR_ONBOARDING_GUIDE.md) |
-| General Public | [Public Guide](../guides/UBEC_Public_Guide.md) |
+| Token Holders | [Token Holder User Guide](/docs/guides/token-holders-guide) |
+| Farmers | [Farmer Onboarding Guide](/docs/guides/farmer-onboarding-guide) |
+| Communities | [Community Onboarding Guide](/docs/guides/community-onboarding-guide) |
+| Community Activators | [Community Activator Guide](/docs/guides/community-activator-guide) |
+| Living Labs | [Living Lab Guide](/docs/guides/living-lab-guide) |
+| Community Organizers | [Community Organizer Guide](/docs/guides/community-organizer-guide) |
+| Developers | [Developer Guide](/docs/guides/developer-guide) |
+| Governance | [Governance Guide](/docs/guides/governance-guide) |
+| System Administrators | [System Administrator Guide](/docs/guides/system-administrator-guide) |
+| Technical Operators | [Technical Operator Guide](/docs/guides/technical-operator-guide) |
+| General Public | [Public Guide](/docs/guides/public-guide) |
 
 ### Step 3: Connect With the Community
 
 Don't go alone! UBEC works through relationship:
 
-- **Community Forums:** [forums.ubec.protocol](https://forums.ubec.protocol)
+- **Community Forums:** [forums.ubec.network](https://forums.ubec.network)
 - **Regional Gatherings:** Find your bioregion's events
 - **Online Sessions:** Regular community calls and webinars
 - **Peer Networks:** Connect with others in your role
@@ -601,23 +504,23 @@ Every step forward deserves recognition. Celebrate your milestones, honor others
 ### Getting Help
 
 **Community Support:**
-- Community Forums: [forums.ubec.protocol](https://forums.ubec.protocol)
-- Community Chat: [chat.ubec.protocol](https://chat.ubec.protocol)
-- FAQ Library: [help.ubec.protocol](https://help.ubec.protocol)
+- Community Forums: [forums.ubec.network](https://forums.ubec.network)
+- Community Chat: [chat.ubec.network](https://chat.ubec.network)
+- FAQ Library: [help.ubec.network](https://help.ubec.network)
 
 **Technical Support:**
-- Technical Documentation: [docs.ubec.protocol](https://docs.ubec.protocol)
-- Developer Community: [dev.ubec.protocol](https://dev.ubec.protocol)
+- Technical Documentation: [bioregional.ubec.network/docs](https://bioregional.ubec.network/docs)
+- Developer Community: [dev.ubec.network](https://dev.ubec.network)
 - GitHub Issues: [github.com/ubec-protocol](https://github.com/ubec-protocol)
 
 **Application Support:**
-- Beneficiary Applications: beneficiaries@ubec.protocol
-- Application Status: [status.ubec.protocol](https://status.ubec.protocol)
+- Beneficiary Applications: beneficiaries@ubec.network
+- Application Status: [status.ubec.network](https://status.ubec.network)
 
 **General Inquiries:**
-- General Questions: hello@ubec.protocol
-- Partnership Inquiries: partnerships@ubec.protocol
-- Press & Media: press@ubec.protocol
+- General Questions: hello@ubec.network
+- Partnership Inquiries: partnerships@ubec.network
+- Press & Media: press@ubec.network
 
 ### Educational Resources
 
@@ -641,10 +544,10 @@ Every step forward deserves recognition. Celebrate your milestones, honor others
 
 ### Staying Updated
 
-- **Newsletter:** Subscribe at [ubec.protocol/newsletter](https://ubec.protocol/newsletter)
-- **Blog:** Latest updates at [blog.ubec.protocol](https://blog.ubec.protocol)
+- **Newsletter:** Subscribe at [ubec.network/newsletter](https://ubec.network/newsletter)
+- **Blog:** Latest updates at [blog.ubec.network](https://blog.ubec.network)
 - **Social Media:** Follow @UBECProtocol on your preferred platforms
-- **Community Calendar:** Events at [calendar.ubec.protocol](https://calendar.ubec.protocol)
+- **Community Calendar:** Events at [calendar.ubec.network](https://calendar.ubec.network)
 
 ---
 
@@ -672,8 +575,8 @@ This project uses the services of Claude and Anthropic PBC to inform our decisio
 
 ## Document Information
 
-**Version:** 1.1  
-**Date:** November 9, 2025  
+**Version:** 1.2  
+**Date:** November 26, 2025  
 **Authors:** UBEC Project Team  
 **Status:** Living Document  
 **Next Review:** Quarterly based on participant feedback

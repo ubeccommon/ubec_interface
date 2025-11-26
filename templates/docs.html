@@ -9,8 +9,12 @@
         <h1>UBEC DAO Protocol Documentation</h1>
         <p class="lead">Comprehensive guides, tutorials, and references for building with Ubuntu economics</p>
         <div class="hero-search">
-            <input type="text" placeholder="Search documentation..." class="search-input">
-            <button class="search-button">Search</button>
+            <input type="text" id="docs-search-input" placeholder="Search documentation..." class="search-input" autocomplete="off">
+            <button id="docs-search-btn" class="search-button">Search</button>
+        </div>
+        <!-- Search Results Container -->
+        <div id="search-results-container" class="search-results-container" style="display: none;">
+            <div id="search-results" class="search-results"></div>
         </div>
     </div>
 </section>
@@ -28,8 +32,7 @@
                 <span class="card-number">1</span>
                 <h3>Understand Ubuntu Philosophy</h3>
                 <p>
-                    Learn about the ancient African philosophy that shapes every aspect of the UBEC Protocol.
-                    "I am because we are" is not just a motto—it's the foundation of our economic design.
+                    Learn about the ancient African philosophy that shapes every aspect of the UBEC Decentralized Autonomous Organization (DAO) Protocol. "I am because we are" is not just a motto—it's the foundation of our economic design.
                 </p>
                 <a href="/about" class="card-link">Read About Ubuntu →</a>
             </div>
@@ -61,7 +64,7 @@
                     Connect with your local economic community or help establish a bioregion in your area.
                     Economics works best when rooted in place.
                 </p>
-                <a href="/documents/guides/UBEC_Bioregion_Guide.md" class="card-link">Bioregion Guide →</a>
+                <a href="/docs/guides/bioregion-guide" class="card-link">Bioregion Guide →</a>
             </div>
         </div>
     </div>
@@ -116,11 +119,11 @@
                     Guides for organizers, bioregional coordinators, and community participants.
                 </p>
                 <div class="doc-links">
-                    <a href="/documents/guides/participation-guide" class="doc-link">
+                    <a href="/docs/guides/participation-guide" class="doc-link">
                         <strong>Participation Guide</strong>
                         <span>Discover your pathway into the UBEC ecosystem - farmers, communities, token holders, and more</span>
                     </a>
-                    <a href="/documents/guides/" class="doc-link">
+                    <a href="/docs/guides/" class="doc-link">
                         <strong>All User Guides</strong>
                         <span>Complete collection of guides for every participant type</span>
                     </a>
@@ -242,23 +245,23 @@
             </div>
             
             <div class="concept-card element-earth">
-                <div class="concept-icon">🌍</div>
-                <h3>Bioregional Economics</h3>
+                <div class="concept-icon">🌿</div>
+                <h3>Bioregional Mapping</h3>
                 <p>
-                    Economic systems rooted in specific places, respecting local ecology, culture, 
-                    and relationships rather than abstract global markets.
+                    Place-based economics rooted in natural boundaries—watersheds and ecoregions—
+                    rather than arbitrary political borders.
                 </p>
-                <a href="#bioregions" class="concept-link">Learn More →</a>
+                <a href="/dashboard" class="concept-link">Explore Map →</a>
             </div>
             
             <div class="concept-card element-fire">
                 <div class="concept-icon">🔥</div>
-                <h3>65/30/5 Distribution</h3>
+                <h3>Ubuntu Philosophy</h3>
                 <p>
-                    Token distribution model: 65% community circulation, 30% stewardship reserve, 
-                    5% administration—prioritizing community benefit over extraction.
+                    "I am because we are" - an ancient wisdom that recognizes our interconnected 
+                    humanity and shared responsibility for collective wellbeing.
                 </p>
-                <a href="#distribution" class="concept-link">Learn More →</a>
+                <a href="/about" class="concept-link">Learn More →</a>
             </div>
         </div>
     </div>
@@ -267,74 +270,60 @@
 <!-- Tutorials -->
 <section class="tutorials">
     <div class="container">
-        <h2>Tutorials & Guides</h2>
+        <h2>Step-by-Step Tutorials</h2>
+        <p class="section-intro">
+            Practical guides to get you started with common tasks in the UBEC ecosystem.
+        </p>
         
         <div class="tutorials-grid">
             <div class="tutorial-card">
-                <span class="tutorial-badge beginner">Beginner</span>
-                <h3>Setting Up Your First Stellar Wallet</h3>
-                <p>
-                    Step-by-step guide to creating a Stellar wallet using Freighter browser extension 
-                    and adding UBEC tokens to your account.
-                </p>
+                <h3>🎯 Getting Started with UBEC</h3>
                 <div class="tutorial-meta">
                     <span class="meta-item">⏱️ 15 minutes</span>
-                    <span class="meta-item">📱 Desktop & Mobile</span>
+                    <span class="meta-item">📊 Beginner</span>
                 </div>
-                <a href="#tutorial-wallet" class="tutorial-link">Start Tutorial →</a>
+                <p>
+                    Set up your Stellar wallet, receive your first UBEC tokens, and understand 
+                    the basics of the four-token system.
+                </p>
+                <a href="#tutorial-getting-started" class="tutorial-link">Start Tutorial →</a>
             </div>
             
             <div class="tutorial-card">
-                <span class="tutorial-badge intermediate">Intermediate</span>
-                <h3>Building a Basic UBEC Token Dashboard</h3>
+                <h3>🗺️ Mapping Your Bioregion</h3>
+                <div class="tutorial-meta">
+                    <span class="meta-item">⏱️ 30 minutes</span>
+                    <span class="meta-item">📊 Intermediate</span>
+                </div>
                 <p>
-                    Learn to query the UBEC API and display token balances, transaction history, 
-                    and holonic scores using Python.
+                    Learn how to define and register your local bioregion using watershed and 
+                    ecoregion data, establishing the foundation for community economics.
                 </p>
+                <a href="#tutorial-bioregion" class="tutorial-link">Start Tutorial →</a>
+            </div>
+            
+            <div class="tutorial-card">
+                <h3>💻 Building with the API</h3>
                 <div class="tutorial-meta">
                     <span class="meta-item">⏱️ 45 minutes</span>
-                    <span class="meta-item">💻 Python 3.11+</span>
+                    <span class="meta-item">📊 Advanced</span>
                 </div>
-                <a href="#tutorial-dashboard" class="tutorial-link">Start Tutorial →</a>
-            </div>
-            
-            <div class="tutorial-card">
-                <span class="tutorial-badge advanced">Advanced</span>
-                <h3>Implementing Holonic Evaluation</h3>
                 <p>
-                    Deep dive into the holonic evaluation framework, including calculating scores 
-                    across all five dimensions for your community.
+                    Create a simple application that interacts with the UBEC Protocol API, 
+                    including authentication, token queries, and transaction submission.
                 </p>
-                <div class="tutorial-meta">
-                    <span class="meta-item">⏱️ 2 hours</span>
-                    <span class="meta-item">🧮 Advanced Math</span>
-                </div>
-                <a href="#tutorial-holonic" class="tutorial-link">Start Tutorial →</a>
-            </div>
-            
-            <div class="tutorial-card">
-                <span class="tutorial-badge intermediate">Intermediate</span>
-                <h3>Organizing Your Bioregion</h3>
-                <p>
-                    Practical guide to establishing and managing a bioregional economic hub, from 
-                    initial outreach to ongoing governance.
-                </p>
-                <div class="tutorial-meta">
-                    <span class="meta-item">⏱️ 1 hour</span>
-                    <span class="meta-item">🌍 Community</span>
-                </div>
-                <a href="#tutorial-bioregion" class="tutorial-link">Start Tutorial →</a>
+                <a href="#tutorial-api" class="tutorial-link">Start Tutorial →</a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- API Quick Reference -->
+<!-- API Reference Preview -->
 <section class="api-reference">
     <div class="container">
-        <h2>API Quick Reference</h2>
+        <h2>API Reference</h2>
         <p class="section-intro">
-            Common API endpoints for quick reference. See full <a href="/api/docs">API documentation</a> for details.
+            Complete REST API documentation for developers building on the UBEC Protocol.
         </p>
         
         <div class="api-endpoints">
@@ -343,19 +332,23 @@
                     <span class="http-method get">GET</span>
                     <code class="endpoint-path">/api/v1/tokens</code>
                 </div>
-                <p class="endpoint-description">Retrieve information about all four UBEC tokens</p>
+                <p class="endpoint-description">
+                    Retrieve information about all four UBEC tokens including current metrics and distribution.
+                </p>
                 <div class="endpoint-example">
                     <strong>Example Response:</strong>
-                    <pre><code>[
-  {
-    "token_code": "UBEC",
-    "element": "Air",
-    "ubuntu_principle": "Diversity",
-    "total_supply": 152025699,
-    "holders_count": 495
-  },
-  ...
-]</code></pre>
+                    <pre><code>{
+  "tokens": [
+    {
+      "code": "UBEC",
+      "name": "Ubuntu Bioregional Economic Commons",
+      "element": "Air",
+      "total_supply": 1000000,
+      "active_holders": 495
+    },
+    ...
+  ]
+}</code></pre>
                 </div>
             </div>
             
@@ -364,80 +357,46 @@
                     <span class="http-method get">GET</span>
                     <code class="endpoint-path">/api/v1/network/status</code>
                 </div>
-                <p class="endpoint-description">Get current network statistics and health</p>
-                <div class="endpoint-example">
-                    <strong>Example Response:</strong>
-                    <pre><code>{
-  "active_participants": 495,
-  "total_transactions_24h": 1247,
-  "average_ubuntu_score": 0.77,
-  "bioregions_count": 12,
-  "network_health": "healthy"
-}</code></pre>
-                </div>
-            </div>
-            
-            <div class="endpoint">
-                <div class="endpoint-header">
-                    <span class="http-method get">GET</span>
-                    <code class="endpoint-path">/api/v1/holonic/scores</code>
-                </div>
-                <p class="endpoint-description">Retrieve holonic evaluation scores</p>
-                <div class="endpoint-example">
-                    <strong>Example Response:</strong>
-                    <pre><code>{
-  "autonomy_integration": 0.78,
-  "ubuntu_alignment": 0.85,
-  "reciprocity_health": 0.72,
-  "mutualism_capacity": 0.81,
-  "regeneration_impact": 0.68
-}</code></pre>
-                </div>
+                <p class="endpoint-description">
+                    Get current network health metrics including transaction volume, participant counts, and Ubuntu scores.
+                </p>
             </div>
         </div>
         
         <div class="api-cta">
-            <h3>Need More Details?</h3>
-            <p>Access the complete API documentation with authentication, rate limits, and advanced features.</p>
-            <a href="/api/docs" class="btn btn-primary">View Full API Docs</a>
+            <h3>Explore Full API Documentation</h3>
+            <p>
+                Access the complete interactive API reference with all endpoints, parameters, 
+                and authentication details.
+            </p>
+            <a href="/api/docs" class="btn btn-primary">View API Docs</a>
         </div>
     </div>
 </section>
 
-<!-- FAQ Section -->
+<!-- FAQ -->
 <section class="faq-section">
     <div class="container">
         <h2>Frequently Asked Questions</h2>
         
         <div class="faq-grid">
             <div class="faq-category">
-                <h3>General Questions</h3>
+                <h3>Getting Started</h3>
                 <div class="faq-items">
                     <div class="faq-item">
-                        <h4>What is the UBEC Protocol?</h4>
+                        <h4>Do I need cryptocurrency experience to participate?</h4>
                         <p>
-                            UBEC (Ubuntu Bioregional Economic Commons) is a four-token economic system 
-                            built on Stellar blockchain, designed to embody Ubuntu philosophy: "I am 
-                            because we are." It creates infrastructure where cooperation, reciprocity, 
-                            and regeneration are economically valuable.
+                            Not at all. While UBEC uses blockchain technology, we provide guided 
+                            walkthroughs and support for newcomers. Many participants start with 
+                            no crypto experience.
                         </p>
                     </div>
                     
                     <div class="faq-item">
-                        <h4>What blockchain does UBEC use?</h4>
+                        <h4>What wallet should I use?</h4>
                         <p>
-                            UBEC tokens operate on the Stellar network, which offers fast transactions 
-                            (3-5 seconds), extremely low costs (~$0.000003 per transaction), and is 
-                            carbon-neutral. Stellar is specifically designed for asset issuance and transfer.
-                        </p>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <h4>How do I get UBEC tokens?</h4>
-                        <p>
-                            Tokens are distributed through community participation, bioregional engagement, 
-                            and demonstrating alignment with Ubuntu principles. The protocol rewards 
-                            diversity, reciprocity, mutualism, and regenerative action.
+                            We recommend Freighter wallet for general use or Stellar Laboratory 
+                            for developers. Both are free and work seamlessly with UBEC tokens.
                         </p>
                     </div>
                 </div>
@@ -447,63 +406,39 @@
                 <h3>Technical Questions</h3>
                 <div class="faq-items">
                     <div class="faq-item">
-                        <h4>What programming languages are supported?</h4>
+                        <h4>Which blockchain does UBEC use?</h4>
                         <p>
-                            The UBEC Protocol backend is built with Python 3.11+ using FastAPI. We provide 
-                            an official Python SDK. The API is RESTful, so any language with HTTP support 
-                            can integrate with UBEC.
+                            The UBEC DAO Protocol is built on the Stellar network, chosen for its low fees, 
+                            fast transactions, and environmental efficiency.
                         </p>
                     </div>
                     
                     <div class="faq-item">
-                        <h4>Is the code open source?</h4>
+                        <h4>Are there transaction fees?</h4>
                         <p>
-                            Yes! The UBEC Protocol is open source under a permissive license. We believe 
-                            tools for economic liberation should be freely available. Check our GitHub 
-                            for the source code.
-                        </p>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <h4>What are the API rate limits?</h4>
-                        <p>
-                            The public API allows 60 requests per minute per IP address. Higher rate 
-                            limits are available for registered applications. See the API documentation 
-                            for details on authentication and rate limit increases.
+                            Yes, minimal network fees (fractions of a cent) are required by Stellar 
+                            to prevent spam. These are not UBEC fees but standard blockchain costs.
                         </p>
                     </div>
                 </div>
             </div>
             
             <div class="faq-category">
-                <h3>Community Questions</h3>
+                <h3>Community & Governance</h3>
                 <div class="faq-items">
                     <div class="faq-item">
-                        <h4>What is a bioregion?</h4>
+                        <h4>How are decisions made in the protocol?</h4>
                         <p>
-                            A bioregion is an area defined by natural characteristics (watersheds, climate, 
-                            ecology) rather than political boundaries. In UBEC, bioregions are economic 
-                            communities rooted in specific places, where participants engage in localized 
-                            reciprocal exchange.
+                            THE UBEC DAO uses holonic governance where communities have autonomy within 
+                            their bioregions while participating in larger collective decisions.
                         </p>
                     </div>
                     
                     <div class="faq-item">
-                        <h4>How does governance work?</h4>
+                        <h4>Can anyone start a bioregion?</h4>
                         <p>
-                            UBEC uses a progressive decentralization model. Currently in foundation phase 
-                            with core team stewardship, transitioning to community governance through 
-                            holonic structures, eventually reaching full decentralization with minimal 
-                            core team involvement.
-                        </p>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <h4>Can I start a bioregion in my area?</h4>
-                        <p>
-                            Absolutely! We encourage bioregional emergence wherever communities are ready. 
-                            Review the bioregion setup guide, connect with existing coordinators, and reach 
-                            out for support in establishing your local economic hub.
+                            Yes! We encourage communities to map and establish their local bioregions. 
+                            Our guides provide step-by-step instructions for the process.
                         </p>
                     </div>
                 </div>
@@ -512,70 +447,50 @@
     </div>
 </section>
 
-<!-- Resources & Downloads -->
+<!-- Resources -->
 <section class="resources">
     <div class="container">
-        <h2>Resources & Downloads</h2>
+        <h2>Additional Resources</h2>
         
         <div class="resources-grid">
             <div class="resource-card">
-                <span class="resource-icon">📄</span>
+                <span class="resource-icon">📚</span>
                 <h3>Whitepaper</h3>
                 <p>
-                    Comprehensive technical and philosophical documentation of the UBEC Protocol, 
-                    including Ubuntu principles, token mechanics, and holonic evaluation framework.
+                    Read the complete UBEC DAO Protocol whitepaper detailing our economic model, 
+                    technical architecture, and philosophical foundation.
                 </p>
-                <a href="#whitepaper" class="resource-link">Download PDF →</a>
+                <a href="#whitepaper" class="resource-link">Read Whitepaper →</a>
             </div>
             
             <div class="resource-card">
-                <span class="resource-icon">📊</span>
-                <h3>Token Economics Report</h3>
+                <span class="resource-icon">🎥</span>
+                <h3>Video Tutorials</h3>
                 <p>
-                    Detailed analysis of the four-token architecture, distribution model, and 
-                    economic flows within the UBEC ecosystem.
+                    Visual learner? Watch our collection of tutorial videos covering everything 
+                    from wallet setup to bioregion mapping.
                 </p>
-                <a href="#tokenomics" class="resource-link">Download PDF →</a>
+                <a href="#videos" class="resource-link">Watch Videos →</a>
             </div>
             
             <div class="resource-card">
-                <span class="resource-icon">🎓</span>
-                <h3>Ubuntu Philosophy Guide</h3>
+                <span class="resource-icon">📰</span>
+                <h3>Newsletter</h3>
                 <p>
-                    Educational resource exploring Ubuntu philosophy, its history, and its 
-                    application to economic systems and community building.
+                    Stay updated with monthly insights on protocol development, community 
+                    highlights, and Ubuntu economics.
                 </p>
-                <a href="#philosophy-guide" class="resource-link">Download PDF →</a>
+                <a href="#newsletter" class="resource-link">Subscribe →</a>
             </div>
             
             <div class="resource-card">
-                <span class="resource-icon">🛠️</span>
-                <h3>Developer Toolkit</h3>
+                <span class="resource-icon">💬</span>
+                <h3>Community Forum</h3>
                 <p>
-                    Collection of code examples, templates, and tools for building applications 
-                    on top of the UBEC Protocol.
+                    Connect with other UBEC participants, ask questions, share experiences, 
+                    and collaborate on local initiatives.
                 </p>
-                <a href="#toolkit" class="resource-link">Download ZIP →</a>
-            </div>
-            
-            <div class="resource-card">
-                <span class="resource-icon">📚</span>
-                <h3>Community Playbook</h3>
-                <p>
-                    Practical guide for community organizers, including templates, best practices, 
-                    and lessons learned from existing bioregions.
-                </p>
-                <a href="#playbook" class="resource-link">Download PDF →</a>
-            </div>
-            
-            <div class="resource-card">
-                <span class="resource-icon">🏗️</span>
-                <h3>Architecture Diagrams</h3>
-                <p>
-                    Visual documentation of system architecture, data flows, and component 
-                    relationships for technical architects.
-                </p>
-                <a href="#diagrams" class="resource-link">Download PNG/SVG →</a>
+                <a href="#forum" class="resource-link">Join Discussion →</a>
             </div>
         </div>
     </div>
@@ -588,44 +503,44 @@
         
         <div class="support-grid">
             <div class="support-card">
-                <h3>Need Help?</h3>
+                <h3>Get Help</h3>
                 <p>
-                    Can't find what you're looking for in the documentation? Reach out to the 
-                    community or check these additional resources.
+                    Need assistance? Our community and support team are here to help you 
+                    navigate the UBEC ecosystem.
                 </p>
                 <ul class="support-links">
-                    <li><a href="#">Community Forum</a></li>
-                    <li><a href="#">Discord Server</a></li>
-                    <li><a href="#">GitHub Issues</a></li>
-                    <li><a href="#">Stack Overflow</a></li>
+                    <li><a href="#support">Submit a Support Request</a></li>
+                    <li><a href="#community-slack">Join Community Chat</a></li>
+                    <li><a href="#office-hours">Attend Office Hours</a></li>
+                    <li><a href="#faq">Browse FAQ</a></li>
                 </ul>
             </div>
             
             <div class="support-card">
-                <h3>Stay Updated</h3>
+                <h3>Connect</h3>
                 <p>
-                    Follow UBEC Protocol development, get notified about new features, and 
-                    connect with the growing community.
+                    Join our growing community of Ubuntu economics practitioners, developers, 
+                    and regenerative change-makers.
                 </p>
                 <ul class="support-links">
-                    <li><a href="#">Newsletter Signup</a></li>
-                    <li><a href="#">Development Blog</a></li>
-                    <li><a href="#">Twitter/X Updates</a></li>
-                    <li><a href="#">Telegram Channel</a></li>
+                    <li><a href="#discord">Discord Community</a></li>
+                    <li><a href="#twitter">Twitter/X Updates</a></li>
+                    <li><a href="#linkedin">LinkedIn Network</a></li>
+                    <li><a href="#events">Upcoming Events</a></li>
                 </ul>
             </div>
             
             <div class="support-card">
                 <h3>Contribute</h3>
                 <p>
-                    UBEC is open source and community-driven. Contributions are welcome in code, 
-                    documentation, design, and community building.
+                    Help build the future of regenerative economics. Contribute code, 
+                    documentation, or participate in governance.
                 </p>
                 <ul class="support-links">
-                    <li><a href="#">Contribution Guide</a></li>
-                    <li><a href="#">GitHub Repository</a></li>
-                    <li><a href="#">Code of Conduct</a></li>
-                    <li><a href="#">Bounty Programs</a></li>
+                    <li><a href="#github">GitHub Repository</a></li>
+                    <li><a href="#contribute">Contribution Guide</a></li>
+                    <li><a href="#governance">Governance Participation</a></li>
+                    <li><a href="#bounties">Open Bounties</a></li>
                 </ul>
             </div>
         </div>
@@ -642,78 +557,212 @@
         </p>
     </div>
 </section>
-{% endblock %}
 
-{% block extra_css %}
 <style>
-    /* Hero Section */
+    /* Docs Page Styles */
     .docs-hero {
-        background: linear-gradient(135deg, #8BC34A 0%, #87CEEB 100%);
-        padding: 4rem 0;
+        background: linear-gradient(135deg, #8FBC8F 0%, #87CEEB 100%);
+        color: white;
+        padding: 6rem 0 4rem;
         text-align: center;
+        position: relative;
     }
     
     .docs-hero h1 {
         font-size: 3rem;
         margin-bottom: 1rem;
-        color: #2c3e50;
+        font-weight: 700;
     }
     
-    .docs-hero .lead {
+    .lead {
         font-size: 1.25rem;
+        opacity: 0.95;
         margin-bottom: 2rem;
-        color: #2c3e50;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     .hero-search {
         max-width: 600px;
         margin: 0 auto;
         display: flex;
-        gap: 0.5rem;
+        gap: 1rem;
+        position: relative;
     }
     
     .search-input {
         flex: 1;
-        padding: 0.875rem 1.25rem;
-        border: 2px solid rgba(0,0,0,0.1);
+        padding: 1rem;
         border-radius: 8px;
+        border: none;
         font-size: 1rem;
-        background: white;
     }
     
     .search-input:focus {
-        outline: none;
-        border-color: #667eea;
+        outline: 3px solid rgba(255, 255, 255, 0.5);
     }
     
     .search-button {
-        padding: 0.875rem 2rem;
-        background: #667eea;
-        color: white;
+        padding: 1rem 2rem;
+        background: white;
+        color: #8FBC8F;
         border: none;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: all 0.3s ease;
     }
     
     .search-button:hover {
-        background: #764ba2;
+        background: #f8f9fa;
+        transform: translateY(-2px);
     }
     
-    /* Quick Start */
-    .quick-start {
-        padding: 4rem 0;
+    .search-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    /* Search Results Styles */
+    .search-results-container {
+        max-width: 600px;
+        margin: 1rem auto 0;
+        position: relative;
+    }
+    
+    .search-results {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        max-height: 400px;
+        overflow-y: auto;
+        text-align: left;
+    }
+    
+    .search-result-item {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+        transition: background 0.2s ease;
+        display: block;
+        text-decoration: none;
+    }
+    
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+    
+    .search-result-item:hover {
         background: #f8f9fa;
     }
     
-    .section-intro {
-        font-size: 1.125rem;
+    .search-result-title {
+        color: #8FBC8F;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .search-result-excerpt {
         color: #666;
-        max-width: 800px;
-        margin: 0 auto 3rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .search-result-excerpt mark {
+        background: #fff3cd;
+        padding: 0 2px;
+        border-radius: 2px;
+    }
+    
+    .search-no-results {
+        padding: 2rem;
         text-align: center;
-        line-height: 1.8;
+        color: #666;
+    }
+    
+    .search-no-results .no-results-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .search-no-results p {
+        margin: 0;
+        color: #666;
+    }
+    
+    .search-loading {
+        padding: 2rem;
+        text-align: center;
+        color: #666;
+    }
+    
+    .search-loading .spinner {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e9ecef;
+        border-top-color: #8FBC8F;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .search-header {
+        padding: 0.75rem 1.5rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 0.85rem;
+        color: #666;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .search-close-btn {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 28px;
+        height: 28px;
+        background: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
+        z-index: 10;
+    }
+    
+    .search-close-btn:hover {
+        background: #1a252f;
+    }
+
+    /* Quick Start Section */
+    .quick-start {
+        padding: 4rem 0;
+    }
+    
+    .section-intro {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 3rem;
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.7;
     }
     
     .quick-start-grid {
@@ -728,8 +777,9 @@
         padding: 2rem;
         border-radius: 12px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
         position: relative;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
     }
     
     .quick-start-card:hover {
@@ -739,23 +789,19 @@
     
     .card-number {
         position: absolute;
-        top: -15px;
-        left: 2rem;
-        width: 40px;
-        height: 40px;
-        background: #667eea;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 1.25rem;
+        top: -10px;
+        right: 20px;
+        font-size: 5rem;
+        font-weight: 700;
+        color: rgba(143, 188, 143, 0.15);
+        line-height: 1;
     }
     
     .quick-start-card h3 {
-        margin: 1rem 0;
         color: #2c3e50;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
     }
     
     .quick-start-card p {
@@ -765,19 +811,20 @@
     }
     
     .card-link {
-        color: #667eea;
+        color: #87CEEB;
         font-weight: 600;
         text-decoration: none;
         transition: color 0.2s ease;
     }
     
     .card-link:hover {
-        color: #764ba2;
+        color: #8FBC8F;
     }
     
     /* Documentation Categories */
     .doc-categories {
         padding: 4rem 0;
+        background: #f8f9fa;
     }
     
     .categories-grid {
@@ -805,7 +852,7 @@
         font-size: 2.5rem;
     }
     
-    .category-header h3 {
+    .category-section h3 {
         color: #2c3e50;
         margin: 0;
     }
@@ -819,17 +866,18 @@
     .doc-links {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 1rem;
     }
     
     .doc-link {
         display: flex;
         flex-direction: column;
+        gap: 0.25rem;
         padding: 1rem;
         background: #f8f9fa;
         border-radius: 8px;
         text-decoration: none;
-        transition: background 0.2s ease, transform 0.2s ease;
+        transition: all 0.2s ease;
     }
     
     .doc-link:hover {
@@ -838,19 +886,19 @@
     }
     
     .doc-link strong {
-        color: #2c3e50;
-        margin-bottom: 0.25rem;
+        color: #87CEEB;
+        font-size: 1rem;
     }
     
     .doc-link span {
         color: #666;
         font-size: 0.9rem;
+        line-height: 1.5;
     }
     
     /* Core Concepts */
     .core-concepts {
         padding: 4rem 0;
-        background: #f8f9fa;
     }
     
     .concepts-grid {
@@ -866,17 +914,30 @@
         border-radius: 12px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         text-align: center;
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
+        border-top: 4px solid;
     }
     
     .concept-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
     
-    .concept-card.element-air { border-top: 4px solid #87CEEB; }
-    .concept-card.element-water { border-top: 4px solid #4FC3F7; }
-    .concept-card.element-earth { border-top: 4px solid #8BC34A; }
-    .concept-card.element-fire { border-top: 4px solid #FF6B6B; }
+    .concept-card.element-air {
+        border-top-color: #B8D4E8;
+    }
+    
+    .concept-card.element-water {
+        border-top-color: #7FC7C4;
+    }
+    
+    .concept-card.element-earth {
+        border-top-color: #8AA67E;
+    }
+    
+    .concept-card.element-fire {
+        border-top-color: #F4A896;
+    }
     
     .concept-icon {
         font-size: 3rem;
@@ -895,23 +956,24 @@
     }
     
     .concept-link {
-        color: #667eea;
+        color: #87CEEB;
         font-weight: 600;
         text-decoration: none;
     }
     
     .concept-link:hover {
-        color: #764ba2;
+        color: #8FBC8F;
     }
     
     /* Tutorials */
     .tutorials {
         padding: 4rem 0;
+        background: #f8f9fa;
     }
     
     .tutorials-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 2rem;
         margin-top: 2rem;
     }
@@ -921,36 +983,12 @@
         padding: 2rem;
         border-radius: 12px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
     }
     
     .tutorial-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    }
-    
-    .tutorial-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
-    
-    .tutorial-badge.beginner {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .tutorial-badge.intermediate {
-        background: #fff3cd;
-        color: #856404;
-    }
-    
-    .tutorial-badge.advanced {
-        background: #f8d7da;
-        color: #721c24;
     }
     
     .tutorial-card h3 {
@@ -978,13 +1016,13 @@
     }
     
     .tutorial-link {
-        color: #667eea;
+        color: #87CEEB;
         font-weight: 600;
         text-decoration: none;
     }
     
     .tutorial-link:hover {
-        color: #764ba2;
+        color: #8FBC8F;
     }
     
     /* API Reference */
@@ -1170,13 +1208,13 @@
     }
     
     .resource-link {
-        color: #667eea;
+        color: #87CEEB;
         font-weight: 600;
         text-decoration: none;
     }
     
     .resource-link:hover {
-        color: #764ba2;
+        color: #8FBC8F;
     }
     
     /* Support & Community */
@@ -1218,14 +1256,14 @@
     }
     
     .support-links a {
-        color: #667eea;
+        color: #87CEEB;
         text-decoration: none;
         padding: 0.5rem 0;
         transition: color 0.2s ease;
     }
     
     .support-links a:hover {
-        color: #764ba2;
+        color: #8FBC8F;
     }
     
     .support-links a::before {
@@ -1258,6 +1296,11 @@
             flex-direction: column;
         }
         
+        .search-results-container {
+            margin: 1rem 1rem 0;
+            max-width: calc(100% - 2rem);
+        }
+        
         .quick-start-grid {
             grid-template-columns: 1fr;
         }
@@ -1287,4 +1330,159 @@
         }
     }
 </style>
+
+<!-- Search JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('docs-search-input');
+    const searchBtn = document.getElementById('docs-search-btn');
+    const resultsContainer = document.getElementById('search-results-container');
+    const resultsDiv = document.getElementById('search-results');
+    
+    let searchTimeout = null;
+    
+    // Perform search
+    async function performSearch() {
+        const query = searchInput.value.trim();
+        
+        if (query.length < 2) {
+            hideResults();
+            return;
+        }
+        
+        // Show loading state
+        showLoading();
+        
+        try {
+            const response = await fetch(`/api/v1/docs/search?q=${encodeURIComponent(query)}&limit=10`);
+            const data = await response.json();
+            
+            displayResults(data, query);
+        } catch (error) {
+            console.error('Search error:', error);
+            displayError();
+        }
+    }
+    
+    // Display search results
+    function displayResults(data, query) {
+        resultsContainer.style.display = 'block';
+        
+        if (!data.results || data.results.length === 0) {
+            resultsDiv.innerHTML = `
+                <button class="search-close-btn" onclick="hideSearchResults()">×</button>
+                <div class="search-no-results">
+                    <span class="no-results-icon">🔍</span>
+                    <p>No results found for "<strong>${escapeHtml(query)}</strong>"</p>
+                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">Try different keywords or browse the documentation below</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = `
+            <button class="search-close-btn" onclick="hideSearchResults()">×</button>
+            <div class="search-header">${data.count} result${data.count !== 1 ? 's' : ''} for "${escapeHtml(query)}"</div>
+        `;
+        
+        data.results.forEach(result => {
+            const highlightedExcerpt = highlightQuery(result.excerpt, query);
+            html += `
+                <a href="${result.url}" class="search-result-item">
+                    <div class="search-result-title">${escapeHtml(result.title)}</div>
+                    <div class="search-result-excerpt">${highlightedExcerpt}</div>
+                </a>
+            `;
+        });
+        
+        resultsDiv.innerHTML = html;
+    }
+    
+    // Show loading state
+    function showLoading() {
+        resultsContainer.style.display = 'block';
+        resultsDiv.innerHTML = `
+            <div class="search-loading">
+                <span class="spinner"></span>
+                Searching documentation...
+            </div>
+        `;
+    }
+    
+    // Display error
+    function displayError() {
+        resultsDiv.innerHTML = `
+            <button class="search-close-btn" onclick="hideSearchResults()">×</button>
+            <div class="search-no-results">
+                <span class="no-results-icon">⚠️</span>
+                <p>Unable to search. Please try again.</p>
+            </div>
+        `;
+    }
+    
+    // Hide results
+    function hideResults() {
+        resultsContainer.style.display = 'none';
+        resultsDiv.innerHTML = '';
+    }
+    
+    // Escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Highlight search query in text
+    function highlightQuery(text, query) {
+        if (!text || !query) return escapeHtml(text);
+        
+        const escapedText = escapeHtml(text);
+        const escapedQuery = escapeHtml(query);
+        const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return escapedText.replace(regex, '<mark>$1</mark>');
+    }
+    
+    // Event listeners
+    searchBtn.addEventListener('click', performSearch);
+    
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
+        }
+    });
+    
+    // Live search with debounce (optional - search as you type)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            if (searchInput.value.trim().length >= 2) {
+                performSearch();
+            } else {
+                hideResults();
+            }
+        }, 300);
+    });
+    
+    // Close results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!resultsContainer.contains(e.target) && 
+            e.target !== searchInput && 
+            e.target !== searchBtn) {
+            hideResults();
+        }
+    });
+    
+    // Make hideSearchResults globally accessible
+    window.hideSearchResults = hideResults;
+    
+    // Focus input shows results again if there are any
+    searchInput.addEventListener('focus', function() {
+        if (searchInput.value.trim().length >= 2 && resultsDiv.innerHTML) {
+            resultsContainer.style.display = 'block';
+        }
+    });
+});
+</script>
 {% endblock %}

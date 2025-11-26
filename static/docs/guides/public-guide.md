@@ -1,4 +1,4 @@
-# Understanding the UBEC Protocol: A Guide for Everyone
+# Understanding the UBEC DAO Protocol: A Guide for Everyone
 
 ## What is UBEC?
 

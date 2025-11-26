@@ -47,7 +47,7 @@ Within UBEC, bioregions function as:
 #### Find Bioregions Near You
 
 1. **Check the UBEC Bioregion Map**
-   - Visit the UBEC Protocol dashboard
+   - Visit the [UBEC Protocol dashboard](https://bioregional.ubec.network/dashboard)
    - Navigate to "Bioregions" section
    - Search by location, postal code, or coordinates
    - View active bioregions in your area
@@ -113,28 +113,28 @@ The UBEC Protocol supports four primary beneficiary types. Choose the one that b
 - You manage land for regenerative purposes
 - You want to access fair markets and earn rewards for environmental stewardship
 
-**See**: [Farmer Onboarding Guide →](farmer-guide.md)
+**See**: [Farmer Onboarding Guide →](/docs/guides/farmer-onboarding-guide)
 
 #### 🏘️ **Community**
 - You represent a neighborhood, village, or local organization
 - You want to build local economic resilience
 - You're interested in community-owned resources and cooperative ventures
 
-**See**: [Community Onboarding Guide →](community-guide.md)
+**See**: [Community Onboarding Guide →](/docs/guides/community-onboarding-guide)
 
 #### 🔄 **Community Activator**
 - You're a connector and facilitator
 - You want to help coordinate bioregional activities
 - You can bridge between different stakeholder groups
 
-**See**: [Community Activator Guide →](activator-guide.md)
+**See**: [Community Activator Guide →](/docs/guides/community-activator-guide)
 
 #### 🎓 **Living Lab**
 - You're part of an educational or research institution
 - You can contribute environmental monitoring data
 - You want to integrate field studies with real-world impact
 
-**See**: [Living Lab Guide →](livinglab-guide.md)
+**See**: [Living Lab Guide →](/docs/guides/living-lab-guide)
 
 ### Step 4: Complete Your Onboarding
 
@@ -149,7 +149,7 @@ The UBEC Protocol supports four primary beneficiary types. Choose the one that b
    - 🌍 **UBECgpi (Earth)**: Green performance incentives
    - 🔥 **UBECtt (Fire)**: Time trading and service exchange
    
-   **See**: [Token System Guide →](token-guide.md)
+   **See**: [Token Stories →](/stories)
 
 3. **Set up your wallet**
    - Install compatible wallet software
@@ -231,369 +231,172 @@ Work with your core group to identify:
    - What are the upstream and downstream connections?
 
 2. **Ecological zones**
-   - What are the dominant ecosystems (forest, grassland, desert, etc.)?
-   - Where do climate patterns shift?
-   - What are the soil types and growing conditions?
+   - What ecoregion classification applies to your area?
+   - What are the dominant ecosystems (forest, prairie, wetland, etc.)?
+   - What indicator species define your area?
 
-3. **Natural features**
-   - Mountain ranges that create rain shadows
-   - Coastlines or major water bodies
-   - Historic migration patterns of wildlife
+3. **Climate patterns**
+   - What are typical temperature and precipitation ranges?
+   - What growing zones apply?
+   - What climate challenges do you face?
 
-#### Use the UBEC Mapping Interface
+4. **Topography**
+   - What landforms define your region (mountains, valleys, plains)?
+   - How does elevation vary?
+   - What are the key water features?
 
-**→ [Complete Bioregion Mapping Guide →](UBEC_Bioregion_Mapping_Guide.md)**
+#### Use UBEC Mapping Tools
 
-The UBEC Protocol provides a professional mapping interface powered by Mapbender WMS to help you accurately define bioregion boundaries based on natural features:
+The UBEC Protocol provides mapping interfaces to help:
 
-**What the Interface Provides:**
-- 🌊 **Watershed Boundaries**: Visualize major river basins and drainage areas from authoritative FEOW HydroSHEDS datasets
-- 🌍 **Ecoregion Data**: Access Ecoregions2017 classification showing ecological zones (14 distinct biomes)
-- 🏔️ **Terrain Analysis**: View elevation, slope, and topographic features
-- ✏️ **Digitizer Tool**: Draw bioregion boundaries directly on the interactive map
-- 📋 **Metadata Forms**: Complete submission details for bioregion approval workflow
+- **[Bioregion Mapping Interface](https://mapservice.ubec.network)**: Interactive map for boundary definition
+- **Watershed layers**: Overlay hydrological boundaries
+- **Ecoregion data**: Reference ecological classifications
+- **Population data**: Understand demographic context
 
-**Quick Start**:
-1. **Visit the mapping interface**: [https://mapbender.ubec.network/application/ubec_bioregions](https://mapbender.ubec.network/application/ubec_bioregions)
-2. **Enable base layers**: Turn on watershed and ecoregion layers to see natural boundaries
-3. **Locate your area**: Use the search function to find your region
-4. **Identify boundaries**: Follow watershed divides and ecoregion transitions
-5. **Draw your boundary**: Use the "Bioregion Mapping" digitizer to draw your polygon
-6. **Submit for review**: Fill in metadata form and submit for community approval
+**See**: [Bioregion Mapping Guide →](/docs/guides/bioregion-mapping-guide) - Using the UBEC Mapbender WMS Interface
 
-**For complete step-by-step instructions** including layer-by-layer guidance, drawing techniques, and best practices, see the **[Complete Bioregion Mapping Guide](UBEC_Bioregion_Mapping_Guide.md)**.
+### Step 2: Gather Your Community
 
-#### Document Your Bioregion
+#### Community Listening Sessions
 
-After mapping with the interface, create supplementary documentation:
-- **Narrative description**: Explain your boundary rationale and ecological reasoning
-- **Visual evidence**: Photos of key ecological features, watersheds, or natural landmarks
-- **Land use analysis**: Current patterns of agriculture, urban areas, and wilderness
-- **Community input**: Notes from listening sessions and stakeholder consultations
-- **Traditional knowledge**: Indigenous perspectives on territorial boundaries (where appropriate)
+Before formalizing anything:
 
-**Additional Reference Tools** (for supplementary context):
-- **OpenStreetMap**: Community infrastructure and local features
-- **Google Earth**: Historical satellite imagery
-- **Government GIS Data**: Environmental agency datasets
-- **Indigenous Land Maps**: Where appropriate and available
+1. **Host open conversations** about local economic challenges
+2. **Listen deeply** to what people care about
+3. **Identify shared concerns** and aspirations
+4. **Find natural leaders** already doing this work
+5. **Build relationships** before building structures
 
-### Step 2: Build Your Core Team
+#### Core Team Formation
 
-#### Recruit Founding Members
+Recruit founding members representing:
 
-You need diverse perspectives and skills:
+- **Farmers/producers**: Those growing food or managing land
+- **Community organizations**: Nonprofits, cooperatives, faith groups
+- **Local businesses**: Committed to local economy
+- **Technical capacity**: People who can manage platforms and data
+- **Facilitation skills**: Those who can hold space for dialogue
 
-- **Farmers/Land managers**: Those working directly with soil and ecosystems
-- **Community leaders**: People with social networks and organizing experience
-- **Technical facilitators**: Those comfortable with digital platforms
-- **Environmental scientists**: People who can guide monitoring and assessment
-- **Economic thinkers**: Those who understand trade, value flows, and finance
+### Step 3: Design Your Bioregion Structure
 
-#### Establish Working Agreements
+#### Governance Framework
 
-Your founding team should align on:
+Decide how decisions will be made:
 
-1. **Vision and purpose**: Why create this bioregion?
-2. **Decision-making process**: Consensus? Majority vote? Consent-based?
-3. **Time commitments**: How often will you meet? Who does what?
-4. **Communication norms**: How will you stay in touch and coordinate?
-5. **Conflict resolution**: How will you handle disagreements?
+- **Consensus vs. consent**: How much agreement is needed?
+- **Working groups**: What functional teams are needed?
+- **Leadership roles**: Who coordinates, and how are they chosen?
+- **Conflict resolution**: How will disagreements be handled?
+- **Evolution process**: How can governance change over time?
 
-#### Form Working Groups
+#### Economic Priorities
 
-Typical working groups for bioregion formation:
+Identify initial focus areas:
 
-- **Mapping & Boundaries**: Defining geographic scope
-- **Outreach & Engagement**: Building participation
-- **Economic Design**: Determining initial token flows and trade patterns
-- **Monitoring & Data**: Setting up environmental tracking
-- **Governance**: Designing decision-making structures
+- What are the most pressing economic needs?
+- Where are the opportunities for local production?
+- What leakages can be plugged (money leaving the region)?
+- What existing local economy can be strengthened?
 
-### Step 3: Engage Your Communities
+#### Monitoring Systems
 
-#### Conduct Listening Sessions
+Plan for environmental and economic tracking:
 
-Before imposing a structure, listen deeply:
-
-1. **Host community gatherings**
-   - Invite diverse stakeholders
-   - Ask: What are your economic challenges?
-   - Explore: What do you value about this place?
-   - Discover: What resources are underutilized?
-
-2. **Interview key actors**
-   - Farmers and food producers
-   - Local business owners
-   - Indigenous leaders (if applicable)
-   - Environmental organizations
-   - Municipal officials
-
-3. **Identify existing initiatives**
-   - What's already working?
-   - Where are the gaps?
-   - Who might resist or support this work?
-
-#### Co-Design Economic Flows
-
-With community input, map:
-
-- **Current economic patterns**: Where does money come from and go to?
-- **Resource flows**: Food, water, energy, materials
-- **Unmet needs**: What do people want but can't access locally?
-- **Surplus resources**: What do you have too much of?
-- **Potential exchanges**: Who could trade what with whom?
+- What data will you collect?
+- Who will manage data systems?
+- How will data inform decisions?
+- What privacy protections are needed?
 
 ### Step 4: Apply for Bioregion Recognition
 
-Once you have:
-- Defined boundaries
-- A core team (minimum 3 participants from different categories)
-- At least one Community Activator
-- Initial economic flow mapping
-- Community support
+#### Application Requirements
 
-You can apply to the UBEC Protocol for official bioregion status.
+Submit to UBEC Protocol:
 
-#### Application Process
+1. **Boundary definition**: Map with natural boundary justification
+2. **Founding participants**: List of initial members and their roles
+3. **Governance structure**: Decision-making framework
+4. **Economic plan**: Initial priorities and strategies
+5. **Monitoring plan**: How you'll track progress
+6. **Community support**: Evidence of local buy-in
 
-1. **Submit bioregion proposal**
-   - Geographic boundaries (with maps)
-   - Founding team members
-   - Initial governance structure
-   - Economic focus areas
-   - Environmental monitoring plan
+#### Review Process
 
-2. **Technical review**
-   - UBEC Protocol team evaluates feasibility
-   - Checks for boundary conflicts with existing bioregions
-   - Assesses team capacity
+The UBEC network will:
 
-3. **Community verification**
-   - Other bioregions provide feedback
-   - UBEC Advisory Council reviews
-   - Indigenous communities consulted (if territories overlap)
+1. Review application for completeness
+2. Verify boundary appropriateness
+3. Check for overlap with existing bioregions
+4. Assess founding team capacity
+5. Provide feedback or request modifications
+6. Grant provisional recognition
 
-4. **Approval and onboarding**
-   - Bioregion granted official status
-   - Initial token allocation provided
-   - Technical support for platform setup
+#### Provisional Period
 
-**Timeline**: Typically 4-8 weeks from submission to approval
+New bioregions enter a 12-month provisional period:
 
-### Step 5: Launch Your Bioregion
+- **Months 1-3**: Setup and initial transactions
+- **Months 4-6**: First evaluation checkpoint
+- **Months 7-9**: Adjustment and growth
+- **Months 10-12**: Full recognition assessment
 
-#### Setup Phase (Months 1-3)
+### Step 5: Launch and Grow
 
-1. **Platform configuration**
-   - Create bioregion profile on UBEC Protocol
-   - Set up participant onboarding process
-   - Configure initial token parameters
+#### Launch Activities
 
-2. **Participant recruitment**
-   - Onboard founding members
-   - Host launch events
-   - Activate communication channels
+1. **Public announcement**: Share with broader community
+2. **Onboarding sessions**: Help members get started
+3. **First transactions**: Demonstrate the system works
+4. **Celebration**: Honor the founding moment
 
-3. **Initial transactions**
-   - Facilitate first token exchanges
-   - Document successes and challenges
-   - Gather feedback and iterate
+#### First Year Priorities
 
-#### Growth Phase (Months 4-12)
-
-1. **Expand participation**
-   - Recruit additional Farmers, Communities, Activators
-   - Reach out to potential Living Labs
-   - Build critical mass (aim for 20-30 active participants)
-
-2. **Develop infrastructure**
-   - Establish regular gathering rhythms
-   - Create resource libraries
-   - Build local monitoring networks
-
-3. **Deepen economic integration**
-   - Increase transaction volume and diversity
-   - Develop specialized roles and services
-   - Create feedback loops between economic and environmental data
-
-4. **Strengthen governance**
-   - Establish working groups and committees
-   - Formalize decision-making processes
-   - Build conflict resolution capacity
-
-### Step 6: Sustain and Evolve
-
-#### Ongoing Bioregion Health
-
-Monitor and nurture:
-
-- **Participant satisfaction**: Are people getting value?
-- **Economic velocity**: Is the local economy strengthening?
-- **Environmental indicators**: Is the land improving?
-- **Social cohesion**: Are relationships deepening?
-- **Innovation**: Are new ideas emerging?
-
-#### Connection to Wider Network
-
-Your bioregion isn't isolated:
-
-- **Learn from other bioregions**: Share practices and lessons
-- **Inter-bioregional trade**: Exchange what you have surplus of
-- **Collective governance**: Participate in protocol-wide decisions
-- **Advocacy**: Represent bioregional economics in broader conversations
+- **Grow membership**: Aim for diverse participation
+- **Increase transactions**: Build economic activity
+- **Develop governance**: Refine decision-making through practice
+- **Document learning**: Capture what works and what doesn't
+- **Connect outward**: Build relationships with other bioregions
 
 ---
 
-## Token Economics in Bioregions
+## Bioregion Health Metrics
 
-### How Tokens Flow in Place
+### How Bioregions Are Evaluated
 
-Each of the four UBEC tokens serves specific functions within bioregional economies:
+The UBEC Protocol tracks bioregion health across five dimensions:
 
-#### 🌬️ UBEC (Air) - Universal Exchange
-- **Function**: General medium of exchange
-- **Circulation**: Moves freely within and between bioregions
-- **Use cases**: 
-  - Buying and selling goods/services
-  - Paying for labor and expertise
-  - General trade and commerce
+#### 1. **Participation Diversity**
+- Range of participant types (Farmers, Communities, Activators, Labs)
+- Geographic distribution within the bioregion
+- Demographic representation
+- Holonic level distribution
 
-#### 💧 UBECrc (Water) - Resource Conservation
-- **Function**: Reward for water stewardship and resource conservation
-- **Generation**: Earned through documented conservation practices
-- **Use cases**:
-  - Rainwater harvesting
-  - Watershed restoration
-  - Greywater systems
-  - Drought-resistant agriculture
+#### 2. **Economic Vitality**
+- Transaction volume and velocity
+- Token circulation patterns
+- Local multiplier effect
+- Import/export balance
 
-#### 🌍 UBECgpi (Earth) - Green Performance
-- **Function**: Incentive for environmental improvement
-- **Generation**: Earned through verified ecological regeneration
-- **Use cases**:
-  - Soil carbon sequestration
-  - Biodiversity restoration
-  - Renewable energy production
-  - Waste reduction
+#### 3. **Environmental Impact**
+- Monitoring data coverage
+- Regenerative practice adoption
+- Ecological indicator trends
+- Carbon sequestration estimates
 
-#### 🔥 UBECtt (Fire) - Time Trading
-- **Function**: Exchange of skills, labor, and services
-- **Generation**: Earned by contributing time and expertise
-- **Use cases**:
-  - Skill sharing and teaching
-  - Community work projects
-  - Mutual aid and reciprocity
-  - Knowledge transfer
-
-### Initial Token Allocation
-
-When a new bioregion launches, it receives an initial allocation:
-
-- **Community pool**: Tokens for collective projects and infrastructure
-- **Participant rewards**: Distributed to early adopters and active members
-- **Reserve**: Held for future growth and unexpected needs
-
-The specific amounts depend on:
-- Number of founding participants
-- Geographic scope
-- Proposed activities and economic focus
-
-### Earning Additional Tokens
-
-Beyond initial allocation, participants earn tokens through:
-
-1. **Economic activity**: Making trades and exchanges
-2. **Environmental stewardship**: Documented regenerative practices
-3. **Governance participation**: Attending meetings, making decisions
-4. **Network building**: Recruiting and mentoring new participants
-5. **Data contribution**: Providing monitoring information
-
----
-
-## Governance in Bioregions
-
-### Decision-Making Structures
-
-Each bioregion develops its own governance approach, but common patterns include:
-
-#### Consent-Based Governance
-- Decisions move forward unless someone has a principled objection
-- Focuses on "good enough for now, safe enough to try"
-- Emphasizes rapid iteration and learning
-
-#### Consensus Decision-Making
-- Everyone must actively agree for a decision to pass
-- Takes more time but builds strong alignment
-- Works well for smaller bioregions (under 30 active participants)
-
-#### Sociocratic Circles
-- Nested decision-making domains
-- Each circle has autonomy within its scope
-- Double-linking ensures information flows between levels
-
-#### Holonic Representation
-- Participants vote based on holonic level (weighted by contribution)
-- Exemplars and Integrators carry more weight than Observers
-- Incentivizes deep engagement and earned authority
-
-**Most bioregions blend multiple approaches** depending on the decision type.
-
-### What Bioregions Govern
-
-Typical areas of collective decision-making:
-
-- **Boundary adjustments**: If geographic scope needs refinement
-- **Participant admission**: Who can join and under what conditions
-- **Token parameters**: Local policies for token generation and use
-- **Project priorities**: What initiatives to pursue collectively
-- **Conflict resolution**: How to handle disputes
-- **Inter-bioregional relations**: Partnerships and trade agreements
-
-### What Bioregions DON'T Govern
-
-Bioregions do not control:
-
-- **Individual transactions**: People trade freely within protocol rules
-- **Core protocol rules**: Fundamental token mechanics are system-wide
-- **Personal land management**: What you do on your property (within ecological laws)
-- **Member privacy**: Financial and personal information remains confidential
-
----
-
-## Monitoring and Evaluation
-
-### Bioregion Health Metrics
-
-Track your bioregion's vitality across multiple dimensions:
-
-#### Economic Indicators
-- Transaction volume (total value exchanged)
-- Transaction velocity (how quickly tokens circulate)
-- Participant diversity (spread across categories and holonic levels)
-- Local retention (what percentage of value stays in the bioregion)
-
-#### Environmental Indicators
-- Soil health measurements
-- Water quality and availability
-- Biodiversity counts
-- Carbon sequestration rates
-- Renewable energy production
-
-#### Social Indicators
-- Participant satisfaction scores
-- Attendance at gatherings
-- Conflict resolution success rate
-- New participant recruitment and retention
-- Inter-generational engagement
-
-#### Governance Indicators
+#### 4. **Governance Health**
 - Decision-making participation rates
-- Time from proposal to decision
-- Proposal success/failure ratio
-- Representation across stakeholder groups
+- Conflict resolution effectiveness
+- Leadership rotation
+- Policy implementation success
 
-### Reporting and Transparency
+#### 5. **Network Connectivity**
+- Inter-bioregional relationships
+- Knowledge sharing activities
+- Collaborative projects
+- External partnerships
+
+### Data Sharing and Privacy
 
 Bioregions share aggregated, anonymized data with:
 
@@ -721,9 +524,9 @@ Periodically, bioregions gather for:
 As you join or establish a bioregion, support is available:
 
 #### UBEC Protocol Support
-- **Technical documentation**: [docs.ubec-protocol.org](https://docs.ubec-protocol.org)
-- **Platform support**: help@ubec-protocol.org
-- **Community forum**: Connect with other bioregions
+- **Technical documentation**: [bioregional.ubec.network/docs](https://bioregional.ubec.network/docs)
+- **Platform support**: help@ubec.network
+- **Community forum**: Connect with other bioregions at [community.ubec.network](https://community.ubec.network)
 
 #### Learning Resources
 - **Case studies**: Successful bioregion stories
@@ -762,9 +565,9 @@ As you join or establish a bioregion, support is available:
 
 ## Next Steps
 
-### If Joining an Existing Bioregion
+### Joining an Existing Bioregion
 
-1. ☑️ Find bioregions in your area using the UBEC map
+1. ☑️ Find bioregions in your area using the [UBEC Bioregional Mapping Service](https://mapservice.ubec.network/application)
 2. ☑️ Connect with local Community Activators
 3. ☑️ Choose your participation role
 4. ☑️ Complete role-specific onboarding
@@ -774,7 +577,7 @@ As you join or establish a bioregion, support is available:
 ### If Establishing a New Bioregion
 
 1. ☑️ Gather a core team (3-5 people)
-2. ☑️ [Map your bioregion boundaries →](UBEC_Bioregion_Mapping_Guide.md)
+2. ☑️ [Map your bioregion boundaries →](/docs/guides/bioregion-mapping-guide)
 3. ☑️ Conduct community listening sessions
 4. ☑️ Submit bioregion application
 5. ☑️ Launch with founding participants
@@ -801,30 +604,30 @@ As you step into this work, remember: you are part of a global movement of peopl
 
 ## Related Guides
 
-- [**Bioregion Mapping Guide** →](UBEC_Bioregion_Mapping_Guide.md) - **Using the UBEC Mapbender WMS Interface**
-- [Farmer Onboarding Guide →](farmer-guide.md)
-- [Community Onboarding Guide →](community-guide.md)
-- [Community Activator Guide →](activator-guide.md)
-- [Living Lab Guide →](livinglab-guide.md)
-- [Token System Guide →](token-guide.md)
-- [Complete UBEC Protocol Documentation →](index.md)
+- [**Bioregion Mapping Guide** →](/docs/guides/bioregion-mapping-guide) - Using the UBEC Mapbender WMS Interface
+- [Farmer Onboarding Guide →](/docs/guides/farmer-onboarding-guide)
+- [Community Onboarding Guide →](/docs/guides/community-onboarding-guide)
+- [Community Activator Guide →](/docs/guides/community-activator-guide)
+- [Living Lab Guide →](/docs/guides/living-lab-guide)
+- [Token Stories →](/stories)
+- [Complete UBEC Protocol Documentation →](/docs)
 
 ---
 
 ## Contact and Support
 
 **Questions about bioregions?**
-- Email: bioregions@ubec-protocol.org
-- Forum: [community.ubec-protocol.org](https://community.ubec-protocol.org)
-- Support: help@ubec-protocol.org
+- Email: bioregions@ubec.network
+- Forum: [community.ubec.network](https://community.ubec.network)
+- Support: hello@ubec.network
 
 ---
 
 *This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.*
 
-**UBEC Protocol** | Ubuntu Bioregional Economic Commons
+**UBEC DAO Protocol** | Ubuntu Bioregional Economic Commons
 *Building regenerative economies rooted in place and relationship*
 
 ---
 
-*Version 1.0 | Last updated: November 2025*
+*Version 1.1 | Last updated: November 2025*

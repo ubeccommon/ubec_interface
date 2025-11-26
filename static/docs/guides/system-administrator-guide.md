@@ -1,4 +1,4 @@
-# UBEC Protocol Suite - System Administrator Onboarding Guide
+# UBEC DAO Protocol Suite - System Administrator Onboarding Guide
 
 **Version:** 1.0  
 **Last Updated:** November 2, 2025  
@@ -9,7 +9,7 @@
 
 ## Document Overview
 
-This guide provides comprehensive onboarding for System Administrators responsible for deploying, operating, and maintaining the UBEC (Ubuntu Bioregional Economic Commons) Protocol Suite. This system implements a sophisticated blockchain-based economic platform built on the Stellar network with a four-element token ecosystem.
+This guide provides comprehensive onboarding for System Administrators responsible for deploying, operating, and maintaining the UBEC (Ubuntu Bioregional Economic Commons) DAO Protocol Suite. This system implements a sophisticated blockchain-based economic platform built on the Stellar network with a four-element token ecosystem.
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 

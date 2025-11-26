@@ -1,4 +1,4 @@
-# UBEC Protocol Suite - Technical Operator Onboarding Guide
+# UBEC DAO Protocol Suite - Technical Operator Onboarding Guide
 
 **Version:** 1.0  
 **Last Updated:** November 2, 2025  
@@ -9,7 +9,7 @@
 
 ## Document Overview
 
-This guide provides comprehensive technical onboarding for operators responsible for database management, blockchain operations, and system-level troubleshooting of the UBEC (Ubuntu Bioregional Economic Commons) Protocol Suite. This documentation assumes advanced technical knowledge and focuses on operational procedures, architecture internals, and hands-on troubleshooting.
+This guide provides comprehensive technical onboarding for operators responsible for database management, blockchain operations, and system-level troubleshooting of the UBEC (Ubuntu Bioregional Economic Commons) DAO Protocol Suite. This documentation assumes advanced technical knowledge and focuses on operational procedures, architecture internals, and hands-on troubleshooting.
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 

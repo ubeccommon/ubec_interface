@@ -4,15 +4,15 @@
 
 This guide is part of a comprehensive onboarding system:
 
-- **[Onboarding Overview](./UBEC_Onboarding_Overview.md)** - Common information for all beneficiaries
-- [Community Onboarding Guide](./UBEC_Community_Onboarding_Guide.md)
-- [Community Activator Onboarding Guide](./UBEC_Community_Activator_Onboarding_Guide.md)
-- [Living Lab Onboarding Guide](./UBEC_Living_Lab_Onboarding_Guide.md)
+- **[Onboarding Overview](/docs/guides/onboarding-overview)** - Common information for all beneficiaries
+- [Community Onboarding Guide](/docs/guides/community-onboarding-guide)
+- [Community Activator Guide](/docs/guides/community-activator-guide)
+- [Living Lab Guide](/docs/guides/living-lab-guide)
 
 **📚 Shared Resources:**
-- [Technical Setup: Creating Your Stellar Wallet](./UBEC_Onboarding_Overview.md#technical-setup-creating-your-stellar-wallet)
-- [Understanding Your Holonic Journey](./UBEC_Onboarding_Overview.md#understanding-your-holonic-journey)
-- [Support and Resources](./UBEC_Onboarding_Overview.md#support-and-resources)
+- [Technical Setup: Creating Your Stellar Wallet](/docs/guides/onboarding-overview#technical-setup-creating-your-stellar-wallet)
+- [Understanding Your Holonic Journey](/docs/guides/onboarding-overview#understanding-your-holonic-journey)
+- [Support and Resources](/docs/guides/onboarding-overview#support-and-resources)
 
 ---
 
@@ -174,10 +174,10 @@ This might be neighbors, local food advocates, other farmers, community leaders,
 ### Step 1: Initial Inquiry
 
 **How to Start:**
-- Visit the UBEC application portal [URL to be provided]
+- Visit the UBEC application portal at [apply.ubec.network](https://apply.ubec.network)
 - Fill out the initial interest form (basic contact info and farm overview)
 - Or: Ask a community member who's already in UBEC to refer you
-- Or: Contact UBEC directly via email [contact to be provided]
+- Or: Contact UBEC directly via email at beneficiaries@ubec.network
 
 **What Happens Next:**
 You'll receive a confirmation and an invitation to complete the full application.
@@ -252,103 +252,83 @@ The evaluation committee will seek input from your local community. This might i
 
 ### What's Happening
 
-Your application is reviewed by an Evaluation Committee composed of:
-- UBEC team members
-- Experienced regenerative farmers
-- Community organizers
-- Indigenous/traditional knowledge holders
-- Technical experts (soil scientists, permaculturists)
-- Regional representatives
+Your application will be evaluated by the UBEC Evaluation Committee on several dimensions:
 
-**They're Evaluating:**
-✓ Regenerative commitment and potential  
-✓ Scale appropriateness  
-✓ Community benefit  
-✓ Sustainability indicators  
-✓ Symbiotic relationships with ecosystem  
-✓ Alignment with UBEC values
+**Regenerative Potential (30%)**
+- Commitment to regenerative practices
+- Realistic transition plan
+- Ecosystem improvement potential
 
-### Possible Outcomes
+**Community Benefit (25%)**
+- Local food production impact
+- Knowledge sharing willingness
+- Community relationships
 
-**1. Full Approval ✅**
-- You meet all criteria
-- Token allocation amount determined
-- Move directly to agreement drafting
+**Viability (20%)**
+- Long-term sustainability
+- Realistic budget and timeline
+- Appropriate scale
 
-**2. Conditional Approval ⚠️**
-- You meet most criteria
-- Specific conditions must be met first
-- Token allocation upon meeting conditions
-- Support provided to meet conditions
+**Ubuntu Alignment (15%)**
+- Understanding of Ubuntu principles
+- Cooperative spirit
+- Generosity orientation
 
-**3. Deferred 🔄**
-- Promising but not quite ready
-- Specific guidance provided
-- Encouragement to reapply when ready
-- Often just needs more planning or preparation
-
-**4. Declined ❌**
-- Does not meet current criteria
-- Explanation provided
-- May include guidance for different paths
-- Can reapply after significant changes
+**Need & Impact (10%)**
+- Urgency of need
+- Potential impact of support
+- Efficient use of resources
 
 ### Timeline
 
-- **Application to Decision:** 30-60 days
-- You'll receive updates throughout the process
-- Can contact support for status checks
+- **Initial review:** 1-2 weeks after complete application
+- **Site assessment:** 1-2 weeks
+- **Community validation:** 1-2 weeks (concurrent)
+- **Committee decision:** 1 week
+- **Total:** Typically 30-60 days from complete application
 
-### If Approved: Next Steps
+### Possible Outcomes
 
-**Step 1: Agreement Drafting** (3-5 days)
-- UBEC drafts agreement detailing:
-  - Token allocation amount
-  - Expectations and responsibilities
-  - Milestones and timeline
-  - Reporting requirements
-  - Support available to you
+**Approved:**
+- Welcome to UBEC! 🎉
+- You'll receive your allocation and begin onboarding
+- Move to Phase 5
 
-**Step 2: Review and Questions** (5-7 days)
-- You review the agreement
-- Ask questions and seek clarifications
-- Negotiate if needed (reasonable adjustments possible)
-- Ensure you understand all terms
+**Approved with Modifications:**
+- Your application is strong but needs adjustments
+- Work with liaison to modify plan
+- Proceed when modifications are complete
 
-**Step 3: Agreement Signing** (1-2 days)
-- Digital signature process
-- Legal commitment by both parties
-- Copy provided for your records
+**Deferred:**
+- Not rejected, but not ready now
+- You'll receive feedback on what's needed
+- Reapply when circumstances change
 
-**Step 4: Technical Setup** (see detailed guide below)
-- Create your Stellar wallet if you haven't already
-- Establish trustlines for UBEC tokens
-- Verify your wallet address with UBEC
-
-**Step 5: Token Allocation** (3-7 days after wallet verification)
-- UBEC tokens transferred to your wallet
-- You receive confirmation
-- Tokens are now available for use
-
-**Total Time from Approval to Tokens:** 14-21 days
+**Not Approved:**
+- Doesn't mean you're not valued
+- Specific reasons will be provided
+- You may reapply after addressing concerns
+- Other pathways may be better suited
 
 ---
 
-## Phase 5: Your First 90 Days as a Funded Farmer
+## Phase 5: Your First 6 Months
 
-### Month 1: Getting Started
+### Week 1: Welcome & Setup
 
-**Week 1:**
-- [ ] Receive welcome packet and orientation materials
-- [ ] Set up your Stellar wallet (if not done already)
-- [ ] Join the farmer peer network (online forum/group)
-- [ ] Receive your first tokens
-- [ ] Create a simple plan for token use
+**You'll Receive:**
+- Official welcome communication
+- Your initial token allocation (transferred to your wallet)
+- Access to farmer community channels
+- Your dedicated liaison contact
+- Onboarding materials and resources
 
-**Week 2:**
-- [ ] Attend new farmer orientation (virtual or in-person)
-- [ ] Meet your support liaison
-- [ ] Make your first token transactions (practice with small amounts)
+**Your Actions:**
+- [ ] Confirm receipt of tokens in your Stellar wallet
+- [ ] Review all onboarding materials
+- [ ] Join farmer community channels
+- [ ] Introduce yourself to the community
+- [ ] Schedule first call with your liaison
 - [ ] Connect with nearby UBEC farmers
 
 **Week 3-4:**
@@ -592,7 +572,12 @@ Your application is reviewed by an Evaluation Committee composed of:
 
 ---
 
-<a name="community-onboarding"></a>
+## Related Guides
+
+- [Participation Guide](/docs/guides/participation-guide) - Overview of all pathways
+- [Token Holders Guide](/docs/guides/token-holders-guide) - Using UBEC tokens
+- [Community Organizer Guide](/docs/guides/community-organizer-guide) - Building local networks
+- [Onboarding Overview](/docs/guides/onboarding-overview) - Common information for all beneficiaries
 
 ---
 
@@ -602,4 +587,4 @@ This project uses the services of Claude and Anthropic PBC to inform our decisio
 
 ---
 
-**Return to [Onboarding Overview](./UBEC_Onboarding_Overview.md)**
+**Return to [Onboarding Overview](/docs/guides/onboarding-overview)** | **Return to [Participation Guide](/docs/guides/participation-guide)**

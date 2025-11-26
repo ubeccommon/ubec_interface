@@ -11,9 +11,10 @@ Attribution:
 """
 
 import logging
+import markdown
 from pathlib import Path
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,6 +50,9 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# Directory where guide markdown files are stored
+GUIDES_DIR = Path("static/docs/guides")
 
 @app.on_event("startup")
 async def startup_event():
@@ -261,6 +265,239 @@ async def dashboard(request: Request):
 @app.get("/docs", response_class=HTMLResponse, name="docs")
 async def docs(request: Request):
     return templates.TemplateResponse("docs.html", {"request": request, "page": "docs"})
+
+# ========================================================================
+# DOCUMENTATION GUIDES ROUTES
+# ========================================================================
+
+@app.get("/docs/guides/", response_class=HTMLResponse, name="guides_index")
+async def guides_index(request: Request):
+    """
+    Display an index of all available guides.
+    
+    Returns:
+        HTML page listing all available documentation guides
+    """
+    try:
+        guides = []
+        if GUIDES_DIR.exists():
+            for file in GUIDES_DIR.glob("*.md"):
+                # Parse filename to create friendly title
+                title = file.stem.replace("-", " ").replace("_", " ").title()
+                slug = file.stem
+                guides.append({
+                    "title": title,
+                    "slug": slug,
+                    "filename": file.name
+                })
+        
+        guides.sort(key=lambda x: x['title'])
+        
+        return templates.TemplateResponse(
+            "guides_index.html",
+            {
+                "request": request,
+                "guides": guides,
+                "page": "guides"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error loading guides index: {e}")
+        raise HTTPException(status_code=500, detail="Unable to load guides")
+
+
+@app.get("/docs/guides/{guide_slug}", response_class=HTMLResponse, name="guide_detail")
+async def guide_detail(request: Request, guide_slug: str):
+    """
+    Display a specific guide document.
+    
+    Args:
+        guide_slug: URL-friendly guide identifier (e.g., 'participation-guide')
+    
+    Returns:
+        Rendered HTML page with guide content
+    """
+    try:
+        # Construct file path
+        guide_file = GUIDES_DIR / f"{guide_slug}.md"
+        
+        if not guide_file.exists():
+            logger.warning(f"Guide not found: {guide_slug}")
+            raise HTTPException(status_code=404, detail=f"Guide '{guide_slug}' not found")
+        
+        # Read and convert markdown to HTML
+        with open(guide_file, 'r', encoding='utf-8') as f:
+            markdown_content = f.read()
+        
+        # Convert markdown to HTML with extensions
+        html_content = markdown.markdown(
+            markdown_content,
+            extensions=['extra', 'toc', 'codehilite', 'fenced_code']
+        )
+        
+        # Extract title from first heading or use slug
+        title = guide_slug.replace("-", " ").title()
+        if markdown_content.startswith('# '):
+            title = markdown_content.split('\n')[0].replace('# ', '')
+        
+        return templates.TemplateResponse(
+            "guide_detail.html",
+            {
+                "request": request,
+                "title": title,
+                "content": html_content,
+                "guide_slug": guide_slug,
+                "page": "guides"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error loading guide {guide_slug}: {e}")
+        raise HTTPException(status_code=500, detail="Unable to load guide")
+
+
+@app.get("/docs/guides/{guide_slug}/raw", response_class=FileResponse, name="guide_raw")
+async def guide_raw(guide_slug: str):
+    """
+    Download raw markdown file.
+    
+    Args:
+        guide_slug: URL-friendly guide identifier
+    
+    Returns:
+        Raw markdown file for download
+    """
+    try:
+        guide_file = GUIDES_DIR / f"{guide_slug}.md"
+        
+        if not guide_file.exists():
+            raise HTTPException(status_code=404, detail=f"Guide '{guide_slug}' not found")
+        
+        return FileResponse(
+            path=guide_file,
+            media_type='text/markdown',
+            filename=f"{guide_slug}.md"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading guide {guide_slug}: {e}")
+        raise HTTPException(status_code=500, detail="Unable to download guide")
+
+# ========================================================================
+# DOCUMENTATION SEARCH API
+# ========================================================================
+
+@app.get("/api/v1/docs/search", response_class=JSONResponse, name="docs_search")
+async def docs_search(q: str = "", limit: int = 10):
+    """
+    Search through documentation guides.
+    
+    Args:
+        q: Search query string
+        limit: Maximum number of results (default 10)
+    
+    Returns:
+        JSON array of matching documents with title, excerpt, and URL
+    """
+    if not q or len(q.strip()) < 2:
+        return {"results": [], "query": q, "message": "Query must be at least 2 characters"}
+    
+    query = q.lower().strip()
+    results = []
+    
+    try:
+        if not GUIDES_DIR.exists():
+            return {"results": [], "query": q, "message": "Guides directory not found"}
+        
+        for file in GUIDES_DIR.glob("*.md"):
+            try:
+                with open(file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                content_lower = content.lower()
+                
+                # Check if query matches
+                if query in content_lower:
+                    # Extract title from first heading
+                    lines = content.split('\n')
+                    title = file.stem.replace("-", " ").replace("_", " ").title()
+                    for line in lines:
+                        if line.startswith('# '):
+                            title = line.replace('# ', '').strip()
+                            break
+                    
+                    # Find excerpt with context around the match
+                    excerpt = ""
+                    match_pos = content_lower.find(query)
+                    if match_pos != -1:
+                        # Get surrounding context (100 chars before and 150 after)
+                        start = max(0, match_pos - 100)
+                        end = min(len(content), match_pos + len(query) + 150)
+                        
+                        # Find word boundaries
+                        if start > 0:
+                            while start > 0 and content[start] not in ' \n\t':
+                                start -= 1
+                            start += 1
+                        
+                        if end < len(content):
+                            while end < len(content) and content[end] not in ' \n\t':
+                                end += 1
+                        
+                        excerpt = content[start:end].strip()
+                        excerpt = ' '.join(excerpt.split())  # Normalize whitespace
+                        excerpt = excerpt.replace('#', '').strip()
+                        
+                        if start > 0:
+                            excerpt = "..." + excerpt
+                        if end < len(content):
+                            excerpt = excerpt + "..."
+                    
+                    # Count occurrences for relevance scoring
+                    occurrences = content_lower.count(query)
+                    
+                    # Check if match is in title (higher relevance)
+                    title_match = query in title.lower()
+                    
+                    results.append({
+                        "title": title,
+                        "slug": file.stem,
+                        "url": f"/docs/guides/{file.stem}",
+                        "excerpt": excerpt[:300] if excerpt else "",
+                        "relevance": occurrences + (10 if title_match else 0)
+                    })
+                    
+            except Exception as e:
+                logger.warning(f"Error reading guide {file.name}: {e}")
+                continue
+        
+        # Sort by relevance (title matches first, then by occurrence count)
+        results.sort(key=lambda x: x["relevance"], reverse=True)
+        
+        # Limit results
+        results = results[:limit]
+        
+        # Remove relevance score from output
+        for r in results:
+            del r["relevance"]
+        
+        return {
+            "results": results,
+            "query": q,
+            "count": len(results)
+        }
+        
+    except Exception as e:
+        logger.error(f"Search error: {e}")
+        return {"results": [], "query": q, "error": str(e)}
+
+# ========================================================================
+# API ROUTES AND SYSTEM ENDPOINTS
+# ========================================================================
 
 app.include_router(api_router, prefix="/api/v1", tags=["api"])
 
