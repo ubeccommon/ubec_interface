@@ -1,10 +1,14 @@
 """
-API Routes v1.2.0 - Token Audit Endpoint (Backend API v2.5.5)
-=============================================================
+API Routes v1.3.0 - Liquidity Pools Endpoint (Backend API v2.5.6)
+=================================================================
 
 Frontend API routes that proxy to backend protocol server.
 
-NEW IN v1.2.0 - TOKEN AUDIT:
+NEW IN v1.3.0 - LIQUIDITY POOLS:
+- /liquidity-pools - Get all UBEC liquidity pools
+- /liquidity-pools?token_code=UBEC - Filter by specific token
+
+MAINTAINED v1.2.0 - TOKEN AUDIT:
 - /token-audit - Get UBEC token audit (default)
 - /token-audit/{token_code} - Get specific token audit (UBEC, UBECrc, UBECgpi, UBECtt)
 
@@ -535,6 +539,33 @@ async def get_token_audit(
     except Exception as e:
         logger.error(f"Error fetching token audit: {e}")
         raise HTTPException(status_code=500, detail="Unable to fetch token audit")
+
+@router.get("/liquidity-pools", response_class=JSONResponse, summary="Get liquidity pools")
+async def get_liquidity_pools(
+    token_code: Optional[str] = Query(None, description="Filter by token (UBEC, UBECrc, UBECgpi, UBECtt)"),
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get UBEC liquidity pool details from Stellar DEX.
+    
+    NEW v2.5.6: Comprehensive liquidity pool endpoint
+    
+    Query Parameters:
+        - token_code: Optional filter by token (UBEC, UBECrc, UBECgpi, UBECtt)
+    
+    Returns:
+        Liquidity pool data including:
+        - pools: Array of pool objects with pair, reserves, participants, fees
+        - summary: Aggregate stats (total_pools, total_value_locked, pools_by_token)
+        - filter_applied: Which token filter was used (if any)
+        - timestamp: Response timestamp
+    """
+    try:
+        pools = await client.get_liquidity_pools(token_code=token_code)
+        return pools
+    except Exception as e:
+        logger.error(f"Error fetching liquidity pools: {e}")
+        raise HTTPException(status_code=500, detail="Unable to fetch liquidity pools")
 
 # ========================================================================
 # SYSTEM ENDPOINTS

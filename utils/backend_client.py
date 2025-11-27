@@ -694,6 +694,38 @@ class BackendAPIClient:
         """
         return await self._cached_get(f"/api/v1/token-audit/{token_code.upper()}", ttl=60)
     
+    async def get_liquidity_pools(self, token_code: str = None) -> Dict:
+        """
+        Get liquidity pool information for UBEC tokens.
+        
+        NEW v2.5.6: Liquidity pools overview endpoint
+        
+        Args:
+            token_code: Optional filter by token (UBEC, UBECrc, UBECgpi, UBECtt)
+        
+        Returns:
+            Dictionary containing:
+            - pools: List of pool objects with:
+                - id: Stellar pool ID (64-byte hex)
+                - pair: Human-readable pair name (e.g., UBEC/XLM)
+                - token_code: Which UBEC token
+                - element: Element classification
+                - ubec_position: Whether UBEC is asset_a or asset_b
+                - asset_a/asset_b: Asset details (code, issuer)
+                - reserves: Current reserve amounts
+                - total_shares: Total pool shares
+                - balance: Total UBEC in pool
+                - fee_bp: Trading fee in basis points
+                - trustline_count: Number of trustlines
+                - participant_count: Number of LP owners
+            - summary: Aggregate stats (total_pools, total_value_locked, pools_by_token)
+            - filter_applied: Which token filter was used
+            - timestamp: When this data was retrieved
+        """
+        if token_code:
+            return await self._cached_get(f"/api/v1/liquidity-pools?token_code={token_code.upper()}", ttl=60)
+        return await self._cached_get("/api/v1/liquidity-pools", ttl=60)
+    
     # ========================================================================
     # HEALTH CHECK
     # ========================================================================

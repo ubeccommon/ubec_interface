@@ -132,15 +132,46 @@
                                             </a>
                                         </td>
                                         <td><span class="badge tx-{{ (op.get('type', 'UNKNOWN') or 'UNKNOWN')|lower|replace('_', '-') }}">{{ op.get('type', 'UNKNOWN') or 'UNKNOWN' }}</span></td>
-                                        {# Handle trade operations with exchange details #}
-                                        {% if op.get('is_trade') and op.get('trade_summary') %}
-                                        <td class="trade-info" colspan="2">
-                                            <span class="trade-summary">{{ op.get('trade_summary', '') }}</span>
+                                        
+                                        {# Token column - show pair for trades only if we have exact data #}
+                                        {% set op_type = op.get('type', '')|upper %}
+                                        {% set is_trade_op = op_type in ['MANAGE_BUY_OFFER', 'MANAGE_SELL_OFFER', 'PATH_PAYMENT_STRICT_SEND', 'PATH_PAYMENT_STRICT_RECEIVE'] %}
+                                        {% set exchange = op.get('exchange', {}) or {} %}
+                                        {% set source_asset = exchange.get('source_asset') %}
+                                        {% set dest_asset = exchange.get('dest_asset') %}
+                                        
+                                        <td class="token-cell">
+                                            {% if is_trade_op and source_asset and dest_asset %}
+                                                {# Trade with complete exchange data - show exact pair #}
+                                                <span class="token-badge token-{{ source_asset|lower }}">{{ source_asset }}</span>
+                                                <span class="swap-arrow">⇄</span>
+                                                <span class="token-badge token-{{ dest_asset|lower }}">{{ dest_asset }}</span>
+                                            {% else %}
+                                                {# Single token (regular op or trade without exchange data) #}
+                                                <span class="token-badge token-{{ (op.get('asset_code', 'XLM') or 'XLM')|lower }}">{{ op.get('asset_code', 'XLM') or 'XLM' }}</span>
+                                            {% endif %}
                                         </td>
-                                        {% else %}
-                                        <td><span class="token-badge token-{{ (op.get('asset_code', 'XLM') or 'XLM')|lower }}">{{ op.get('asset_code', 'XLM') or 'XLM' }}</span></td>
-                                        <td class="amount">{{ "{:,.2f}".format(op.get('amount', 0) or 0) }}</td>
-                                        {% endif %}
+                                        
+                                        {# Amount column - handle different operation types #}
+                                        <td class="amount">
+                                            {% set amount = op.get('amount', 0) or 0 %}
+                                            {% set source_amount = exchange.get('source_amount') %}
+                                            {% set dest_amount = exchange.get('dest_amount') %}
+                                            
+                                            {% if op_type == 'CHANGE_TRUST' %}
+                                                {# CHANGE_TRUST: show trustline action, not the max amount #}
+                                                <span class="trustline-action">Trustline Set</span>
+                                            {% elif is_trade_op and source_amount and dest_amount %}
+                                                {# Trade with full exchange amounts #}
+                                                <span class="trade-amounts">{{ "{:,.2f}".format(source_amount) }} → {{ "{:,.2f}".format(dest_amount) }}</span>
+                                            {% elif amount > 0 and amount < 900000000000 %}
+                                                {# Normal amount (filter out max trustline values) #}
+                                                {{ "{:,.2f}".format(amount) }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        
                                         <td class="direction">
                                             {% set from_acct = op.get('from_account', '') or '' %}
                                             {% set to_acct = op.get('to_account', '') or '' %}
@@ -557,11 +588,15 @@
                 <table class="audit-table lp-breakdown">
                     <tbody>
                         <tr>
-                            <td class="purpose-cell" colspan="2">Amount of {{ token.get('code', 'UBEC') }}s unlocked in liquidity pools:</td>
+                            <td class="purpose-cell" colspan="2"><em>Stewardship Liquidity Pool position breakdown:</em></td>
+                            <td class="balance-cell"></td>
+                        </tr>
+                        <tr>
+                            <td class="purpose-cell" colspan="2">└ Available (unlocked):</td>
                             <td class="balance-cell">{{ "{:,.7f}".format(lp_summary.get('stewardship_lp_unlocked', 0)) }}</td>
                         </tr>
                         <tr>
-                            <td class="purpose-cell" colspan="2">Amount of {{ token.get('code', 'UBEC') }}s locked in liquidity pools:</td>
+                            <td class="purpose-cell" colspan="2">└ Deposited in pools (locked):</td>
                             <td class="balance-cell">{{ "{:,.7f}".format(lp_summary.get('stewardship_lp_locked', 0)) }}</td>
                         </tr>
                     </tbody>
@@ -600,41 +635,146 @@
                 </table>
             </div>
             
-            <!-- Disclaimer -->
-            {% if token_audit.get('disclaimer') %}
+            {% endif %}
+        </div>
+    </section>
+    
+    <!-- ================================================================
+         LIQUIDITY POOLS OVERVIEW
+         Shows all DEX liquidity pools with UBEC token pairings
+         ================================================================ -->
+    {% if liquidity_pools %}
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">💧 Liquidity Pools Overview</h2>
+            <p class="section-description">
+                UBEC tokens available for trading on Stellar DEX through liquidity pools
+            </p>
+            
+            {% set lp_summary = liquidity_pools.get('summary', {}) %}
+            {% set pools = liquidity_pools.get('pools', []) %}
+            
+            {# Calculate total participants from all pools #}
+            {% set total_participants = namespace(value=0) %}
+            {% for pool in pools %}
+                {% set total_participants.value = total_participants.value + pool.get('participant_count', 0) %}
+            {% endfor %}
+            
+            <!-- LP Summary Cards -->
+            <div class="lp-summary-grid">
+                <div class="lp-summary-card">
+                    <div class="lp-summary-icon">🏊</div>
+                    <div class="lp-summary-value">{{ lp_summary.get('total_pools', 0) }}</div>
+                    <div class="lp-summary-label">Active Pools</div>
+                </div>
+                <div class="lp-summary-card">
+                    <div class="lp-summary-icon">🔒</div>
+                    <div class="lp-summary-value">{{ "{:,.2f}".format(lp_summary.get('total_value_locked', 0)) }}</div>
+                    <div class="lp-summary-label">Total UBEC Locked</div>
+                </div>
+                <div class="lp-summary-card">
+                    <div class="lp-summary-icon">👥</div>
+                    <div class="lp-summary-value">{{ total_participants.value }}</div>
+                    <div class="lp-summary-label">LP Positions</div>
+                </div>
+            </div>
+            
+            <!-- Pools Table -->
+            <div class="audit-section">
+                <div class="audit-header">
+                    <span class="audit-title">Token Pairs & Reserves</span>
+                    <span class="audit-total">{{ pools|length }} pools with UBEC tokens</span>
+                </div>
+                <table class="audit-table lp-pools-table">
+                    <thead>
+                        <tr>
+                            <th>Trading Pair</th>
+                            <th>Token</th>
+                            <th>UBEC Reserve</th>
+                            <th>Paired Asset Reserve</th>
+                            <th>Participants</th>
+                            <th>Fee</th>
+                            <th>Pool ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pool in pools %}
+                        {# Determine which reserve is UBEC based on ubec_position #}
+                        {% set ubec_pos = pool.get('ubec_position', 'a') %}
+                        {% set reserves = pool.get('reserves', {}) %}
+                        {% if ubec_pos == 'a' %}
+                            {% set ubec_reserve = reserves.get('asset_a', 0) %}
+                            {% set pair_reserve = reserves.get('asset_b', 0) %}
+                            {% set pair_asset = pool.get('asset_b', {}) %}
+                        {% else %}
+                            {% set ubec_reserve = reserves.get('asset_b', 0) %}
+                            {% set pair_reserve = reserves.get('asset_a', 0) %}
+                            {% set pair_asset = pool.get('asset_a', {}) %}
+                        {% endif %}
+                        {% set pool_id = pool.get('id', '') %}
+                        {% set pool_id_short = pool_id[:8] ~ '...' ~ pool_id[-8:] if pool_id|length > 20 else pool_id %}
+                        <tr>
+                            <td class="pair-cell">
+                                <span class="pair-badge">{{ pool.get('pair', 'Unknown') }}</span>
+                            </td>
+                            <td class="token-cell">{{ pool.get('token_code', 'UBEC') }}</td>
+                            <td class="balance-cell">{{ "{:,.4f}".format(ubec_reserve) }}</td>
+                            <td class="balance-cell">
+                                {{ "{:,.4f}".format(pair_reserve) }}
+                                <span class="asset-code">{{ pair_asset.get('code', '') }}</span>
+                            </td>
+                            <td class="center-cell">{{ pool.get('participant_count', 0) }}</td>
+                            <td class="center-cell">{{ "%.2f"|format(pool.get('fee_bp', 30) / 100) }}%</td>
+                            <td class="pool-id-cell">
+                                <a href="https://stellar.expert/explorer/public/liquidity-pool/{{ pool_id }}" 
+                                   target="_blank" rel="noopener noreferrer" title="{{ pool_id }}">
+                                    {{ pool_id_short }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="no-data">No liquidity pools found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pools by Token Summary -->
+            {% set pools_by_token = lp_summary.get('pools_by_token', {}) %}
+            {% if pools_by_token %}
+            <div class="pools-by-token">
+                <strong>Pools by Token:</strong>
+                {% for token, count in pools_by_token.items() %}
+                <span class="token-count-badge">{{ token }}: {{ count }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <p class="lp-note">
+                <em>💡 Liquidity pools enable decentralized trading on the Stellar DEX. 
+                Liquidity providers deposit token pairs and earn trading fees.</em>
+            </p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Disclaimer (moved after LP section) -->
+    {% if token_audit and token_audit.get('disclaimer') %}
+    <section class="section" style="padding: 1rem 0;">
+        <div class="container">
             <div class="audit-disclaimer">
                 <h4>Disclaimer</h4>
                 <p>{{ token_audit.get('disclaimer', '') }}</p>
             </div>
-            {% endif %}
-            
-            {% else %}
-            <!-- Fallback: Show static distribution model -->
-            <div class="distribution-grid">
-                <div class="distribution-card">
-                    <h4>Distribution Model</h4>
-                    <p class="distribution-model">65 / 30 / 5</p>
-                    <div class="distribution-breakdown">
-                        <div class="breakdown-item">
-                            <span class="breakdown-label">Community Circulation</span>
-                            <span class="breakdown-value">65%</span>
-                        </div>
-                        <div class="breakdown-item">
-                            <span class="breakdown-label">Stewardship Reserve</span>
-                            <span class="breakdown-value">30%</span>
-                        </div>
-                        <div class="breakdown-item">
-                            <span class="breakdown-label">Administration</span>
-                            <span class="breakdown-value">5%</span>
-                        </div>
-                    </div>
-                    <p class="audit-note">Full token audit loading...</p>
-                </div>
-            </div>
-            {% endif %}
         </div>
-        
-        <!-- Auto-refresh notification -->
+    </section>
+    {% endif %}
+
+<!-- Auto-refresh notification -->
+<section class="section" style="padding: 1rem 0;">
+    <div class="container">
         <div class="auto-refresh-notice">
             <span class="refresh-icon">🔄</span>
             Dashboard refreshes automatically every 30 seconds
@@ -977,6 +1117,28 @@
         color: #6c757d;
     }
     
+    .trustline-action {
+        font-size: 0.85em;
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    .token-cell {
+        white-space: nowrap;
+    }
+    
+    .swap-arrow {
+        color: #6c757d;
+        margin: 0 0.25rem;
+        font-size: 0.9em;
+    }
+    
+    .trade-amounts {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #495057;
+    }
+    
     /* Direction Column */
     .direction {
         font-family: 'Courier New', monospace;
@@ -1225,6 +1387,7 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         margin-bottom: 1.5rem;
         overflow: hidden;
+        scroll-margin-top: 100px; /* Prevent navbar overlap when scrolling */
     }
     
     .audit-section.issuer-section {
@@ -1348,6 +1511,21 @@
         color: #6c757d;
     }
     
+    .lp-total-row {
+        background: #e8f5e9;
+        border-top: 2px solid #8BC34A;
+    }
+    
+    .lp-total-row td {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    .lp-total-row td.purpose-cell {
+        font-style: normal;
+        color: #2e7d32;
+    }
+    
     /* Auto-refresh Notice */
     .auto-refresh-notice {
         text-align: center;
@@ -1443,6 +1621,132 @@
         background: #a1a1a1;
     }
     
+    /* Liquidity Pools Section */
+    .lp-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .lp-summary-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .lp-summary-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .lp-summary-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+    
+    .lp-summary-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .lp-pools-table th {
+        white-space: nowrap;
+    }
+    
+    .pair-cell {
+        font-weight: 600;
+    }
+    
+    .pair-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #8BC34A 0%, #4FC3F7 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .token-cell {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .center-cell {
+        text-align: center;
+    }
+    
+    .asset-code {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-left: 0.25rem;
+    }
+    
+    .pool-id-cell {
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+    }
+    
+    .pool-id-cell a {
+        color: #8BC34A;
+        text-decoration: none;
+    }
+    
+    .pool-id-cell a:hover {
+        color: #689F38;
+        text-decoration: underline;
+    }
+    
+    .lp-note {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .pools-by-token {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .pools-by-token strong {
+        color: #495057;
+    }
+    
+    .token-count-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #8BC34A 0%, #689F38 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .no-data {
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        padding: 2rem !important;
+    }
+    
     /* Responsive Design */
     @media (max-width: 1200px) {
         .geo-overview-grid {
@@ -1473,6 +1777,14 @@
         
         .geo-stats-grid {
             grid-template-columns: 1fr !important;
+        }
+        
+        .lp-summary-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .lp-pools-table {
+            font-size: 0.85rem;
         }
     }
 </style>

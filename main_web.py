@@ -153,6 +153,7 @@ async def dashboard(request: Request):
         "recent_transactions": [],
         "distribution_stats": None,
         "token_audit": None,
+        "liquidity_pools": None,
         "ecoregions": None,
         "watersheds": None,
         "page": "dashboard"
@@ -254,6 +255,19 @@ async def dashboard(request: Request):
             logger.info("Loaded token audit data")
         except Exception as e:
             logger.warning(f"Could not fetch token audit: {e}")
+        
+        # ============================================================
+        # LIQUIDITY POOLS - DEX pool information
+        # Backend endpoint /api/v1/liquidity-pools (v2.5.6+)
+        # ============================================================
+        try:
+            raw_lp_data = await client.get_liquidity_pools()
+            context["liquidity_pools"] = raw_lp_data
+            pool_count = len(raw_lp_data.get('pools', [])) if raw_lp_data else 0
+            logger.info(f"Loaded {pool_count} liquidity pools")
+        except Exception as e:
+            logger.warning(f"Could not fetch liquidity pools: {e}")
+            context["liquidity_pools"] = None
         
         # ============================================================
         # ECOREGIONS - FIXED FIELD MAPPING
