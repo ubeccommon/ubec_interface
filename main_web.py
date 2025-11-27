@@ -4,6 +4,10 @@ UBEC Protocol Web Interface - Main Application
 
 Production version with all field mappings corrected for actual backend API.
 
+FIXED v2.5.2: Transactions now pass raw API response with operations array
+- Template handles operations directly (type, asset_code, amount, from/to)
+- Previously was using operation_count as amount (bug)
+
 Attribution:
     This project uses the services of Claude and Anthropic PBC to inform 
     our decisions and recommendations. This project was made possible with 
@@ -69,7 +73,50 @@ async def shutdown_event():
 
 @app.get("/", response_class=HTMLResponse, name="home")
 async def home(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request, "page": "home"})
+    """Home page with live token and network data from backend API."""
+    context = {
+        "request": request,
+        "page": "home",
+        "tokens": [],
+        "network": {
+            "participants": 0,
+            "bioregions": 0,
+            "transactions": 0,
+            "health": "unknown"
+        },
+        "total_holders": 0
+    }
+    
+    try:
+        client = await get_backend_client()
+        
+        # Fetch token data
+        try:
+            tokens_response = await client.get_all_tokens()
+            # get_all_tokens() returns a list directly (extracts from {"tokens": [...]})
+            if tokens_response and isinstance(tokens_response, list):
+                context["tokens"] = tokens_response
+                # Calculate total unique holders across all tokens
+                context["total_holders"] = sum(
+                    t.get('holder_count', 0) for t in context["tokens"]
+                )
+                logger.info(f"Loaded {len(context['tokens'])} tokens")
+        except Exception as e:
+            logger.warning(f"Could not fetch tokens: {e}")
+        
+        # Fetch network status
+        try:
+            network_response = await client.get_network_status()
+            if network_response and isinstance(network_response, dict):
+                context["network"] = network_response.get('network', context["network"])
+                logger.info(f"Network: {context['network'].get('participants', 0)} participants")
+        except Exception as e:
+            logger.warning(f"Could not fetch network status: {e}")
+            
+    except Exception as e:
+        logger.error(f"Error fetching home page data: {e}")
+    
+    return templates.TemplateResponse("home.html", context)
 
 @app.get("/stories", response_class=HTMLResponse, name="stories")
 async def stories(request: Request):
@@ -105,6 +152,7 @@ async def dashboard(request: Request):
         "holonic_scores": None,
         "recent_transactions": [],
         "distribution_stats": None,
+        "token_audit": None,
         "ecoregions": None,
         "watersheds": None,
         "page": "dashboard"
@@ -136,39 +184,51 @@ async def dashboard(request: Request):
             logger.warning(f"Could not fetch network status: {e}")
         
         # ============================================================
-        # HOLONIC SCORES - DISABLED DUE TO DATA STRUCTURE MISMATCH
+        # HOLONIC SCORES - Transform backend response to template format
+        # Backend: ubuntu_principles.{diversity,reciprocity,mutualism,regeneration}.average
+        # Template: flat structure with percentage-ready values
         # ============================================================
         try:
-            raw_holonic_response = await client.get_holonic_scores(limit=5)
-            # Backend returns ubuntu_principles with nested dict values
-            # Template expects numeric values, so we skip this for now
-            # TODO: Update when backend provides numeric scores
-            context["holonic_scores"] = None
-            logger.debug("Holonic scores temporarily disabled")
+            raw_holonic_response = await client.get_holonic_scores(limit=50)
+            if raw_holonic_response and isinstance(raw_holonic_response, dict):
+                principles = raw_holonic_response.get('ubuntu_principles', {})
+                
+                # Extract averages from nested structure
+                diversity = principles.get('diversity', {}).get('average', 0) or 0
+                reciprocity = principles.get('reciprocity', {}).get('average', 0) or 0
+                mutualism = principles.get('mutualism', {}).get('average', 0) or 0
+                regeneration = principles.get('regeneration', {}).get('average', 0) or 0
+                
+                # Calculate overall health as weighted average
+                overall = (diversity + reciprocity + mutualism + regeneration) / 4
+                
+                # Transform to template-expected format
+                context["holonic_scores"] = {
+                    "overall_network_health": overall,
+                    "autonomy_integration": diversity,      # Diversity maps to autonomy
+                    "ubuntu_alignment": diversity,          # Use diversity as ubuntu alignment
+                    "reciprocity_health": reciprocity,
+                    "mutualism_capacity": mutualism,
+                    "regeneration_impact": regeneration,
+                    "account_count": raw_holonic_response.get('account_count', 0)
+                }
+                logger.info(f"Loaded holonic scores: overall={overall:.2%}")
+            else:
+                context["holonic_scores"] = None
         except Exception as e:
             logger.warning(f"Could not fetch holonic scores: {e}")
         
         # ============================================================
-        # TRANSACTIONS - FIXED FIELD MAPPING
+        # TRANSACTIONS - Pass raw API response for v2.5.2 format
+        # Template handles the operations array directly
         # ============================================================
         try:
             raw_transactions_response = await client.get_recent_transactions(limit=20)
             if raw_transactions_response and isinstance(raw_transactions_response, dict):
-                transactions = raw_transactions_response.get('transactions', [])
-                recent_transactions = []
-                for tx in transactions[:10]:
-                    involves_tokens = tx.get('involves_tokens', [])
-                    token = involves_tokens[0] if involves_tokens else 'XLM'
-                    tx_type = 'payment' if involves_tokens else 'transfer'
-                    recent_transactions.append({
-                        'hash': tx.get('transaction_hash', ''),
-                        'timestamp': tx.get('created_at', ''),
-                        'amount': float(tx.get('operation_count', 0)),
-                        'type': tx_type,
-                        'token': token
-                    })
-                context["recent_transactions"] = recent_transactions
-                logger.info(f"Loaded {len(recent_transactions)} transactions")
+                # Pass the full response - template handles transactions array with operations
+                context["recent_transactions"] = raw_transactions_response
+                tx_count = len(raw_transactions_response.get('transactions', []))
+                logger.info(f"Loaded {tx_count} transactions with operations")
             else:
                 context["recent_transactions"] = []
         except Exception as e:
@@ -183,6 +243,17 @@ async def dashboard(request: Request):
             context["distribution_stats"] = raw_distribution
         except Exception as e:
             logger.warning(f"Could not fetch distribution stats: {e}")
+        
+        # ============================================================
+        # TOKEN AUDIT - Real wallet balances for transparency
+        # Backend endpoint /api/v1/token-audit (v2.5.5+)
+        # ============================================================
+        try:
+            raw_audit = await client.get_token_audit(token_code="UBEC")
+            context["token_audit"] = raw_audit
+            logger.info("Loaded token audit data")
+        except Exception as e:
+            logger.warning(f"Could not fetch token audit: {e}")
         
         # ============================================================
         # ECOREGIONS - FIXED FIELD MAPPING

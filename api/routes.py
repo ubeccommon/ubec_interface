@@ -1,8 +1,22 @@
 """
-API Routes
-==========
+API Routes v1.2.0 - Token Audit Endpoint (Backend API v2.5.5)
+=============================================================
 
 Frontend API routes that proxy to backend protocol server.
+
+NEW IN v1.2.0 - TOKEN AUDIT:
+- /token-audit - Get UBEC token audit (default)
+- /token-audit/{token_code} - Get specific token audit (UBEC, UBECrc, UBECgpi, UBECtt)
+
+UPDATED v1.1.1 - TRANSACTIONS v2.5.2:
+- /transactions/recent now returns operation-level details
+- Includes trade_summary for DEX operations
+- Full operation array per transaction
+
+NEW IN v1.1.0 - BBOX ENDPOINTS:
+- /bioregions/{bioregion_id}/bbox - Get bioregion bounding box for map zoom
+- /ecoregions/{eco_id}/bbox - Get ecoregion bounding box for map zoom
+- /watersheds/{feow_id}/bbox - Get watershed bounding box for map zoom
 
 This module implements:
     - Principle #3: Service pattern with centralized execution
@@ -209,6 +223,37 @@ async def get_bioregion_health(
         logger.error(f"Error fetching bioregion health {bioregion_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Unable to fetch bioregion health")
 
+
+@router.get("/bioregions/{bioregion_id}/bbox", response_class=JSONResponse, summary="Get bioregion bounding box")
+async def get_bioregion_bbox(
+    bioregion_id: int,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get bounding box coordinates for a specific bioregion.
+    
+    Useful for map centering and zoom calculations.
+    
+    Args:
+        bioregion_id: Bioregion GID identifier
+        
+    Returns:
+        Dictionary containing:
+        - gid: Bioregion identifier
+        - bioregion_name: Name of the bioregion
+        - bioregion_code: Bioregion code
+        - bbox: Bounding box with min_lon, min_lat, max_lon, max_lat
+        - centroid: Center point coordinates (lon, lat)
+        - area_sqkm: Area in square kilometers
+        - srid: Spatial Reference ID (4326 = WGS84)
+    """
+    try:
+        bbox_data = await client.get_bioregion_bbox(bioregion_id)
+        return bbox_data
+    except Exception as e:
+        logger.error(f"Error fetching bioregion bbox {bioregion_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Unable to fetch bioregion bounding box")
+
 # ========================================================================
 # ECOREGION ENDPOINTS
 # ========================================================================
@@ -260,6 +305,38 @@ async def get_ecoregion(
         logger.error(f"Error fetching ecoregion {eco_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Unable to fetch ecoregion {eco_id}")
 
+
+@router.get("/ecoregions/{eco_id}/bbox", response_class=JSONResponse, summary="Get ecoregion bounding box")
+async def get_ecoregion_bbox(
+    eco_id: int,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get bounding box coordinates for a specific ecoregion.
+    
+    Useful for map centering and zoom calculations.
+    
+    Args:
+        eco_id: Ecoregion eco_id from WWF Ecoregions 2017 dataset
+        
+    Returns:
+        Dictionary containing:
+        - eco_id: Ecoregion identifier
+        - eco_name: Name of the ecoregion
+        - biome_name: Associated biome name
+        - realm: Biogeographic realm
+        - bbox: Bounding box with min_lon, min_lat, max_lon, max_lat
+        - centroid: Center point coordinates (lon, lat)
+        - shape_area: Area from source dataset
+        - srid: Spatial Reference ID (4326 = WGS84)
+    """
+    try:
+        bbox_data = await client.get_ecoregion_bbox(eco_id)
+        return bbox_data
+    except Exception as e:
+        logger.error(f"Error fetching ecoregion bbox {eco_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Unable to fetch ecoregion bounding box")
+
 # ========================================================================
 # WATERSHED ENDPOINTS
 # ========================================================================
@@ -309,6 +386,36 @@ async def get_watershed(
         logger.error(f"Error fetching watershed {feow_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Unable to fetch watershed {feow_id}")
 
+
+@router.get("/watersheds/{feow_id}/bbox", response_class=JSONResponse, summary="Get watershed bounding box")
+async def get_watershed_bbox(
+    feow_id: int,
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get bounding box coordinates for a specific watershed.
+    
+    Useful for map centering and zoom calculations.
+    
+    Args:
+        feow_id: FEOW watershed identifier from HydroSHEDS dataset
+        
+    Returns:
+        Dictionary containing:
+        - feow_id: Watershed identifier
+        - name: Generated watershed name
+        - bbox: Bounding box with min_lon, min_lat, max_lon, max_lat
+        - centroid: Center point coordinates (lon, lat)
+        - area_sqkm: Area in square kilometers
+        - srid: Spatial Reference ID (4326 = WGS84)
+    """
+    try:
+        bbox_data = await client.get_watershed_bbox(feow_id)
+        return bbox_data
+    except Exception as e:
+        logger.error(f"Error fetching watershed bbox {feow_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Unable to fetch watershed bounding box")
+
 # ========================================================================
 # HOLONIC EVALUATION ENDPOINTS
 # ========================================================================
@@ -352,13 +459,20 @@ async def get_recent_transactions(
     client: BackendAPIClient = Depends(get_backend_client)
 ) -> Dict:
     """
-    Get recent blockchain transactions.
+    Get recent blockchain transactions with full operation details.
+    
+    UPDATED v2.5.2: Now returns operation-level details including
+    trade summaries for DEX operations.
     
     Query Parameters:
         - limit: Maximum number of transactions to return (default: 20, max: 100)
     
     Returns:
-        Dictionary with list of recent transaction operations
+        Dictionary with:
+        - transactions: List of transactions with operations array
+        - pagination: Limit, total, and returned counts
+        - valid_tokens: List of valid UBEC tokens
+        - filter: Applied filters (if any)
     """
     try:
         transactions = await client.get_recent_transactions(limit=limit)
@@ -390,6 +504,37 @@ async def get_distribution_stats(
     except Exception as e:
         logger.error(f"Error fetching distribution stats: {e}")
         raise HTTPException(status_code=500, detail="Unable to fetch distribution statistics")
+
+@router.get("/token-audit", response_class=JSONResponse, summary="Get token audit (default UBEC)")
+@router.get("/token-audit/{token_code}", response_class=JSONResponse, summary="Get token audit")
+async def get_token_audit(
+    token_code: str = "UBEC",
+    client: BackendAPIClient = Depends(get_backend_client)
+) -> Dict:
+    """
+    Get comprehensive token audit data for transparency reporting.
+    
+    NEW v2.5.5: Full token audit endpoint for dashboard display
+    
+    Path Parameters:
+        - token_code: Token to audit (UBEC, UBECrc, UBECgpi, UBECtt) - default UBEC
+    
+    Returns:
+        Comprehensive audit data including:
+        - token: Token info (code, element, ubuntu_principle, issuer)
+        - summary: Totals and percentages
+        - general_distribution: 65% category with accounts and projects
+        - token_ecosystem_stewardship: 30% category with accounts and LP breakdown
+        - administration: 5% category with accounts
+        - compliance: Compliance status indicators
+        - disclaimer: Legal disclaimer text
+    """
+    try:
+        audit = await client.get_token_audit(token_code=token_code)
+        return audit
+    except Exception as e:
+        logger.error(f"Error fetching token audit: {e}")
+        raise HTTPException(status_code=500, detail="Unable to fetch token audit")
 
 # ========================================================================
 # SYSTEM ENDPOINTS

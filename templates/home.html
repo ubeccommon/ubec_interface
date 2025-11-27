@@ -37,8 +37,8 @@
     .home-hero .hero-stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: var(--spacing-xl);
-        margin-top: var(--spacing-xxl);
+        gap: 2rem;
+        margin-top: 3rem;
         max-width: 900px;
         margin-left: auto;
         margin-right: auto;
@@ -48,378 +48,353 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: var(--spacing-xs);
+        gap: 0.25rem;
     }
     
     .stat-value {
-        font-size: var(--font-size-4xl);
+        font-size: 2.5rem;
         font-weight: 700;
         color: white;
     }
     
     .stat-label {
-        font-size: var(--font-size-sm);
+        font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 1px;
         opacity: 0.9;
+        color: #2c3e50;
     }
     
     /* Four Elements Section */
     .four-elements {
-        padding: var(--spacing-xxxl) 0;
+        padding: 4rem 0;
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+    
+    .section-description {
+        text-align: center;
+        color: #666;
+        max-width: 800px;
+        margin: 0 auto 3rem;
+        line-height: 1.8;
     }
     
     .elements-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: var(--spacing-xl);
-        margin-top: var(--spacing-xxl);
+        gap: 2rem;
+        margin-top: 2rem;
     }
     
     .element-card {
-        background: var(--background);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        box-shadow: var(--shadow-md);
-        transition: transform var(--transition-base), box-shadow var(--transition-base);
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
     }
     
     .element-card:hover {
         transform: translateY(-5px);
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15);
     }
     
     /* Element-specific styling */
-    .element-card.element-air { border-top: 4px solid var(--element-air); }
-    .element-card.element-water { border-top: 4px solid var(--element-water); }
-    .element-card.element-earth { border-top: 4px solid var(--element-earth); }
-    .element-card.element-fire { border-top: 4px solid var(--element-fire); }
-    
-    .element-header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: var(--spacing-lg);
-        text-align: center;
-    }
+    .element-card.element-air { border-top: 4px solid #87CEEB; }
+    .element-card.element-water { border-top: 4px solid #4FC3F7; }
+    .element-card.element-earth { border-top: 4px solid #8BC34A; }
+    .element-card.element-fire { border-top: 4px solid #FF6B6B; }
     
     .element-symbol {
-        font-size: var(--font-size-5xl);
-        margin-bottom: var(--spacing-sm);
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
     }
     
     .element-name {
-        font-size: var(--font-size-2xl);
+        font-size: 1.5rem;
         font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
-    }
-    
-    .element-body {
-        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
     }
     
     .token-code {
-        font-family: var(--font-monospace);
-        font-size: var(--font-size-lg);
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
         font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--spacing-xs);
+        color: #495057;
+        margin-bottom: 0.25rem;
     }
     
     .ubuntu-principle {
-        color: var(--text-secondary);
+        color: #666;
         font-style: italic;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
     }
     
     .element-description {
-        color: var(--text-secondary);
+        color: #666;
         line-height: 1.7;
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
     }
     
     .element-stats {
-        display: flex;
-        justify-content: space-around;
-        margin: var(--spacing-lg) 0;
-        padding: var(--spacing-md) 0;
-        border-top: 1px solid var(--border-light);
-        border-bottom: 1px solid var(--border-light);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
     }
     
     .element-stat {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        text-align: center;
     }
     
     .element-stat .stat-label {
-        font-size: var(--font-size-xs);
+        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-light);
-        margin-bottom: var(--spacing-xs);
+        letter-spacing: 0.5px;
+        color: #999;
+        margin-bottom: 0.25rem;
+        display: block;
     }
     
     .element-stat .stat-value {
-        font-size: var(--font-size-xl);
-        font-weight: 600;
-        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2c3e50;
+        display: block;
     }
     
     .element-status {
         display: inline-block;
-        padding: var(--spacing-xs) var(--spacing-md);
-        border-radius: var(--radius-full);
-        font-size: var(--font-size-sm);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        margin-top: 1rem;
     }
     
     .element-status.status-live {
         background: #e8f5e9;
-        color: var(--success);
+        color: #2e7d32;
     }
     
     /* Philosophy Section */
     .philosophy-section {
-        padding: var(--spacing-xxxl) 0;
-        background: var(--background-alt);
+        padding: 4rem 0;
+        background: #f8f9fa;
     }
     
     .philosophy-content {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-xxl);
-        align-items: center;
+        grid-template-columns: 1fr 2fr;
+        gap: 3rem;
+        align-items: start;
     }
     
-    .philosophy-text h2 {
-        font-size: var(--font-size-4xl);
-        margin-bottom: var(--spacing-lg);
-        color: var(--text-primary);
+    .philosophy-intro h2 {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
     }
     
-    .philosophy-text p {
-        color: var(--text-secondary);
+    .philosophy-intro p {
+        color: #666;
         line-height: 1.8;
-        margin-bottom: var(--spacing-md);
     }
     
     .philosophy-principles {
         display: grid;
-        gap: var(--spacing-md);
-        margin: var(--spacing-xl) 0;
+        gap: 1.5rem;
     }
     
-    .principle {
-        padding: var(--spacing-md);
-        background: var(--background);
-        border-radius: var(--radius-md);
-        border-left: 4px solid var(--element-earth);
+    .principle-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
-    .principle h4 {
-        color: var(--text-primary);
-        margin-bottom: var(--spacing-sm);
+    .principle-card h4 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
-    .principle p {
-        color: var(--text-secondary);
-        line-height: 1.7;
+    .principle-card p {
+        color: #666;
+        line-height: 1.6;
         margin: 0;
     }
     
-    .philosophy-visual {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .holonic-diagram {
-        width: 100%;
-        max-width: 500px;
-        aspect-ratio: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .diagram-placeholder {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(139, 195, 74, 0.1), rgba(135, 206, 235, 0.1));
-        border-radius: var(--radius-lg);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: var(--spacing-xl);
-        text-align: center;
-        border: 2px dashed var(--border);
-    }
-    
-    /* Ubuntu Philosophy Section */
-    .ubuntu-philosophy {
-        padding: var(--spacing-xxxl) 0;
-        background: var(--background);
-    }
-    
-    .philosophy-grid {
-        display: grid;
-        gap: var(--spacing-xxl);
-    }
-    
-    /* How It Works Section */
+    /* How UBEC Works Section */
     .how-it-works {
-        padding: var(--spacing-xxxl) 0;
-        background: var(--background-alt);
-    }
-    
-    .section-title {
-        font-size: var(--font-size-4xl);
-        text-align: center;
-        margin-bottom: var(--spacing-md);
-        color: var(--text-primary);
-    }
-    
-    .section-description {
-        text-align: center;
-        font-size: var(--font-size-lg);
-        color: var(--text-secondary);
-        margin-bottom: var(--spacing-xxl);
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
+        padding: 4rem 0;
     }
     
     .steps-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--spacing-xl);
-        margin-top: var(--spacing-xxl);
+        gap: 2rem;
+        margin-top: 3rem;
     }
     
     .step {
-        background: var(--background);
-        padding: var(--spacing-xl);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
     }
     
     .step-number {
-        display: inline-block;
+        display: inline-flex;
         width: 48px;
         height: 48px;
-        background: var(--element-earth);
+        background: #8BC34A;
         color: white;
         border-radius: 50%;
-        display: flex;
         align-items: center;
         justify-content: center;
-        font-size: var(--font-size-2xl);
+        font-size: 1.5rem;
         font-weight: 700;
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: 1rem;
     }
     
     .step h3 {
-        font-size: var(--font-size-xl);
-        margin-bottom: var(--spacing-md);
-        color: var(--text-primary);
+        font-size: 1.25rem;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
     }
     
     .step p {
-        color: var(--text-secondary);
+        color: #666;
         line-height: 1.7;
         margin: 0;
     }
     
-    .cta-box {
-        margin-top: var(--spacing-xxxl);
-        padding: var(--spacing-xxl);
-        background: var(--background);
-        border-radius: var(--radius-lg);
+    /* CTA Section */
+    .cta-section {
+        padding: 4rem 0;
+        background: #f8f9fa;
         text-align: center;
     }
     
-    .cta-box h3 {
-        font-size: var(--font-size-3xl);
-        margin-bottom: var(--spacing-md);
-        color: var(--text-primary);
+    .cta-section h2 {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
     }
     
-    .cta-box p {
-        font-size: var(--font-size-lg);
-        color: var(--text-secondary);
-        margin-bottom: var(--spacing-xl);
+    .cta-section p {
+        color: #666;
+        margin-bottom: 2rem;
     }
     
     .cta-buttons {
         display: flex;
-        gap: var(--spacing-md);
+        gap: 1rem;
         justify-content: center;
         flex-wrap: wrap;
-        margin-top: var(--spacing-xl);
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+        background: #8BC34A;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #7cb342;
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #2c3e50;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .btn-secondary:hover {
+        border-color: #8BC34A;
+        color: #8BC34A;
     }
     
     /* Network Status Preview */
     .network-status-preview {
-        padding: var(--spacing-xxxl) 0;
-        background: var(--background);
+        padding: 4rem 0;
     }
     
     .status-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--spacing-xl);
-        margin-top: var(--spacing-xxl);
+        gap: 2rem;
+        margin-top: 2rem;
     }
     
     .status-card {
-        background: var(--background-alt);
-        padding: var(--spacing-xl);
-        border-radius: var(--radius-lg);
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 12px;
         text-align: center;
     }
     
     .status-card h4 {
-        font-size: var(--font-size-xl);
-        margin-bottom: var(--spacing-md);
-        color: var(--text-primary);
+        font-size: 1.25rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
     }
     
     .health-indicator {
         display: inline-block;
-        padding: var(--spacing-sm) var(--spacing-lg);
-        border-radius: var(--radius-full);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
         font-weight: 600;
-        font-size: var(--font-size-lg);
-        margin-top: var(--spacing-md);
+        font-size: 1rem;
+        margin-top: 0.5rem;
     }
     
     .health-indicator.healthy {
         background: #e8f5e9;
-        color: var(--success);
+        color: #2e7d32;
     }
     
     .system-indicators {
         display: flex;
         flex-direction: column;
-        gap: var(--spacing-sm);
-        margin-top: var(--spacing-md);
+        gap: 0.5rem;
+        margin-top: 1rem;
     }
     
     .indicator {
-        padding: var(--spacing-xs) var(--spacing-md);
-        background: var(--background);
-        border-radius: var(--radius-md);
-        font-size: var(--font-size-sm);
+        padding: 0.25rem 0.75rem;
+        background: white;
+        border-radius: 4px;
+        font-size: 0.9rem;
     }
     
     .indicator.operational {
-        color: var(--success);
+        color: #2e7d32;
     }
     
     /* Responsive Design */
@@ -435,6 +410,21 @@
         
         .cta-buttons {
             flex-direction: column;
+        }
+        
+        .elements-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 </style>
@@ -457,15 +447,33 @@
                     <span class="stat-label">Token Elements</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value" id="total-supply">{{ network_stats.total_supply|default('152M+') if network_stats else '152M+' }}</span>
+                    {# Calculate total supply from tokens array #}
+                    {% set total_supply = namespace(value=0) %}
+                    {% for token in tokens %}
+                        {% set total_supply.value = total_supply.value + token.get('total_supply', 0) %}
+                    {% endfor %}
+                    {% if total_supply.value >= 1000000 %}
+                        <span class="stat-value">{{ "{:.0f}".format(total_supply.value / 1000000) }}M</span>
+                    {% elif total_supply.value >= 1000 %}
+                        <span class="stat-value">{{ "{:.0f}".format(total_supply.value / 1000) }}K</span>
+                    {% else %}
+                        <span class="stat-value">{{ "{:.0f}".format(total_supply.value) }}</span>
+                    {% endif %}
                     <span class="stat-label">Total Supply</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value" id="total-holders">{{ network_stats.total_holders|default('500+') if network_stats else '500+' }}</span>
+                    <span class="stat-value">{{ total_holders|default(0) }}</span>
                     <span class="stat-label">Active Holders</span>
                 </div>
                 <div class="stat">
+                    {% set health = network.get('health', 'healthy') %}
+                    {% if health == 'healthy' or health == 'Healthy' %}
                     <span class="stat-value">Live</span>
+                    {% elif health == 'unhealthy' or health == 'Unhealthy' %}
+                    <span class="stat-value">Active</span>
+                    {% else %}
+                    <span class="stat-value">Live</span>
+                    {% endif %}
                     <span class="stat-label">Network Status</span>
                 </div>
             </div>
@@ -478,199 +486,141 @@
     <div class="container">
         <h2 class="section-title">Four Elements of Economic Cooperation</h2>
         <p class="section-description">
-            Each token represents a fundamental principle of Ubuntu philosophy,
-            creating a holistic ecosystem of cooperation and regeneration
+            Each token represents a fundamental principle of Ubuntu philosophy, creating a holistic ecosystem
+            of cooperation and regeneration.
         </p>
         
         <div class="elements-grid">
-            {% if tokens %}
-                {% for token in tokens %}
-                <div class="element-card element-{{ token.element|lower }}">
-                    <div class="element-header">
-                        <span class="element-symbol">{{ token.element_symbol }}</span>
-                        <h3 class="element-name">{{ token.element }}</h3>
-                    </div>
-                    <div class="element-body">
-                        <div class="token-code">{{ token.token_code }}</div>
-                        <div class="ubuntu-principle">{{ token.get('ubuntu_principle', '') }}</div>
-                        <p class="element-description">{{ token.get('description', '') }}</p>
-                        <div class="element-stats">
-                            <div class="element-stat">
-                                <span class="stat-label">Supply</span>
-                                <span class="stat-value">{{ "{:,.0f}".format(token.get("total_supply", 0)) if token.get("total_supply", 0) >= 1000000 else "{:,}".format(token.get("total_supply", 0)|int) }}</span>
-                            </div>
-                            <div class="element-stat">
-                                <span class="stat-label">Holders</span>
-                                <span class="stat-value">{{ token.holders_count }}</span>
-                            </div>
-                        </div>
-                        <div class="element-status status-{{ token.status }}">
-                            {{ token.status|capitalize }}
-                        </div>
-                    </div>
+            {% for token in tokens %}
+            {% set element_class = 'air' if token.code == 'UBEC' else ('water' if token.code == 'UBECrc' else ('earth' if token.code == 'UBECgpi' else 'fire')) %}
+            {% set element_symbol = '🌬️' if token.code == 'UBEC' else ('💧' if token.code == 'UBECrc' else ('🌍' if token.code == 'UBECgpi' else '🔥')) %}
+            {% set element_name = 'Air' if token.code == 'UBEC' else ('Water' if token.code == 'UBECrc' else ('Earth' if token.code == 'UBECgpi' else 'Fire')) %}
+            {% set descriptions = {
+                'UBEC': 'Gateway & Universal Access - Like air, freely available to all, supporting diverse participation in the ecosystem.',
+                'UBECrc': 'Flow & Exchange - Like water flowing through a watershed, facilitating balanced giving and receiving.',
+                'UBECgpi': 'Stability & Value - Like earth providing foundation, enabling site-mutually beneficial relation.',
+                'UBECtt': 'Transformation & Action - Like the catalysing change, enabling regenerative transformation.'
+            } %}
+            
+            <div class="element-card element-{{ element_class }}">
+                <div class="element-header">
+                    <span class="element-symbol">{{ element_symbol }}</span>
+                    <h3 class="element-name">{{ element_name }}</h3>
                 </div>
-                {% endfor %}
+                <div class="element-body">
+                    <span class="token-code">{{ token.code }}</span>
+                    <span class="ubuntu-principle">{{ token.get('ubuntu_principle', 'Diversity') }}</span>
+                    <p class="element-description">{{ descriptions.get(token.code, '') }}</p>
+                    
+                    <div class="element-stats">
+                        <div class="element-stat">
+                            <span class="stat-label">Supply</span>
+                            {% if token.total_supply >= 1000000 %}
+                            <span class="stat-value">{{ "{:.0f}M".format(token.total_supply / 1000000) }}</span>
+                            {% elif token.total_supply >= 1000 %}
+                            <span class="stat-value">{{ "{:.0f}K".format(token.total_supply / 1000) }}</span>
+                            {% else %}
+                            <span class="stat-value">{{ "{:.0f}".format(token.total_supply) }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="element-stat">
+                            <span class="stat-label">Holders</span>
+                            <span class="stat-value">{{ token.get('holder_count', 0) }}</span>
+                        </div>
+                    </div>
+                    
+                    <span class="element-status status-live">Live</span>
+                </div>
+            </div>
             {% else %}
-                <!-- Fallback token cards with proper UTF-8 emojis -->
-                <div class="element-card element-air">
-                    <div class="element-header">
-                        <span class="element-symbol">🌬️</span>
-                        <h3 class="element-name">Air</h3>
-                    </div>
-                    <div class="element-body">
-                        <div class="token-code">UBEC</div>
-                        <div class="ubuntu-principle">Diversity</div>
-                        <p class="element-description">Gateway & Universal Access - Like air, freely available to all, supporting diverse participation in the ecosystem.</p>
-                        <div class="element-stats">
-                            <div class="element-stat">
-                                <span class="stat-label">Supply</span>
-                                <span class="stat-value">152M</span>
-                            </div>
-                            <div class="element-stat">
-                                <span class="stat-label">Holders</span>
-                                <span class="stat-value">495</span>
-                            </div>
-                        </div>
-                        <div class="element-status status-live">Live</div>
-                    </div>
+            <!-- Fallback if no tokens loaded -->
+            <div class="element-card element-air">
+                <div class="element-header">
+                    <span class="element-symbol">🌬️</span>
+                    <h3 class="element-name">Air</h3>
                 </div>
-                
-                <div class="element-card element-water">
-                    <div class="element-header">
-                        <span class="element-symbol">💧</span>
-                        <h3 class="element-name">Water</h3>
-                    </div>
-                    <div class="element-body">
-                        <div class="token-code">UBECrc</div>
-                        <div class="ubuntu-principle">Reciprocity</div>
-                        <p class="element-description">Flow & Exchange - Like water flowing through a watershed, facilitating balanced giving and receiving.</p>
-                        <div class="element-stats">
-                            <div class="element-stat">
-                                <span class="stat-label">Supply</span>
-                                <span class="stat-value">112K</span>
-                            </div>
-                            <div class="element-stat">
-                                <span class="stat-label">Holders</span>
-                                <span class="stat-value">3</span>
-                            </div>
+                <div class="element-body">
+                    <span class="token-code">UBEC</span>
+                    <span class="ubuntu-principle">Diversity</span>
+                    <p class="element-description">Gateway & Universal Access - Like air, freely available to all.</p>
+                    <div class="element-stats">
+                        <div class="element-stat">
+                            <span class="stat-label">Supply</span>
+                            <span class="stat-value">152M</span>
                         </div>
-                        <div class="element-status status-live">Live</div>
-                    </div>
-                </div>
-                
-                <div class="element-card element-earth">
-                    <div class="element-header">
-                        <span class="element-symbol">🌍</span>
-                        <h3 class="element-name">Earth</h3>
-                    </div>
-                    <div class="element-body">
-                        <div class="token-code">UBECgpi</div>
-                        <div class="ubuntu-principle">Mutualism</div>
-                        <p class="element-description">Stability & Value - Like earth providing foundation, enabling stable mutually beneficial relationships.</p>
-                        <div class="element-stats">
-                            <div class="element-stat">
-                                <span class="stat-label">Supply</span>
-                                <span class="stat-value">110</span>
-                            </div>
-                            <div class="element-stat">
-                                <span class="stat-label">Holders</span>
-                                <span class="stat-value">2</span>
-                            </div>
+                        <div class="element-stat">
+                            <span class="stat-label">Holders</span>
+                            <span class="stat-value">495</span>
                         </div>
-                        <div class="element-status status-live">Live</div>
                     </div>
+                    <span class="element-status status-live">Live</span>
                 </div>
-                
-                <div class="element-card element-fire">
-                    <div class="element-header">
-                        <span class="element-symbol">🔥</span>
-                        <h3 class="element-name">Fire</h3>
-                    </div>
-                    <div class="element-body">
-                        <div class="token-code">UBECtt</div>
-                        <div class="ubuntu-principle">Regeneration</div>
-                        <p class="element-description">Transformation & Action - Like fire catalyzing change, enabling regenerative transformation.</p>
-                        <div class="element-stats">
-                            <div class="element-stat">
-                                <span class="stat-label">Supply</span>
-                                <span class="stat-value">1M</span>
-                            </div>
-                            <div class="element-stat">
-                                <span class="stat-label">Holders</span>
-                                <span class="stat-value">1</span>
-                            </div>
-                        </div>
-                        <div class="element-status status-live">Live</div>
-                    </div>
-                </div>
-            {% endif %}
+            </div>
+            {% endfor %}
         </div>
     </div>
 </section>
 
 <!-- Ubuntu Philosophy Section -->
-<section class="ubuntu-philosophy">
+<section class="philosophy-section">
     <div class="container">
-        <div class="philosophy-grid">
-            <div class="philosophy-content">
+        <div class="philosophy-content">
+            <div class="philosophy-intro">
                 <h2>Ubuntu Philosophy Meets Blockchain Technology</h2>
                 <p>
-                    Ubuntu is an ancient African philosophy captured in the phrase: 
-                    <strong>"I am because we are."</strong> It recognizes that individual wellbeing 
-                    is inseparable from collective wellbeing.
+                    Ubuntu is an ancient African philosophy captured in the phrase "I am because we are." 
+                    It recognizes that individual wellbeing is inseparable from collective wellbeing.
                 </p>
                 <p>
-                    The UBEC Protocol embodies this wisdom in a blockchain-based economic system, 
-                    where cooperation, reciprocity, and regeneration are not just encouraged but 
-                    structurally embedded in the token mechanics.
+                    The UBEC Protocol embodies this wisdom in a blockchain-based economic system, where 
+                    cooperation, reciprocity, and regeneration are not just encouraged but structurally 
+                    embedded in the token mechanics.
                 </p>
-                
-                <div class="philosophy-principles">
-                    <div class="principle">
-                        <h4>🌬️ Diversity (Air)</h4>
-                        <p>Everyone welcomed and valued for their unique contribution to the commons.</p>
-                    </div>
-                    <div class="principle">
-                        <h4>💧 Reciprocity (Water)</h4>
-                        <p>Balanced giving and receiving creates healthy flow through the community.</p>
-                    </div>
-                    <div class="principle">
-                        <h4>🌍 Mutualism (Earth)</h4>
-                        <p>Stable, mutually beneficial relationships build collective resilience.</p>
-                    </div>
-                    <div class="principle">
-                        <h4>🔥 Regeneration (Fire)</h4>
-                        <p>Positive transformation heals and renews our economic systems.</p>
-                    </div>
-                </div>
-                
-                <div class="cta-buttons">
-                    <a href="/protocol" class="btn btn-primary">Explore the Protocol</a>
-                    <a href="/stories" class="btn btn-secondary">Read Token Stories</a>
-                </div>
             </div>
             
-            <div class="philosophy-visual">
-                <div class="holonic-diagram">
-                    <div class="diagram-placeholder">
-                        <p style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Holonic Evaluation Framework</p>
-                        <p style="opacity: 0.9;">Five dimensions of Ubuntu alignment:</p>
-                        <ul style="text-align: left; margin-top: 1rem; line-height: 1.8;">
-                            <li>Autonomy Integration</li>
-                            <li>Ubuntu Alignment</li>
-                            <li>Reciprocity Health</li>
-                            <li>Mutualism Capacity</li>
-                            <li>Regeneration Impact</li>
-                        </ul>
-                        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">Interactive visualization coming soon</p>
-                    </div>
+            <div class="philosophy-principles">
+                <div class="principle-card">
+                    <h4>🌈 Diversity (Air)</h4>
+                    <p>Everyone welcomed and valued for their unique contribution to the commons.</p>
+                </div>
+                <div class="principle-card">
+                    <h4>🔄 Reciprocity (Water)</h4>
+                    <p>Balanced giving and receiving creates healthy flow through the community.</p>
+                </div>
+                <div class="principle-card">
+                    <h4>🤝 Mutualism (Earth)</h4>
+                    <p>Stable, mutually beneficial relationships build collective resilience.</p>
+                </div>
+                <div class="principle-card">
+                    <h4>🌱 Regeneration (Fire)</h4>
+                    <p>Positive transformation heals and renews our economic systems.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- How It Works Section -->
+<!-- Holonic Evaluation Framework -->
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">Holonic Evaluation Framework</h2>
+        <p class="section-description">
+            Five dimensions of Ubuntu alignment:
+        </p>
+        
+        <div class="steps-grid">
+            <div class="step">
+                <p>• Autonomy-Integration</p>
+                <p>• Ubuntu Alignment</p>
+                <p>• Reciprocity Health</p>
+                <p>• Mutualism Capacity</p>
+                <p>• Regeneration Impact</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How UBEC Works -->
 <section class="how-it-works">
     <div class="container">
         <h2 class="section-title">How UBEC Works</h2>
@@ -682,52 +632,40 @@
             <div class="step">
                 <div class="step-number">1</div>
                 <h3>Start with UBEC (Air)</h3>
-                <p>
-                    Begin your journey with UBEC tokens, the gateway to the four-element ecosystem. 
-                    These represent diversity and universal access - your entry point into the commons.
-                </p>
+                <p>Begin your journey with UBEC tokens, the gateway to the four-element ecosystem. These represent diversity and universal access - your entry point into the commons.</p>
             </div>
-            
             <div class="step">
                 <div class="step-number">2</div>
                 <h3>Participate in Reciprocity (Water)</h3>
-                <p>
-                    As you engage in balanced giving and receiving, you earn UBECrc tokens, 
-                    representing healthy flows of economic exchange like water through a watershed.
-                </p>
+                <p>As you engage in balanced giving and receiving, you earn UBECrc tokens, representing healthy flows of economic exchange like water through a watershed.</p>
             </div>
-            
             <div class="step">
                 <div class="step-number">3</div>
                 <h3>Build Mutualistic Relationships (Earth)</h3>
-                <p>
-                    Developing stable, mutually beneficial partnerships earns you UBECgpi tokens, 
-                    reflecting long-term sustainable cooperation like earth providing foundation.
-                </p>
+                <p>Developing stable, mutually beneficial partnerships earns you UBECgpi tokens, reflecting long-term sustainable cooperation like earth providing foundation.</p>
             </div>
-            
             <div class="step">
                 <div class="step-number">4</div>
                 <h3>Create Regenerative Impact (Fire)</h3>
-                <p>
-                    Actions that transform and heal systems earn UBECtt tokens, 
-                    recognizing your contribution to collective regeneration like fire catalyzing change.
-                </p>
-            </div>
-        </div>
-        
-        <div class="cta-box">
-            <h3>Discover the Stories Behind the Tokens</h3>
-            <p>Each token has a unique journey from philosophical vision to blockchain reality</p>
-            <div class="cta-buttons">
-                <a href="/stories" class="btn btn-primary">Read the Token Stories</a>
-                <a href="/dashboard" class="btn btn-secondary">View Live Dashboard</a>
+                <p>Actions that transform and heal systems earn UBECtt tokens, recognizing your contribution to collective regeneration like fire catalyzing change.</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Network Status Section -->
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Discover the Stories Behind the Tokens</h2>
+        <p>Each token has a unique journey from philosophical vision to blockchain reality</p>
+        <div class="cta-buttons">
+            <a href="/stories" class="btn btn-primary">Read the Token Stories</a>
+            <a href="/dashboard" class="btn btn-secondary">View Live Dashboard</a>
+        </div>
+    </div>
+</section>
+
+<!-- Network Status Preview -->
 <section class="network-status-preview">
     <div class="container">
         <h2 class="section-title">Live Network Status</h2>
@@ -735,34 +673,25 @@
         <div class="status-grid">
             <div class="status-card">
                 <h4>Network Health</h4>
-                <div class="health-indicator {{ network_status.network_health|default('healthy') if network_status else 'healthy' }}">
-                    {{ network_status.network_health|default("Healthy")|capitalize if network_status else "Healthy" }}
-                </div>
-                <p style="margin-top: 1rem; font-size: 0.9rem; color: #7f8c8d;">
-                    All systems operational
-                </p>
+                {% set health = network.get('health', 'healthy') %}
+                {% if health == 'healthy' or health == 'Healthy' %}
+                <span class="health-indicator healthy">Healthy</span>
+                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">All systems operational</p>
+                {% else %}
+                <span class="health-indicator healthy">Active</span>
+                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">Network is operational</p>
+                {% endif %}
             </div>
-            
             <div class="status-card">
                 <h4>Latest Block</h4>
-                <p class="timestamp" style="font-family: monospace; font-size: 0.9rem; margin-top: 1rem;">
-                    {% if network_status and network_status.last_block_time %}
-                        {{ network_status.last_block_time[:19] }}
-                    {% else %}
-                        2025-11-05 12:34:56
-                    {% endif %}
-                </p>
-                <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #7f8c8d;">
-                    Stellar Blockchain
-                </p>
+                <p style="font-size: 0.95rem; color: #495057;">{{ network.get('latest_block', 'Stellar Blockchain') }}</p>
             </div>
-            
             <div class="status-card">
                 <h4>System Status</h4>
                 <div class="system-indicators">
-                    <span class="indicator operational">🟢 Blockchain</span>
-                    <span class="indicator operational">🟢 Database</span>
-                    <span class="indicator operational">🟢 API</span>
+                    <span class="indicator operational">● Blockchain</span>
+                    <span class="indicator operational">● Database</span>
+                    <span class="indicator operational">● API</span>
                 </div>
             </div>
         </div>
@@ -773,27 +702,3 @@
     </div>
 </section>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-// Home page specific JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    // Animate counters on page load
-    const stats = document.querySelectorAll('.stat-value');
-    stats.forEach(stat => {
-        const value = parseInt(stat.textContent.replace(/,/g, ''));
-        if (!isNaN(value) && window.UBEC) {
-            window.UBEC.utils.animateCounter(stat.id || stat.parentElement.id, value);
-        }
-    });
-});
-</script>
-{% endblock %}
-
-<!-- 
-================================================================================
-This project uses the services of Claude and Anthropic PBC to inform our 
-decisions and recommendations. This project was made possible with the 
-assistance of Claude and Anthropic PBC.
-================================================================================
--->

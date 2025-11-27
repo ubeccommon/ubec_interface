@@ -58,37 +58,38 @@
             <div class="holonic-grid">
                 <div class="holonic-card">
                     <h4>Overall Network Health</h4>
-                    <div class="large-score">{{ (holonic_scores.get("overall_network_health", 0) * 100)|round|int }}%</div>
+                    <div class="large-score">{{ (holonic_scores.get("overall_network_health", 0) * 100)|round(1) }}%</div>
                     <div class="score-indicator">
                         <div class="indicator-bar" style="width: {{ (holonic_scores.get("overall_network_health", 0) * 100)|round }}%"></div>
                     </div>
+                    <div class="account-count">{{ holonic_scores.get("account_count", 0) }} accounts evaluated</div>
                 </div>
                 
                 <div class="holonic-card">
-                    <h4>Five Dimensions</h4>
+                    <h4>Ubuntu Principles</h4>
                     <div class="dimensions-list">
                         <div class="dimension-item">
-                            <span class="dimension-name">Autonomy Integration</span>
-                            <span class="dimension-score">{{ (holonic_scores.get("autonomy_integration", 0) * 100)|round }}%</span>
+                            <span class="dimension-name">🌈 Diversity</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("autonomy_integration", 0) * 100)|round(1) }}%</span>
                         </div>
                         <div class="dimension-item">
-                            <span class="dimension-name">Ubuntu Alignment</span>
-                            <span class="dimension-score">{{ (holonic_scores.get("ubuntu_alignment", 0) * 100)|round }}%</span>
+                            <span class="dimension-name">🔄 Reciprocity</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("reciprocity_health", 0) * 100)|round(1) }}%</span>
                         </div>
                         <div class="dimension-item">
-                            <span class="dimension-name">Reciprocity Health</span>
-                            <span class="dimension-score">{{ (holonic_scores.get("reciprocity_health", 0) * 100)|round }}%</span>
+                            <span class="dimension-name">🤝 Mutualism</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("mutualism_capacity", 0) * 100)|round(1) }}%</span>
                         </div>
                         <div class="dimension-item">
-                            <span class="dimension-name">Mutualism Capacity</span>
-                            <span class="dimension-score">{{ (holonic_scores.get("mutualism_capacity", 0) * 100)|round }}%</span>
-                        </div>
-                        <div class="dimension-item">
-                            <span class="dimension-name">Regeneration Impact</span>
-                            <span class="dimension-score">{{ (holonic_scores.get("regeneration_impact", 0) * 100)|round }}%</span>
+                            <span class="dimension-name">🌱 Regeneration</span>
+                            <span class="dimension-score">{{ (holonic_scores.get("regeneration_impact", 0) * 100)|round(1) }}%</span>
                         </div>
                     </div>
                 </div>
+            </div>
+            {% else %}
+            <div class="holonic-card">
+                <p class="no-data">Holonic scores loading...</p>
             </div>
             {% endif %}
         </div>
@@ -104,23 +105,83 @@
                             <th>Type</th>
                             <th>Token</th>
                             <th>Amount</th>
+                            <th>From → To</th>
                             <th>Time</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if recent_transactions %}
-                            {% for tx in recent_transactions[:10] %}
-                            <tr>
-                                <td class="hash">{{ tx.get('hash', '')[:12] }}...</td>
-                                <td><span class="badge tx-{{ tx.get('type', 'unknown') }}">{{ tx.get('type', 'unknown') }}</span></td>
-                                <td><span class="token-badge">{{ tx.get('token', 'UBEC') }}</span></td>
-                                <td class="amount">{{ "{:,.2f}".format(tx.get("amount", 0)) }}</td>
-                                <td class="timestamp">{{ tx.get('timestamp', '')[:19] }}</td>
-                            </tr>
+                            {# Handle both dict format (new API) and list format (old API) #}
+                            {% if recent_transactions is mapping and 'transactions' in recent_transactions %}
+                                {% set tx_list = recent_transactions['transactions'] %}
+                            {% else %}
+                                {% set tx_list = recent_transactions %}
+                            {% endif %}
+                            {% if tx_list %}
+                            {% for tx in tx_list[:10] %}
+                                {# Check if this transaction has operations array (new v2.5.2 format) #}
+                                {% if tx is mapping and 'operations' in tx and tx['operations'] %}
+                                    {% for op in tx['operations'] %}
+                                    <tr>
+                                        <td class="hash">
+                                            <a href="https://stellar.expert/explorer/public/tx/{{ tx.get('transaction_hash', '') or tx.get('hash', '') }}" 
+                                               target="_blank" 
+                                               rel="noopener noreferrer"
+                                               title="View on Stellar Expert">
+                                                {{ (tx.get('transaction_hash', '') or tx.get('hash', '') or '')[:12] }}...
+                                            </a>
+                                        </td>
+                                        <td><span class="badge tx-{{ (op.get('type', 'UNKNOWN') or 'UNKNOWN')|lower|replace('_', '-') }}">{{ op.get('type', 'UNKNOWN') or 'UNKNOWN' }}</span></td>
+                                        {# Handle trade operations with exchange details #}
+                                        {% if op.get('is_trade') and op.get('trade_summary') %}
+                                        <td class="trade-info" colspan="2">
+                                            <span class="trade-summary">{{ op.get('trade_summary', '') }}</span>
+                                        </td>
+                                        {% else %}
+                                        <td><span class="token-badge token-{{ (op.get('asset_code', 'XLM') or 'XLM')|lower }}">{{ op.get('asset_code', 'XLM') or 'XLM' }}</span></td>
+                                        <td class="amount">{{ "{:,.2f}".format(op.get('amount', 0) or 0) }}</td>
+                                        {% endif %}
+                                        <td class="direction">
+                                            {% set from_acct = op.get('from_account', '') or '' %}
+                                            {% set to_acct = op.get('to_account', '') or '' %}
+                                            {% if from_acct %}
+                                            <span class="account-from" title="{{ from_acct }}">{{ from_acct[:8] }}...</span>
+                                            {% else %}
+                                            <span class="account-from">—</span>
+                                            {% endif %}
+                                            <span class="arrow">→</span>
+                                            {% if to_acct %}
+                                            <span class="account-to" title="{{ to_acct }}">{{ to_acct[:8] }}...</span>
+                                            {% else %}
+                                            <span class="account-to">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="timestamp">{{ (tx.get('created_at', '') or '')[:19] | replace('T', ' ') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    {# Fallback for old format without operations array #}
+                                    <tr>
+                                        <td class="hash">
+                                            <a href="https://stellar.expert/explorer/public/tx/{{ tx.get('hash', '') or tx.get('transaction_hash', '') }}" 
+                                               target="_blank" 
+                                               rel="noopener noreferrer"
+                                               title="View on Stellar Expert">
+                                                {{ (tx.get('hash', '') or tx.get('transaction_hash', '') or '')[:12] }}...
+                                            </a>
+                                        </td>
+                                        <td><span class="badge tx-{{ (tx.get('type', 'UNKNOWN') or 'UNKNOWN')|lower }}">{{ tx.get('type', 'UNKNOWN') or 'UNKNOWN' }}</span></td>
+                                        <td><span class="token-badge token-{{ (tx.get('token', 'XLM') or tx.get('asset_code', 'XLM') or 'XLM')|lower }}">{{ tx.get('token', 'XLM') or tx.get('asset_code', 'XLM') or 'XLM' }}</span></td>
+                                        <td class="amount">{{ "{:,.2f}".format(tx.get('amount', 0) or 0) }}</td>
+                                        <td class="direction">—</td>
+                                        <td class="timestamp">{{ (tx.get('timestamp', '') or tx.get('created_at', '') or '')[:19] | replace('T', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
                             {% endfor %}
+                            {% endif %}
                         {% else %}
                             <tr>
-                                <td colspan="5" class="no-data">Loading transactions...</td>
+                                <td colspan="6" class="no-data">Loading transactions...</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -135,7 +196,7 @@
                 <!-- Bioregions Section -->
                 <div class="geo-section">
                     <h2 style="color: #2c3e50; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        🌿 Bioregions Overview
+                        🌿 Ecoregions Overview
                     </h2>
                     
                     {% if ecoregions %}
@@ -158,26 +219,33 @@
                     <!-- Top Ecoregions -->
                     <div class="ecoregions-list" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                         <h3 style="color: #2c3e50; font-size: 1.125rem; margin-bottom: 1rem;">Top Ecoregions</h3>
-                        <div class="ecoregion-items">
-                            {% for eco in ecoregions.get('ecoregions', []) %}
-                            <div class="ecoregion-item" style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">
-                                        {{ eco.get('name', '') if eco.get('name') else 'Ecoregion #' + eco.get('eco_id', '')|string }}
+                        <div class="ecoregion-items" style="max-height: 320px; overflow-y: auto;">
+                            {% for eco in ecoregions.get('ecoregions', [])[:5] %}
+                            <a href="#" 
+                               class="region-link" 
+                               data-region-type="ecoregion" 
+                               data-region-id="{{ eco.get('eco_id', '') }}"
+                               title="Click to view on map">
+                                <div class="ecoregion-item" style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">
+                                            {{ eco.get('name', '') if eco.get('name') else 'Ecoregion #' + eco.get('eco_id', '')|string }}
+                                            <span class="map-icon">🗺️</span>
+                                        </div>
+                                        <div style="font-size: 0.875rem; color: #7f8c8d;">
+                                            <span style="background: #e8f5e9; color: #2e7d32; padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.5rem;">
+                                                {{ eco.get('biome', 'Unknown Biome') }}
+                                            </span>
+                                            <span style="background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                                {{ eco.get('realm', 'Unknown Realm') }}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div style="font-size: 0.875rem; color: #7f8c8d;">
-                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.5rem;">
-                                            {{ eco.get('biome', 'Unknown Biome') }}
-                                        </span>
-                                        <span style="background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.5rem; border-radius: 4px;">
-                                            {{ eco.get('realm', 'Unknown Realm') }}
-                                        </span>
+                                    <div style="text-align: right; color: #8BC34A; font-weight: 600;">
+                                        ID: {{ eco.get('eco_id', '') }}
                                     </div>
                                 </div>
-                                <div style="text-align: right; color: #8BC34A; font-weight: 600;">
-                                    ID: {{ eco.get('eco_id', '') }}
-                                </div>
-                            </div>
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
@@ -229,30 +297,37 @@
                     <!-- Major Watersheds -->
                     <div class="watersheds-list" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                         <h3 style="color: #2c3e50; font-size: 1.125rem; margin-bottom: 1rem;">Major Watersheds</h3>
-                        <div class="watershed-items">
-                            {% for watershed in watersheds.get('major_watersheds', []) %}
-                            <div class="watershed-item" style="padding: 1rem; border-bottom: 1px solid #f0f0f0;">
-                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                                    <div style="font-weight: 600; color: #2c3e50; flex: 1;">
-                                        {{ watershed.get("name", "") if watershed.get("name", "") else 'Watershed #' + watershed.get("feow_id", "")|string }}
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <div style="font-size: 1.125rem; font-weight: 700; color: #4A90E2;">
-                                            {{ "{:,.0f}".format(watershed.get("area_sqkm", 0)) }} km²
+                        <div class="watershed-items" style="max-height: 320px; overflow-y: auto;">
+                            {% for watershed in watersheds.get('major_watersheds', [])[:5] %}
+                            <a href="#" 
+                               class="region-link" 
+                               data-region-type="watershed" 
+                               data-region-id="{{ watershed.get('feow_id', '') }}"
+                               title="Click to view on map">
+                                <div class="watershed-item" style="padding: 1rem; border-bottom: 1px solid #f0f0f0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                        <div style="font-weight: 600; color: #2c3e50; flex: 1;">
+                                            {{ watershed.get("name", "") if watershed.get("name", "") else 'Watershed #' + watershed.get("feow_id", "")|string }}
+                                            <span class="map-icon">🗺️</span>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 1.125rem; font-weight: 700; color: #4A90E2;">
+                                                {{ "{:,.0f}".format(watershed.get("area_sqkm", 0)) }} km²
+                                            </div>
                                         </div>
                                     </div>
+                                    <div style="font-size: 0.875rem; color: #7f8c8d;">
+                                        <span style="background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.5rem;">
+                                            ID: {{ watershed.get("feow_id", "") }}
+                                        </span>
+                                        {% if watershed.get("pfaf_id", "") %}
+                                        <span style="background: #f3e5f5; color: #6a1b9a; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                            Pfafstetter: {{ watershed.get("pfaf_id", "") }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div style="font-size: 0.875rem; color: #7f8c8d;">
-                                    <span style="background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.5rem;">
-                                        ID: {{ watershed.get("feow_id", "") }}
-                                    </span>
-                                    {% if watershed.get("pfaf_id", "") %}
-                                    <span style="background: #f3e5f5; color: #6a1b9a; padding: 0.25rem 0.5rem; border-radius: 4px;">
-                                        Pfafstetter: {{ watershed.get("pfaf_id", "") }}
-                                    </span>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
@@ -280,10 +355,261 @@
             </div>
         </div>
         
-        <!-- Distribution Statistics -->
+        <!-- Token Distribution Audit -->
         <div class="dashboard-section">
-            <h2>Token Distribution</h2>
-            {% if distribution_stats %}
+            <h2>UBEC Utility Token Audit</h2>
+            
+            {% if token_audit %}
+            {% set token = token_audit.get('token', {}) %}
+            {% set summary = token_audit.get('summary', {}) %}
+            {% set general = token_audit.get('general_distribution', {}) %}
+            {% set stewardship = token_audit.get('token_ecosystem_stewardship', {}) %}
+            {% set admin = token_audit.get('administration', {}) %}
+            {% set compliance = token_audit.get('compliance', {}) %}
+            
+            {# Total issued comes from token.total_tokens_issued #}
+            {% set total_issued = token.get('total_tokens_issued', 0) %}
+            {% set stewardship_total = stewardship.get('total_tokens', 0) %}
+            {% set admin_total = admin.get('total_tokens', 0) %}
+            
+            {# General Distribution = Total - Stewardship - Admin (includes all other holders) #}
+            {% set general_total = total_issued - stewardship_total - admin_total %}
+            
+            {# Calculate actual percentages #}
+            {% if total_issued > 0 %}
+                {% set general_pct = (general_total / total_issued) * 100 %}
+                {% set stewardship_pct = (stewardship_total / total_issued) * 100 %}
+                {% set admin_pct = (admin_total / total_issued) * 100 %}
+            {% else %}
+                {% set general_pct = 0 %}
+                {% set stewardship_pct = 0 %}
+                {% set admin_pct = 0 %}
+            {% endif %}
+            
+            {# Check compliance (within ±5% tolerance) #}
+            {% set general_ok = general_pct >= 60 and general_pct <= 70 %}
+            {% set stewardship_ok = stewardship_pct >= 25 and stewardship_pct <= 35 %}
+            {% set admin_ok = admin_pct <= 7 %}
+            {% set needs_rebalancing = not (general_ok and stewardship_ok and admin_ok) %}
+            
+            <!-- Distribution Summary Overview -->
+            <div class="audit-summary">
+                <div class="summary-header">
+                    <h4>Distribution Overview</h4>
+                    {% if needs_rebalancing %}
+                    <span class="rebalance-indicator needs-rebalancing">⚠️ Rebalancing Recommended</span>
+                    {% else %}
+                    <span class="rebalance-indicator compliant">✅ Distribution Compliant</span>
+                    {% endif %}
+                </div>
+                
+                <div class="summary-total">
+                    <span class="total-label">Total {{ token.get('code', 'UBEC') }} Tokens Issued:</span>
+                    <span class="total-value">{{ "{:,.2f}".format(total_issued) }}</span>
+                </div>
+                
+                <div class="summary-grid">
+                    <div class="summary-item {{ 'compliant' if general_ok else 'non-compliant' }}">
+                        <div class="summary-category">General Distribution</div>
+                        <div class="summary-stats">
+                            <span class="target">Target: 65%</span>
+                            <span class="actual">Actual: {{ "{:.1f}".format(general_pct) }}%</span>
+                        </div>
+                        <div class="summary-amount">{{ "{:,.2f}".format(general_total) }} {{ token.get('code', 'UBEC') }}</div>
+                        <div class="summary-bar">
+                            <div class="bar-fill" style="width: {{ [general_pct, 100]|min }}%; background: {{ '#27ae60' if general_ok else '#e74c3c' }};"></div>
+                            <div class="bar-target" style="left: 65%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-item {{ 'compliant' if stewardship_ok else 'non-compliant' }}">
+                        <div class="summary-category">Token Ecosystem Stewardship</div>
+                        <div class="summary-stats">
+                            <span class="target">Target: 30%</span>
+                            <span class="actual">Actual: {{ "{:.1f}".format(stewardship_pct) }}%</span>
+                        </div>
+                        <div class="summary-amount">{{ "{:,.2f}".format(stewardship_total) }} {{ token.get('code', 'UBEC') }}</div>
+                        <div class="summary-bar">
+                            <div class="bar-fill" style="width: {{ [stewardship_pct, 100]|min }}%; background: {{ '#27ae60' if stewardship_ok else '#e74c3c' }};"></div>
+                            <div class="bar-target" style="left: 30%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-item {{ 'compliant' if admin_ok else 'non-compliant' }}">
+                        <div class="summary-category">Administration</div>
+                        <div class="summary-stats">
+                            <span class="target">Target: 5%</span>
+                            <span class="actual">Actual: {{ "{:.1f}".format(admin_pct) }}%</span>
+                        </div>
+                        <div class="summary-amount">{{ "{:,.2f}".format(admin_total) }} {{ token.get('code', 'UBEC') }}</div>
+                        <div class="summary-bar">
+                            <div class="bar-fill" style="width: {{ [admin_pct * 2, 100]|min }}%; background: {{ '#27ae60' if admin_ok else '#e74c3c' }};"></div>
+                            <div class="bar-target" style="left: 10%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Issuer Account -->
+            <div class="audit-section issuer-section">
+                <div class="audit-header">
+                    <span class="audit-title">Issuer Account</span>
+                    <span class="audit-total">{{ "{:,.2f}".format(total_issued) }} {{ token.get('code', 'UBEC') }} Tokens Issued</span>
+                </div>
+                <table class="audit-table">
+                    <tbody>
+                        <tr>
+                            <td class="purpose-cell">{{ token.get('code', 'UBEC') }} Token issued by</td>
+                            <td class="address-cell">
+                                <a href="https://stellar.expert/explorer/public/account/{{ token.get('issuer_account', '') }}" 
+                                   target="_blank" rel="noopener noreferrer">
+                                    {{ token.get('issuer_account', '') }}
+                                </a>
+                            </td>
+                            <td class="balance-cell"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- General Distribution - 65% -->
+            <div class="audit-section">
+                <div class="audit-header">
+                    <span class="audit-title">General Distribution − 65%</span>
+                    <span class="audit-total">({{ "{:,.2f}".format(general_total) }} {{ token.get('code', 'UBEC') }} tokens)</span>
+                </div>
+                <p class="section-note">Includes the General Distribution account, project accounts, and all other {{ token.get('code', 'UBEC') }} token holders.</p>
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th>Purpose</th>
+                            <th>Public Account ID</th>
+                            <th>Actual {{ token.get('code', 'UBEC') }} Token Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in general.get('accounts', []) %}
+                        <tr>
+                            <td class="purpose-cell">{{ account.get('purpose', '') }}</td>
+                            <td class="address-cell">
+                                <a href="https://stellar.expert/explorer/public/account/{{ account.get('account_id', '') }}" 
+                                   target="_blank" rel="noopener noreferrer">
+                                    {{ account.get('account_id', '') }}
+                                </a>
+                            </td>
+                            <td class="balance-cell">{{ "{:,.7f}".format(account.get('balance', 0)) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% for project in general.get('projects', []) %}
+                            {% for account in project.get('accounts', []) %}
+                            <tr>
+                                <td class="purpose-cell">{{ project.get('name', '') }}</td>
+                                <td class="address-cell">
+                                    <a href="https://stellar.expert/explorer/public/account/{{ account.get('account_id', '') }}" 
+                                       target="_blank" rel="noopener noreferrer">
+                                        {{ account.get('account_id', '') }}
+                                    </a>
+                                </td>
+                                <td class="balance-cell">{{ "{:,.7f}".format(account.get('balance', 0)) }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                        <tr class="other-holders-row">
+                            <td class="purpose-cell" colspan="2"><em>All other {{ token.get('code', 'UBEC') }} token holders</em></td>
+                            <td class="balance-cell"><em>(included in 65% total)</em></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Token Ecosystem Stewardship - 30% -->
+            <div class="audit-section">
+                <div class="audit-header">
+                    <span class="audit-title">Token Ecosystem Stewardship − 30%</span>
+                    <span class="audit-total">({{ "{:,.2f}".format(stewardship_total) }} {{ token.get('code', 'UBEC') }} tokens)</span>
+                </div>
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th>Purpose</th>
+                            <th>Public Account ID</th>
+                            <th>Actual {{ token.get('code', 'UBEC') }} Token Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in stewardship.get('accounts', []) %}
+                        <tr>
+                            <td class="purpose-cell">{{ account.get('purpose', '') }}</td>
+                            <td class="address-cell">
+                                <a href="https://stellar.expert/explorer/public/account/{{ account.get('account_id', '') }}" 
+                                   target="_blank" rel="noopener noreferrer">
+                                    {{ account.get('account_id', '') }}
+                                </a>
+                            </td>
+                            <td class="balance-cell">{{ "{:,.7f}".format(account.get('balance', 0)) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% set lp_summary = stewardship.get('liquidity_pools_summary', {}) %}
+                {% if lp_summary %}
+                <table class="audit-table lp-breakdown">
+                    <tbody>
+                        <tr>
+                            <td class="purpose-cell" colspan="2">Amount of {{ token.get('code', 'UBEC') }}s unlocked in liquidity pools:</td>
+                            <td class="balance-cell">{{ "{:,.7f}".format(lp_summary.get('stewardship_lp_unlocked', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="purpose-cell" colspan="2">Amount of {{ token.get('code', 'UBEC') }}s locked in liquidity pools:</td>
+                            <td class="balance-cell">{{ "{:,.7f}".format(lp_summary.get('stewardship_lp_locked', 0)) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+            
+            <!-- Administration - 5% -->
+            <div class="audit-section">
+                <div class="audit-header">
+                    <span class="audit-title">Administration − 5%</span>
+                    <span class="audit-total">({{ "{:,.2f}".format(admin_total) }} {{ token.get('code', 'UBEC') }} tokens)</span>
+                </div>
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th>Purpose</th>
+                            <th>Public Account ID</th>
+                            <th>Actual {{ token.get('code', 'UBEC') }} Token Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in admin.get('accounts', []) %}
+                        <tr>
+                            <td class="purpose-cell">{{ account.get('purpose', '') }}</td>
+                            <td class="address-cell">
+                                <a href="https://stellar.expert/explorer/public/account/{{ account.get('account_id', '') }}" 
+                                   target="_blank" rel="noopener noreferrer">
+                                    {{ account.get('account_id', '') }}
+                                </a>
+                            </td>
+                            <td class="balance-cell">{{ "{:,.7f}".format(account.get('balance', 0)) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Disclaimer -->
+            {% if token_audit.get('disclaimer') %}
+            <div class="audit-disclaimer">
+                <h4>Disclaimer</h4>
+                <p>{{ token_audit.get('disclaimer', '') }}</p>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- Fallback: Show static distribution model -->
             <div class="distribution-grid">
                 <div class="distribution-card">
                     <h4>Distribution Model</h4>
@@ -302,6 +628,7 @@
                             <span class="breakdown-value">5%</span>
                         </div>
                     </div>
+                    <p class="audit-note">Full token audit loading...</p>
                 </div>
             </div>
             {% endif %}
@@ -348,43 +675,42 @@
     
     /* Dashboard Content */
     .dashboard-content {
-        padding: 2rem 0;
+        padding: 3rem 0;
+        background: #f5f7fa;
     }
     
     .dashboard-section {
-        margin: 3rem 0;
+        margin-bottom: 3rem;
     }
     
     .dashboard-section h2 {
         color: #2c3e50;
-        font-size: 2rem;
         margin-bottom: 1.5rem;
+        font-size: 1.75rem;
     }
     
-    /* Network Metrics */
+    /* Metrics Grid */
     .metrics-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
-        margin-top: 1.5rem;
     }
     
     .metric-card {
         background: white;
         padding: 2rem;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
     }
     
     .metric-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
     
     .metric-icon {
-        font-size: 2.5rem;
+        font-size: 2rem;
         margin-bottom: 1rem;
     }
     
@@ -397,16 +723,14 @@
     
     .metric-label {
         color: #666;
-        margin-top: 0.5rem;
         font-size: 0.95rem;
     }
     
     /* Holonic Scores */
     .holonic-grid {
         display: grid;
-        grid-template-columns: 1fr 2fr;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 2rem;
-        margin-top: 1.5rem;
     }
     
     .holonic-card {
@@ -418,29 +742,36 @@
     
     .holonic-card h4 {
         color: #2c3e50;
-        margin-bottom: 1rem;
-    }
-    
-    .large-score {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #4CAF50;
-        margin: 1rem 0;
+        margin-bottom: 1.5rem;
         text-align: center;
     }
     
+    .large-score {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #8BC34A;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
     .score-indicator {
-        height: 24px;
+        height: 8px;
         background: #e0e0e0;
-        border-radius: 12px;
+        border-radius: 4px;
         overflow: hidden;
-        margin-top: 1rem;
     }
     
     .indicator-bar {
         height: 100%;
         background: linear-gradient(90deg, #8BC34A, #4CAF50);
-        transition: width 0.5s ease;
+        border-radius: 4px;
+    }
+    
+    .account-count {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.9em;
+        color: #7f8c8d;
     }
     
     .dimensions-list {
@@ -456,30 +787,23 @@
         padding: 0.75rem 1rem;
         background: #f8f9fa;
         border-radius: 8px;
-        transition: background 0.2s ease;
-    }
-    
-    .dimension-item:hover {
-        background: #e9ecef;
     }
     
     .dimension-name {
-        font-weight: 500;
         color: #2c3e50;
     }
     
     .dimension-score {
-        font-weight: 600;
         color: #8BC34A;
-        font-size: 1.1rem;
+        font-weight: 600;
     }
     
     /* Transactions Table */
     .transactions-table {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
     .transactions-table table {
@@ -487,19 +811,17 @@
         border-collapse: collapse;
     }
     
-    .transactions-table th {
-        background: #f8f9fa;
-        padding: 1rem;
+    .transactions-table th,
+    .transactions-table td {
+        padding: 1rem 1.5rem;
         text-align: left;
-        font-weight: 600;
-        color: #2c3e50;
-        border-bottom: 2px solid #e0e0e0;
+        border-bottom: 1px solid #eee;
     }
     
-    .transactions-table td {
-        padding: 1rem;
-        border-bottom: 1px solid #e0e0e0;
-        color: #555;
+    .transactions-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #2c3e50;
     }
     
     .transactions-table tbody tr:hover {
@@ -513,38 +835,166 @@
     .hash {
         font-family: 'Courier New', monospace;
         font-size: 0.9em;
-        color: #666;
+    }
+    
+    .hash a {
+        color: #4A90E2;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .hash a:hover {
+        color: #2E6BC0;
+        text-decoration: underline;
+    }
+    
+    .hash a:visited {
+        color: #6B7B8A;
     }
     
     .badge {
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
-        font-size: 0.85em;
+        font-size: 0.75em;
         font-weight: 600;
+        text-transform: uppercase;
+        white-space: nowrap;
     }
     
+    /* Core Operations */
     .badge.tx-payment {
         background: #d4edda;
         color: #155724;
     }
     
-    .badge.tx-trade {
-        background: #cce5ff;
-        color: #004085;
-    }
-    
-    .badge.tx-transfer {
+    .badge.tx-change-trust, .badge.tx-change_trust {
         background: #fff3cd;
         color: #856404;
     }
     
+    .badge.tx-create-account, .badge.tx-create_account {
+        background: #e2e3f3;
+        color: #383d98;
+    }
+    
+    /* Trade Operations */
+    .badge.tx-manage-sell-offer, .badge.tx-manage_sell_offer {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .badge.tx-manage-buy-offer, .badge.tx-manage_buy_offer {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .badge.tx-path-payment-strict-send, .badge.tx-path_payment_strict_send,
+    .badge.tx-path-payment-strict-receive, .badge.tx-path_payment_strict_receive {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .badge.tx-create-passive-sell-offer, .badge.tx-create_passive_sell_offer {
+        background: #fce4ec;
+        color: #880e4f;
+    }
+    
+    /* Liquidity Pool */
+    .badge.tx-liquidity-pool-deposit, .badge.tx-liquidity_pool_deposit {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+    
+    .badge.tx-liquidity-pool-withdraw, .badge.tx-liquidity_pool_withdraw {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+    
+    /* Admin Operations */
+    .badge.tx-set-options, .badge.tx-set_options,
+    .badge.tx-allow-trust, .badge.tx-allow_trust,
+    .badge.tx-account-merge, .badge.tx-account_merge,
+    .badge.tx-manage-data, .badge.tx-manage_data,
+    .badge.tx-bump-sequence, .badge.tx-bump_sequence {
+        background: #f5e6d3;
+        color: #8b5a2b;
+    }
+    
+    /* Fallback */
+    .badge.tx-unknown, .badge.tx-transfer, .badge.tx-trade {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+    
     .token-badge {
-        background: #8BC34A;
-        color: white;
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
         font-size: 0.85em;
         font-weight: 600;
+    }
+    
+    /* UBEC Token Colors - Ubuntu Earth Tones */
+    .token-badge.token-ubec {
+        background: linear-gradient(135deg, #8BC34A, #66BB6A);
+        color: white;
+    }
+    
+    .token-badge.token-ubecrc {
+        background: linear-gradient(135deg, #4A90E2, #64B5F6);
+        color: white;
+    }
+    
+    .token-badge.token-ubecgpi {
+        background: linear-gradient(135deg, #8B7355, #A0826D);
+        color: white;
+    }
+    
+    .token-badge.token-ubectt {
+        background: linear-gradient(135deg, #F4A460, #FFB347);
+        color: white;
+    }
+    
+    .token-badge.token-xlm {
+        background: linear-gradient(135deg, #7D8491, #9CA3AF);
+        color: white;
+    }
+    
+    /* Trade Summary Display */
+    .trade-info {
+        background: #f8f9fa;
+        padding: 0.5rem 1rem !important;
+    }
+    
+    .trade-summary {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #495057;
+        font-weight: 600;
+    }
+    
+    .trade-summary::before {
+        content: "⇄ ";
+        color: #6c757d;
+    }
+    
+    /* Direction Column */
+    .direction {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85em;
+        white-space: nowrap;
+    }
+    
+    .account-from {
+        color: #e74c3c;
+    }
+    
+    .account-to {
+        color: #27ae60;
+    }
+    
+    .arrow {
+        color: #7f8c8d;
+        margin: 0 0.25rem;
     }
     
     .amount {
@@ -619,6 +1069,285 @@
         font-size: 1.25rem;
     }
     
+    /* Token Audit Styles */
+    .audit-summary {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .summary-header h4 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.25rem;
+    }
+    
+    .rebalance-indicator {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .rebalance-indicator.compliant {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .rebalance-indicator.needs-rebalancing {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .summary-total {
+        text-align: center;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .total-label {
+        display: block;
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .total-value {
+        display: block;
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+    
+    .summary-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 4px solid #8BC34A;
+    }
+    
+    .summary-item.non-compliant {
+        border-left-color: #e74c3c;
+        background: #fdf2f2;
+    }
+    
+    .summary-category {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-stats .target {
+        color: #6c757d;
+    }
+    
+    .summary-stats .actual {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .summary-amount {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.75rem;
+    }
+    
+    .summary-bar {
+        position: relative;
+        height: 8px;
+        background: #dee2e6;
+        border-radius: 4px;
+        overflow: visible;
+    }
+    
+    .bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    
+    .bar-target {
+        position: absolute;
+        top: -4px;
+        width: 2px;
+        height: 16px;
+        background: #2c3e50;
+        border-radius: 1px;
+    }
+    
+    .section-note {
+        padding: 0.75rem 1rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-style: italic;
+        border-bottom: 1px solid #e9ecef;
+        margin: 0;
+    }
+    
+    .other-holders-row {
+        background: #f8f9fa;
+    }
+    
+    .other-holders-row td {
+        color: #6c757d;
+    }
+    
+    .audit-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .audit-section.issuer-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .audit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .audit-title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+    
+    .audit-total {
+        color: #7f8c8d;
+        font-size: 0.95rem;
+    }
+    
+    .audit-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .audit-table th {
+        background: #f1f3f4;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .audit-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f3f4;
+        vertical-align: middle;
+    }
+    
+    .audit-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .audit-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .purpose-cell {
+        color: #495057;
+        font-weight: 500;
+        width: 25%;
+    }
+    
+    .address-cell {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+    }
+    
+    .address-cell a {
+        color: #8BC34A;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .address-cell a:hover {
+        color: #689F38;
+        text-decoration: underline;
+    }
+    
+    .balance-cell {
+        text-align: right;
+        font-weight: 600;
+        color: #2c3e50;
+        font-family: 'Courier New', monospace;
+        width: 20%;
+    }
+    
+    .audit-note {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        font-style: italic;
+        margin-top: 1rem;
+    }
+    
+    .audit-disclaimer {
+        background: #fff8e6;
+        border: 1px solid #f0e6d2;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .audit-disclaimer h4 {
+        color: #8b7355;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .audit-disclaimer p {
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    .lp-breakdown {
+        background: #f8f9fa;
+        margin-top: 0;
+    }
+    
+    .lp-breakdown td.purpose-cell {
+        font-style: italic;
+        color: #6c757d;
+    }
+    
     /* Auto-refresh Notice */
     .auto-refresh-notice {
         text-align: center;
@@ -647,6 +1376,73 @@
         }
     }
     
+    /* Clickable Region Links */
+    .region-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: opacity 0.2s ease;
+    }
+    
+    .region-link .ecoregion-item,
+    .region-link .watershed-item {
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    
+    .region-link:hover .ecoregion-item {
+        background: #f8fdf8;
+    }
+    
+    .region-link:hover .watershed-item {
+        background: #f0f9ff;
+    }
+    
+    .map-icon {
+        opacity: 0.5;
+        font-size: 0.875rem;
+        margin-left: 0.25rem;
+        transition: opacity 0.2s ease;
+    }
+    
+    .region-link:hover .map-icon {
+        opacity: 1;
+    }
+    
+    /* Loading state for region links */
+    .region-link[style*="opacity"] .map-icon::after {
+        content: " ⏳";
+    }
+    
+    /* Scrollable Region Lists */
+    .ecoregion-items,
+    .watershed-items {
+        scrollbar-width: thin;
+        scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+    
+    .ecoregion-items::-webkit-scrollbar,
+    .watershed-items::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .ecoregion-items::-webkit-scrollbar-track,
+    .watershed-items::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .ecoregion-items::-webkit-scrollbar-thumb,
+    .watershed-items::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .ecoregion-items::-webkit-scrollbar-thumb:hover,
+    .watershed-items::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+    
     /* Responsive Design */
     @media (max-width: 1200px) {
         .geo-overview-grid {
@@ -672,7 +1468,7 @@
         }
         
         .transactions-table table {
-            min-width: 600px;
+            min-width: 800px;
         }
         
         .geo-stats-grid {
@@ -684,18 +1480,115 @@
 
 {% block extra_js %}
 <script>
-    // Auto-refresh dashboard every 30 seconds
-    setInterval(() => {
-        location.reload();
-    }, 30000);
+    // ========================================================================
+    // MAPSERVICE REGION LINKING
+    // ========================================================================
     
-    // Update last refresh time immediately
+    const MAPSERVICE_BASE_URL = 'https://mapservice.ubec.network/application/ubec_bioregions_overview';
+    
+    /**
+     * Fetch bbox data from API and open mapservice with extent parameter
+     */
+    async function openRegionInMap(regionType, regionId) {
+        // Show loading state on the clicked element
+        const link = document.querySelector(`[data-region-type="${regionType}"][data-region-id="${regionId}"]`);
+        if (link) {
+            link.style.opacity = '0.6';
+            link.style.cursor = 'wait';
+        }
+        
+        try {
+            // Determine the API endpoint based on region type
+            // Note: Frontend routes use /api/v1 prefix (set in main_web.py)
+            let apiEndpoint;
+            if (regionType === 'ecoregion') {
+                apiEndpoint = `/api/v1/ecoregions/${regionId}/bbox`;
+            } else if (regionType === 'watershed') {
+                apiEndpoint = `/api/v1/watersheds/${regionId}/bbox`;
+            } else if (regionType === 'bioregion') {
+                apiEndpoint = `/api/v1/bioregions/${regionId}/bbox`;
+            } else {
+                throw new Error(`Unknown region type: ${regionType}`);
+            }
+            
+            console.log(`Fetching bbox from: ${apiEndpoint}`);
+            
+            // Fetch bbox data from API
+            const response = await fetch(apiEndpoint);
+            console.log(`API response status: ${response.status}`);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error: ${errorText}`);
+                throw new Error(`API returned ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Bbox data received:', data);
+            
+            // Build mapservice URL with extent parameter
+            let mapUrl = MAPSERVICE_BASE_URL;
+            
+            if (data.bbox && data.bbox.min_x !== undefined) {
+                const { min_x, min_y, max_x, max_y } = data.bbox;
+                // Format: bbox=minx,miny,maxx,maxy (EPSG:3857 meters)
+                mapUrl = `${MAPSERVICE_BASE_URL}?bbox=${min_x},${min_y},${max_x},${max_y}`;
+                console.log(`Built URL with bbox: ${mapUrl}`);
+            } else if (data.centroid && data.centroid.x !== undefined) {
+                // Fallback to center if no bbox
+                mapUrl = `${MAPSERVICE_BASE_URL}?center=${data.centroid.x},${data.centroid.y}&zoom=8`;
+                console.log(`Built URL with center: ${mapUrl}`);
+            } else {
+                console.warn('No bbox or centroid in response, using base URL');
+            }
+            
+            // Open in new tab
+            window.open(mapUrl, '_blank', 'noopener,noreferrer');
+            
+        } catch (error) {
+            console.error('Error fetching region bbox:', error);
+            // Fallback: open mapservice without extent
+            window.open(MAPSERVICE_BASE_URL, '_blank', 'noopener,noreferrer');
+        } finally {
+            // Reset link state
+            if (link) {
+                link.style.opacity = '';
+                link.style.cursor = '';
+            }
+        }
+    }
+    
+    // ========================================================================
+    // EVENT LISTENERS
+    // ========================================================================
+    
     document.addEventListener('DOMContentLoaded', function() {
+        // Handle region link clicks
+        document.querySelectorAll('.region-link[data-region-type]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const regionType = this.dataset.regionType;
+                const regionId = this.dataset.regionId;
+                
+                console.log(`Region link clicked: type=${regionType}, id=${regionId}`);
+                
+                if (regionType && regionId) {
+                    openRegionInMap(regionType, regionId);
+                }
+            });
+        });
+        
+        // Update last refresh time
         const updateTime = document.getElementById('last-update-time');
         if (updateTime && updateTime.textContent === 'Loading...') {
             const now = new Date();
             updateTime.textContent = now.toISOString().substring(0, 19).replace('T', ' ');
         }
     });
+    
+    // Auto-refresh dashboard every 30 seconds
+    setInterval(() => {
+        location.reload();
+    }, 30000);
 </script>
 {% endblock %}

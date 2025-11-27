@@ -21,7 +21,7 @@ Attribution:
     our decisions and recommendations. This project was made possible with 
     the assistance of Claude and Anthropic PBC.
 
-Version: 2.1.0 - Aligned with Backend API v2.3.0
+Version: 2.3.0 - Added Token Audit endpoint (Backend API v2.5.5)
 """
 
 import aiohttp
@@ -444,6 +444,114 @@ class BackendAPIClient:
             return None
     
     # ========================================================================
+    # BOUNDING BOX ENDPOINTS (v2.5.0)
+    # ========================================================================
+    
+    async def get_bioregion_bbox(self, bioregion_id: int) -> Optional[Dict]:
+        """
+        Get bounding box coordinates for a specific bioregion.
+        
+        NEW v2.5.0: Provides bounding box for map centering and zoom.
+        Coordinates are in EPSG:3857 (WGS 84 / Pseudo-Mercator) meters.
+        
+        Args:
+            bioregion_id: Bioregion GID identifier
+        
+        Returns:
+            Dictionary containing:
+            - gid: Bioregion identifier
+            - bioregion_name: Name of the bioregion
+            - bbox: Bounding box with min_x, min_y, max_x, max_y (meters, EPSG:3857)
+            - centroid: Center point coordinates (x, y in meters)
+            - area_sqkm: Area in square kilometers
+            - srid: 3857 (WGS 84 / Pseudo-Mercator)
+            - projection: 'WGS 84 / Pseudo-Mercator'
+            - units: 'meters'
+        """
+        try:
+            return await self._cached_get(f"/api/v1/bioregions/{bioregion_id}/bbox", ttl=300)
+        except aiohttp.ClientResponseError as e:
+            if e.status == 404:
+                logger.info(f"Bioregion bbox {bioregion_id} not found")
+                return None
+            else:
+                logger.error(f"Error fetching bioregion bbox {bioregion_id}: {e.status}")
+                return None
+        except Exception as e:
+            logger.warning(f"Could not fetch bioregion bbox {bioregion_id}: {e}")
+            return None
+    
+    async def get_ecoregion_bbox(self, eco_id: int) -> Optional[Dict]:
+        """
+        Get bounding box coordinates for a specific ecoregion.
+        
+        NEW v2.5.0: Provides bounding box for map centering and zoom.
+        Coordinates are in EPSG:3857 (WGS 84 / Pseudo-Mercator) meters.
+        
+        Args:
+            eco_id: Ecoregion eco_id from WWF Ecoregions 2017 dataset
+        
+        Returns:
+            Dictionary containing:
+            - eco_id: Ecoregion identifier
+            - eco_name: Name of the ecoregion
+            - biome_name: Associated biome name
+            - realm: Biogeographic realm
+            - bbox: Bounding box with min_x, min_y, max_x, max_y (meters, EPSG:3857)
+            - centroid: Center point coordinates (x, y in meters)
+            - shape_area: Area from source dataset
+            - srid: 3857 (WGS 84 / Pseudo-Mercator)
+            - projection: 'WGS 84 / Pseudo-Mercator'
+            - units: 'meters'
+        """
+        try:
+            return await self._cached_get(f"/api/v1/ecoregions/{eco_id}/bbox", ttl=300)
+        except aiohttp.ClientResponseError as e:
+            if e.status == 404:
+                logger.info(f"Ecoregion bbox {eco_id} not found")
+                return None
+            else:
+                logger.error(f"Error fetching ecoregion bbox {eco_id}: {e.status}")
+                return None
+        except Exception as e:
+            logger.warning(f"Could not fetch ecoregion bbox {eco_id}: {e}")
+            return None
+    
+    async def get_watershed_bbox(self, feow_id: int) -> Optional[Dict]:
+        """
+        Get bounding box coordinates for a specific watershed.
+        
+        NEW v2.5.0: Provides bounding box for map centering and zoom.
+        Coordinates are in EPSG:3857 (WGS 84 / Pseudo-Mercator) meters.
+        
+        Args:
+            feow_id: FEOW watershed identifier from HydroSHEDS dataset
+        
+        Returns:
+            Dictionary containing:
+            - feow_id: Watershed identifier
+            - name: Generated watershed name
+            - bbox: Bounding box with min_x, min_y, max_x, max_y (meters, EPSG:3857)
+            - centroid: Center point coordinates (x, y in meters)
+            - area_sqkm: Area in square kilometers
+            - srid: 3857 (WGS 84 / Pseudo-Mercator)
+            - projection: 'WGS 84 / Pseudo-Mercator'
+            - units: 'meters'
+        """
+        try:
+            return await self._cached_get(f"/api/v1/watersheds/{feow_id}/bbox", ttl=300)
+        except aiohttp.ClientResponseError as e:
+            if e.status == 404:
+                logger.info(f"Watershed bbox {feow_id} not found")
+                return None
+            else:
+                logger.error(f"Error fetching watershed bbox {feow_id}: {e.status}")
+                return None
+        except Exception as e:
+            logger.warning(f"Could not fetch watershed bbox {feow_id}: {e}")
+            return None
+    
+    # ========================================================================
     # HOLONIC EVALUATION ENDPOINTS
     # ========================================================================
     
@@ -503,7 +611,7 @@ class BackendAPIClient:
         """
         Get recent blockchain transactions across all UBEC tokens.
         
-        CRITICAL FIX: Endpoint path corrected to /api/v1/transactions/recent
+        UPDATED v2.5.2: Now returns full operation-level details per transaction.
         
         Args:
             limit: Maximum number of transactions to return (default 20, max 100)
@@ -511,9 +619,26 @@ class BackendAPIClient:
         
         Returns:
             Dictionary with:
-            - transactions: List of recent transaction objects
-            - count: Number of transactions returned
-            - total: Total number of transactions in database
+            - transactions: List of transaction objects, each containing:
+                - transaction_hash: Unique transaction identifier
+                - ledger_sequence: Ledger number
+                - created_at: Transaction timestamp (ISO format)
+                - source_account: Account that submitted the transaction
+                - successful: Whether transaction succeeded
+                - operations: Array of operation details:
+                    - type: Operation type (PAYMENT, CHANGE_TRUST, MANAGE_SELL_OFFER, etc.)
+                    - asset_code: Token code (UBEC, UBECrc, UBECgpi, UBECtt, XLM)
+                    - amount: Amount transferred (float or null)
+                    - from_account: Source of funds
+                    - to_account: Destination of funds
+                    - is_trade: Boolean indicating trade operation
+                    - trade_summary: Human-readable trade description (for trades)
+                    - exchange: Exchange details for trade operations
+                - involves_tokens: Array of tokens involved in transaction
+                - operation_count: Number of operations in transaction
+            - filter: Applied filter (if any)
+            - pagination: Pagination info (limit, total, returned)
+            - valid_tokens: List of valid UBEC tokens
             - timestamp: When this data was retrieved
         """
         params = {
@@ -546,6 +671,28 @@ class BackendAPIClient:
             - timestamp: When this data was retrieved
         """
         return await self._cached_get("/api/v1/distribution", ttl=60)
+    
+    async def get_token_audit(self, token_code: str = "UBEC") -> Dict:
+        """
+        Get comprehensive token audit data for transparency reporting.
+        
+        NEW v2.5.5: Full token audit endpoint for dashboard display
+        
+        Args:
+            token_code: Token to audit (UBEC, UBECrc, UBECgpi, UBECtt) - default UBEC
+        
+        Returns:
+            Dictionary containing:
+            - token: Token info (code, element, ubuntu_principle, issuer_account, total_tokens_issued)
+            - summary: Totals and percentages (total_issued, total_distributed, distribution_model)
+            - general_distribution: 65% category with accounts and projects
+            - token_ecosystem_stewardship: 30% category with accounts and LP breakdown
+            - administration: 5% category with accounts
+            - compliance: Compliance status indicators
+            - disclaimer: Legal disclaimer text
+            - timestamp: When this audit was generated
+        """
+        return await self._cached_get(f"/api/v1/token-audit/{token_code.upper()}", ttl=60)
     
     # ========================================================================
     # HEALTH CHECK
