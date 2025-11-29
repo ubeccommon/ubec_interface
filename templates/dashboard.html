@@ -398,8 +398,11 @@
             {% set admin = token_audit.get('administration', {}) %}
             {% set compliance = token_audit.get('compliance', {}) %}
             
-            {# Total issued comes from token.total_tokens_issued #}
+            {# Total issued comes from token.total_tokens_issued (v2.5.8: now includes LP reserves) #}
             {% set total_issued = token.get('total_tokens_issued', 0) %}
+            {# v2.5.8 NEW: Breakdown of total supply between accounts and liquidity pools #}
+            {% set total_in_accounts = summary.get('total_in_accounts', 0) %}
+            {% set total_in_pools = summary.get('total_in_liquidity_pools', 0) %}
             {% set stewardship_total = stewardship.get('total_tokens', 0) %}
             {% set admin_total = admin.get('total_tokens', 0) %}
             
@@ -501,6 +504,17 @@
                         </tr>
                     </tbody>
                 </table>
+                {# v2.5.8 NEW: Show supply breakdown between accounts and liquidity pools #}
+                {% if total_in_accounts > 0 or total_in_pools > 0 %}
+                <div class="supply-breakdown-info">
+                    <p class="supply-note">
+                        <em>Total Supply Breakdown:</em>
+                        <span class="in-accounts">{{ "{:,.2f}".format(total_in_accounts) }} in accounts</span>
+                        <span class="separator">+</span>
+                        <span class="in-pools">{{ "{:,.2f}".format(total_in_pools) }} in liquidity pools</span>
+                    </p>
+                </div>
+                {% endif %}
             </div>
             
             <!-- General Distribution - 65% -->
@@ -554,21 +568,29 @@
             </div>
             
             <!-- Token Ecosystem Stewardship - 30% -->
+            <!-- UPDATED v2.5.8: Shows LP breakdown per stewardship account -->
             <div class="audit-section">
                 <div class="audit-header">
                     <span class="audit-title">Token Ecosystem Stewardship − 30%</span>
                     <span class="audit-total">({{ "{:,.2f}".format(stewardship_total) }} {{ token.get('code', 'UBEC') }} tokens)</span>
                 </div>
-                <table class="audit-table">
+                <p class="section-note">
+                    Stewardship reserves for ecosystem sustainability. Balances include both direct holdings and liquidity pool positions.
+                </p>
+                <table class="audit-table stewardship-table">
                     <thead>
                         <tr>
                             <th>Purpose</th>
                             <th>Public Account ID</th>
-                            <th>Actual {{ token.get('code', 'UBEC') }} Token Balance</th>
+                            <th>Total Balance</th>
+                            <th class="detail-col">Direct</th>
+                            <th class="detail-col">In LP</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for account in stewardship.get('accounts', []) %}
+                        {# v2.5.8: Get breakdown for each account #}
+                        {% set breakdown = account.get('breakdown', {}) %}
                         <tr>
                             <td class="purpose-cell">{{ account.get('purpose', '') }}</td>
                             <td class="address-cell">
@@ -578,27 +600,48 @@
                                 </a>
                             </td>
                             <td class="balance-cell">{{ "{:,.7f}".format(account.get('balance', 0)) }}</td>
+                            <td class="balance-cell detail-cell">{{ "{:,.7f}".format(breakdown.get('direct', account.get('balance', 0))) }}</td>
+                            <td class="balance-cell detail-cell">{{ "{:,.7f}".format(breakdown.get('lp_positions', 0)) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 
+                {# v2.5.8: Updated LP summary structure with per-account breakdown #}
                 {% set lp_summary = stewardship.get('liquidity_pools_summary', {}) %}
                 {% if lp_summary %}
                 <table class="audit-table lp-breakdown">
                     <tbody>
-                        <tr>
-                            <td class="purpose-cell" colspan="2"><em>Stewardship Liquidity Pool position breakdown:</em></td>
-                            <td class="balance-cell"></td>
+                        <tr class="lp-breakdown-header">
+                            <td colspan="5"><em>💧 Stewardship Liquidity Pool Position Summary:</em></td>
                         </tr>
                         <tr>
-                            <td class="purpose-cell" colspan="2">└ Available (unlocked):</td>
-                            <td class="balance-cell">{{ "{:,.7f}".format(lp_summary.get('stewardship_lp_unlocked', 0)) }}</td>
+                            <td class="purpose-cell" colspan="3">Total locked in all UBEC pools:</td>
+                            <td class="balance-cell" colspan="2">{{ "{:,.7f}".format(lp_summary.get('total_locked_in_all_pools', 0)) }}</td>
                         </tr>
                         <tr>
-                            <td class="purpose-cell" colspan="2">└ Deposited in pools (locked):</td>
-                            <td class="balance-cell">{{ "{:,.7f}".format(lp_summary.get('stewardship_lp_locked', 0)) }}</td>
+                            <td class="purpose-cell" colspan="3">Total stewardship LP positions:</td>
+                            <td class="balance-cell" colspan="2">{{ "{:,.7f}".format(lp_summary.get('stewardship_total_in_lp', 0)) }}</td>
                         </tr>
+                        {# v2.5.8: New per-account LP breakdown #}
+                        {% set lp_by_account = lp_summary.get('stewardship_lp_by_account', {}) %}
+                        {% if lp_by_account %}
+                        <tr class="lp-breakdown-subheader">
+                            <td colspan="5"><em>Breakdown by stewardship account:</em></td>
+                        </tr>
+                        <tr>
+                            <td class="purpose-cell indent" colspan="3">└ Management:</td>
+                            <td class="balance-cell" colspan="2">{{ "{:,.7f}".format(lp_by_account.get('management', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="purpose-cell indent" colspan="3">└ Infrastructure:</td>
+                            <td class="balance-cell" colspan="2">{{ "{:,.7f}".format(lp_by_account.get('infrastructure', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="purpose-cell indent" colspan="3">└ Liquidity:</td>
+                            <td class="balance-cell" colspan="2">{{ "{:,.7f}".format(lp_by_account.get('liquidity', 0)) }}</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
                 {% endif %}
@@ -1747,6 +1790,92 @@
         padding: 2rem !important;
     }
     
+    /* ================================================================
+       v2.5.8 Token Audit Enhancements - LP Breakdown Styles
+       ================================================================ */
+    
+    /* Supply breakdown display (under Issuer Account) */
+    .supply-breakdown-info {
+        margin: 1rem 0 0 0;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        border-left: 4px solid #8BC34A;
+    }
+    
+    .supply-note {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+    
+    .supply-note em {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+    
+    .supply-note .in-accounts,
+    .supply-note .in-pools {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background: white;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85rem;
+    }
+    
+    .supply-note .in-accounts {
+        color: #27ae60;
+    }
+    
+    .supply-note .in-pools {
+        color: #3498db;
+    }
+    
+    .supply-note .separator {
+        margin: 0 0.5rem;
+        color: #7f8c8d;
+    }
+    
+    /* Stewardship table with LP breakdown columns */
+    .stewardship-table th.detail-col,
+    .stewardship-table td.detail-cell {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        text-align: right;
+        min-width: 120px;
+    }
+    
+    .stewardship-table th.detail-col {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    /* LP breakdown summary rows */
+    .lp-breakdown-header td,
+    .lp-breakdown-subheader td {
+        background: #f8f9fa;
+        font-weight: 500;
+        padding-top: 1rem !important;
+    }
+    
+    .lp-breakdown-header td {
+        border-top: 2px solid #dee2e6;
+    }
+    
+    .purpose-cell.indent {
+        padding-left: 2rem !important;
+    }
+    
+    /* Section note styling */
+    .section-note {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+        font-style: italic;
+    }
+    
     /* Responsive Design */
     @media (max-width: 1200px) {
         .geo-overview-grid {
@@ -1785,6 +1914,23 @@
         
         .lp-pools-table {
             font-size: 0.85rem;
+        }
+        
+        /* v2.5.8: Hide detail columns on mobile */
+        .stewardship-table th.detail-col,
+        .stewardship-table td.detail-cell {
+            display: none;
+        }
+        
+        /* Supply breakdown stacks vertically on mobile */
+        .supply-note .in-accounts,
+        .supply-note .in-pools {
+            display: block;
+            margin: 0.25rem 0;
+        }
+        
+        .supply-note .separator {
+            display: none;
         }
     }
 </style>

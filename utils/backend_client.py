@@ -1,34 +1,45 @@
 """
-Backend API Client
-==================
+Backend API Client v1.4.2 - Backend API v2.5.8 Compatibility
+============================================================
 
-HTTP client for communicating with the UBEC Protocol API Gateway.
+HTTP client for communicating with UBEC backend API service.
+Provides async methods for all API endpoints with intelligent caching.
+
+FIX IN v1.4.2:
+- Added get_network_status() alias for main_web.py compatibility
+- Updated get_holonic_scores() to accept optional limit parameter
+
+FIX IN v1.4.1:
+- Fixed URL path: removed /api prefix (Gateway uses /v1 directly)
+- Frontend BACKEND_API_URL=https://api.ubec.network now works correctly
+
+NEW IN v1.4.0 - BACKEND API v2.5.8 SUPPORT:
+- Updated docstrings for token audit v2.5.8 structure
+- Total supply now includes LP reserves
+- Stewardship accounts include per-account LP breakdown
+
+MAINTAINED FROM v1.3.0:
+- get_liquidity_pools() for LP endpoint
+- get_token_audit() for comprehensive auditing
+- Bbox endpoints for map zooming
 
 This module implements:
     - Principle #3: Service pattern with centralized execution
     - Principle #5: Strict async operations
-    - Principle #9: Integrated rate limiting
-
-Features:
-    - Async HTTP client using aiohttp
-    - Response caching with configurable TTL
-    - Automatic session management
-    - Error handling and logging
-    - Connection pooling
+    - Principle #8: No duplicate configuration
+    - Principle #9: Integrated rate limiting (via caching)
 
 Attribution:
     This project uses the services of Claude and Anthropic PBC to inform 
     our decisions and recommendations. This project was made possible with 
     the assistance of Claude and Anthropic PBC.
-
-Version: 3.0.0 - Updated for api.ubec.network gateway (clean /v1/ paths)
 """
 
-import aiohttp
 import asyncio
 import logging
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
+import aiohttp
 
 from config.settings import settings
 
@@ -37,91 +48,122 @@ logger = logging.getLogger(__name__)
 
 class BackendAPIClient:
     """
-    Async HTTP client for UBEC Protocol API Gateway.
+    Async HTTP client for UBEC backend API.
     
-    Provides cached access to API endpoints with automatic session management.
-    Configured for api.ubec.network with clean /v1/ endpoint paths.
+    Provides cached access to all backend API endpoints with automatic
+    session management and error handling.
+    
+    Features:
+    - Async/await for all operations
+    - Response caching with configurable TTL
+    - Connection pooling via aiohttp
+    - Automatic session lifecycle management
+    - Comprehensive error handling
+    
+    Example:
+        async with BackendAPIClient() as client:
+            tokens = await client.get_all_tokens()
+            audit = await client.get_token_audit("UBEC")
+    
+    Attributes:
+        base_url: Backend API base URL
+        timeout: Request timeout in seconds
+        cache: In-memory response cache
+        cache_times: Cache entry timestamps
     """
     
-    def __init__(
-        self,
-        base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        timeout: int = 30
-    ):
+    def __init__(self, base_url: Optional[str] = None, timeout: int = 30):
         """
-        Initialize the API client.
+        Initialize the backend API client.
         
         Args:
-            base_url: API base URL (defaults to settings.BACKEND_API_URL)
-            api_key: API authentication key (defaults to settings.BACKEND_API_KEY)
-            timeout: Request timeout in seconds
+            base_url: Override backend API URL (default from settings)
+            timeout: Request timeout in seconds (default 30)
         """
-        self.base_url = (base_url or settings.BACKEND_API_URL).rstrip("/")
-        self.api_key = api_key or settings.BACKEND_API_KEY
-        self.timeout = aiohttp.ClientTimeout(total=timeout)
+        self.base_url = base_url or settings.BACKEND_API_URL
+        self.timeout = timeout
         self._session: Optional[aiohttp.ClientSession] = None
-        self._cache: Dict[str, tuple[Any, datetime]] = {}
-        self._cache_lock = asyncio.Lock()
         
-        logger.info(f"Initialized BackendAPIClient for {self.base_url}")
+        # Simple in-memory cache
+        self._cache: Dict[str, Any] = {}
+        self._cache_times: Dict[str, datetime] = {}
+        
+        logger.info(f"BackendAPIClient initialized with base URL: {self.base_url}")
     
     async def _get_session(self) -> aiohttp.ClientSession:
-        """Get or create aiohttp session."""
+        """
+        Get or create aiohttp session.
+        
+        Returns:
+            Active aiohttp ClientSession
+        """
         if self._session is None or self._session.closed:
-            headers = {}
-            if self.api_key:
-                headers["Authorization"] = f"Bearer {self.api_key}"
-            
-            self._session = aiohttp.ClientSession(
-                timeout=self.timeout,
-                headers=headers
-            )
+            timeout = aiohttp.ClientTimeout(total=self.timeout)
+            self._session = aiohttp.ClientSession(timeout=timeout)
         return self._session
     
-    async def close(self):
+    async def close(self) -> None:
         """Close the HTTP session."""
         if self._session and not self._session.closed:
             await self._session.close()
-            logger.info("Closed BackendAPIClient session")
+            self._session = None
+    
+    async def __aenter__(self):
+        """Async context manager entry."""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.close()
+    
+    def _is_cache_valid(self, key: str, ttl: int) -> bool:
+        """
+        Check if cached response is still valid.
+        
+        Args:
+            key: Cache key
+            ttl: Time-to-live in seconds
+        
+        Returns:
+            True if cache entry exists and is not expired
+        """
+        if key not in self._cache_times:
+            return False
+        age = (datetime.now() - self._cache_times[key]).total_seconds()
+        return age < ttl
     
     async def _cached_get(
-        self,
-        endpoint: str,
-        ttl: int = 30,
-        params: Optional[Dict] = None
-    ) -> Any:
+        self, 
+        endpoint: str, 
+        params: Optional[Dict] = None,
+        ttl: int = 30
+    ) -> Dict:
         """
-        Make cached GET request to API.
+        GET request with caching.
         
         Args:
             endpoint: API endpoint path (e.g., "/v1/tokens")
-            ttl: Cache time-to-live in seconds
-            params: Query parameters
+            params: Optional query parameters
+            ttl: Cache TTL in seconds (default 30)
         
         Returns:
-            JSON response data
+            JSON response as dictionary
         
         Raises:
-            aiohttp.ClientError: On connection errors
-            ValueError: On invalid JSON response
+            HTTPException: If request fails
         """
-        # Create cache key
+        # Build cache key
         cache_key = f"{endpoint}:{str(params)}"
         
         # Check cache
-        async with self._cache_lock:
-            if cache_key in self._cache:
-                data, cached_at = self._cache[cache_key]
-                if datetime.now() - cached_at < timedelta(seconds=ttl):
-                    logger.debug(f"Cache hit for {endpoint}")
-                    return data
+        if self._is_cache_valid(cache_key, ttl):
+            logger.debug(f"Cache hit for {endpoint}")
+            return self._cache[cache_key]
         
         # Make request
-        url = f"{self.base_url}{endpoint}"
         session = await self._get_session()
-        
-        logger.debug(f"GET {url} (params={params})")
+        # Note: API Gateway uses /v1 directly, no /api prefix needed
+        url = f"{self.base_url}{endpoint}"
         
         try:
             async with session.get(url, params=params) as response:
@@ -129,36 +171,18 @@ class BackendAPIClient:
                 data = await response.json()
                 
                 # Cache response
-                async with self._cache_lock:
-                    self._cache[cache_key] = (data, datetime.now())
+                self._cache[cache_key] = data
+                self._cache_times[cache_key] = datetime.now()
                 
+                logger.debug(f"Fetched {endpoint} from backend")
                 return data
                 
-        except aiohttp.ClientResponseError as e:
-            logger.error(f"HTTP error for {url}: {e.status} - {e.message}")
-            raise
         except aiohttp.ClientError as e:
-            logger.error(f"Connection error for {url}: {e}")
+            logger.error(f"Backend API error for {endpoint}: {e}")
             raise
         except Exception as e:
-            logger.error(f"Unexpected error for {url}: {e}")
+            logger.error(f"Unexpected error fetching {endpoint}: {e}")
             raise
-    
-    def invalidate_cache(self, endpoint: Optional[str] = None):
-        """
-        Invalidate cache entries.
-        
-        Args:
-            endpoint: Specific endpoint to invalidate, or None for all
-        """
-        if endpoint:
-            keys_to_remove = [k for k in self._cache.keys() if k.startswith(endpoint)]
-            for key in keys_to_remove:
-                del self._cache[key]
-            logger.debug(f"Invalidated cache for {endpoint}")
-        else:
-            self._cache.clear()
-            logger.debug("Cleared all cache")
     
     # ========================================================================
     # TOKEN ENDPOINTS
@@ -166,228 +190,136 @@ class BackendAPIClient:
     
     async def get_all_tokens(self) -> List[Dict]:
         """
-        Get all four UBEC token details.
+        Get information about all four UBEC tokens.
         
         Returns:
-            List of token objects with details about UBEC, UBECrc, UBECgpi, UBECtt
+            List of token objects (UBEC, UBECrc, UBECgpi, UBECtt)
         """
-        data = await self._cached_get("/v1/tokens", ttl=60)
-        # Backend returns {"tokens": [...], "count": 4, "timestamp": "..."}
-        if isinstance(data, dict) and "tokens" in data:
-            return data["tokens"]
-        return data if isinstance(data, list) else []
+        result = await self._cached_get("/v1/tokens", ttl=60)
+        return result if isinstance(result, list) else result.get('tokens', [])
     
-    async def get_token_by_code(self, code: str) -> Dict:
+    async def get_token_by_code(self, token_code: str) -> Dict:
         """
-        Get specific token details by code.
+        Get detailed information about a specific token.
         
         Args:
-            code: Token code (UBEC, UBECrc, UBECgpi, or UBECtt)
+            token_code: Token code (UBEC, UBECrc, UBECgpi, UBECtt)
         
         Returns:
             Token object with details
-        
-        Raises:
-            ValueError: If token not found
         """
-        tokens = await self.get_all_tokens()
-        for token in tokens:
-            if token.get("asset_code") == code or token.get("code") == code:
-                return token
-        raise ValueError(f"Token not found: {code}")
+        return await self._cached_get(f"/v1/tokens/{token_code.upper()}", ttl=60)
+    
+    async def get_token_analysis(self, token_code: str) -> Dict:
+        """
+        Get detailed analysis for a specific token.
+        
+        Args:
+            token_code: Token code (UBEC, UBECrc, UBECgpi, UBECtt)
+        
+        Returns:
+            Analysis object with supply, distribution, holder metrics
+        """
+        return await self._cached_get(f"/v1/tokens/{token_code.upper()}/analysis", ttl=60)
     
     # ========================================================================
     # NETWORK ENDPOINTS
     # ========================================================================
     
+    async def get_network_stats(self) -> Dict:
+        """
+        Get overall network statistics and health.
+        
+        Returns:
+            Network stats including participant count, bioregions, 
+            transactions, Ubuntu scores, and health status
+        """
+        return await self._cached_get("/v1/network", ttl=30)
+    
     async def get_network_status(self) -> Dict:
         """
-        Get current network status and health metrics.
+        Alias for get_network_stats (backward compatibility with main_web.py).
         
         Returns:
-            Network status object with participants, bioregions, transactions, health
+            Network stats including participant count, bioregions, 
+            transactions, Ubuntu scores, and health status
         """
-        return await self._cached_get("/v1/network-status", ttl=30)
+        return await self.get_network_stats()
     
     # ========================================================================
-    # BIOREGION ENDPOINTS
+    # ACCOUNT ENDPOINTS
     # ========================================================================
     
-    async def get_bioregion_count(self) -> int:
+    async def get_accounts(self, limit: int = 100, offset: int = 0) -> Dict:
         """
-        Get total count of active bioregions.
-        
-        Returns:
-            Number of bioregions
-        """
-        data = await self._cached_get("/v1/bioregions/count", ttl=30)
-        return data.get("count", 0)
-    
-    async def get_bioregion_summary(self) -> Dict:
-        """
-        Get summary statistics for all bioregions.
-        
-        Returns:
-            Summary statistics including total count, members, averages
-        """
-        return await self._cached_get("/v1/bioregions/summary", ttl=60)
-    
-    async def get_bioregions(self, limit: int = 50) -> Dict:
-        """
-        Get bioregion data.
+        Get list of accounts with basic information.
         
         Args:
-            limit: Maximum number of bioregions to return
+            limit: Maximum accounts to return (default 100)
+            offset: Pagination offset
         
         Returns:
-            Dictionary with bioregions list and count
+            Accounts list with pagination info
         """
-        params = {"limit": min(limit, 500)}
-        return await self._cached_get("/v1/bioregions", ttl=60, params=params)
+        return await self._cached_get(
+            "/v1/accounts", 
+            params={"limit": limit, "offset": offset},
+            ttl=30
+        )
     
-    async def get_bioregion(self, bioregion_id: int) -> Dict:
+    async def get_account_details(self, account_id: str) -> Dict:
         """
-        Get specific bioregion details.
+        Get detailed information for a specific account.
         
         Args:
-            bioregion_id: Bioregion identifier
+            account_id: Stellar account ID
         
         Returns:
-            Bioregion object with detailed information
+            Account details with balances and Ubuntu scores
         """
-        return await self._cached_get(f"/v1/bioregions/{bioregion_id}", ttl=60)
-    
-    async def get_bioregion_health(self, bioregion_id: int) -> Dict:
-        """
-        Get health assessment for a specific bioregion.
-        
-        Args:
-            bioregion_id: Bioregion identifier
-        
-        Returns:
-            Health assessment with rating and component scores
-        """
-        return await self._cached_get(f"/v1/bioregions/{bioregion_id}/health", ttl=60)
+        return await self._cached_get(f"/v1/accounts/{account_id}", ttl=30)
     
     # ========================================================================
-    # GEOGRAPHIC ENDPOINTS
+    # HOLONIC ENDPOINTS
     # ========================================================================
     
-    async def get_ecoregions(self, limit: int = 50) -> Dict:
+    async def get_holonic_scores(self, limit: int = None) -> Dict:
         """
-        Get ecoregion data from Ecoregions2017 dataset.
+        Get holonic scoring metrics.
         
         Args:
-            limit: Maximum number of ecoregions to return
+            limit: Optional limit parameter (ignored, for compatibility)
         
         Returns:
-            Dictionary with ecoregions list and metadata
+            Holonic scores including Ubuntu principle metrics
         """
-        params = {"limit": min(limit, 500)}
-        try:
-            return await self._cached_get("/v1/ecoregions", ttl=120, params=params)
-        except aiohttp.ClientResponseError as e:
-            if e.status == 404:
-                logger.info("Ecoregions endpoint not implemented yet (404)")
-                return None
-            raise
-    
-    async def get_ecoregion(self, eco_id: str) -> Dict:
-        """
-        Get specific ecoregion details.
-        
-        Args:
-            eco_id: Ecoregion identifier
-        
-        Returns:
-            Ecoregion object with detailed information
-        """
-        return await self._cached_get(f"/v1/ecoregions/{eco_id}", ttl=120)
-    
-    async def get_watersheds(self, limit: int = 50) -> Dict:
-        """
-        Get watershed data from FEOW HydroSHEDS dataset.
-        
-        Args:
-            limit: Maximum number of watersheds to return
-        
-        Returns:
-            Dictionary with watersheds list and metadata
-        """
-        params = {"limit": min(limit, 500)}
-        try:
-            return await self._cached_get("/v1/watersheds", ttl=120, params=params)
-        except aiohttp.ClientResponseError as e:
-            if e.status == 404:
-                logger.info("Watersheds endpoint not implemented yet (404)")
-                return None
-            raise
-    
-    async def get_watershed(self, feow_id: str) -> Dict:
-        """
-        Get specific watershed details.
-        
-        Args:
-            feow_id: FEOW watershed identifier
-        
-        Returns:
-            Watershed object with detailed information
-        """
-        return await self._cached_get(f"/v1/watersheds/{feow_id}", ttl=120)
-    
-    # ========================================================================
-    # HOLONIC EVALUATION ENDPOINTS
-    # ========================================================================
-    
-    async def get_holonic_scores(
-        self,
-        limit: int = 50,
-        category: Optional[str] = None,
-        min_score: Optional[float] = None
-    ) -> Dict:
-        """
-        Get Ubuntu principle evaluation scores.
-        
-        Args:
-            limit: Maximum number of accounts to return (default 50)
-            category: Filter by holonic category
-            min_score: Minimum composite score threshold (0.0-1.0)
-        
-        Returns:
-            Dictionary with summary statistics and account evaluations
-        """
-        params = {"limit": min(limit, 500)}
-        if category:
-            params["category"] = category
-        if min_score is not None:
-            params["min_score"] = min_score
-        
-        return await self._cached_get("/v1/holonic-scores", ttl=60, params=params)
+        # Note: limit parameter is accepted for backward compatibility
+        # with main_web.py but is not used by the API endpoint
+        return await self._cached_get("/v1/holonic-scores", ttl=60)
     
     # ========================================================================
     # TRANSACTION ENDPOINTS
     # ========================================================================
     
     async def get_recent_transactions(
-        self,
+        self, 
         limit: int = 20,
-        offset: int = 0
+        asset_code: Optional[str] = None
     ) -> Dict:
         """
-        Get recent blockchain transactions across all UBEC tokens.
+        Get recent transactions with operation details.
         
         Args:
-            limit: Maximum number of transactions to return (default 20, max 100)
-            offset: Number of transactions to skip for pagination
+            limit: Number of transactions (default 20)
+            asset_code: Optional filter by token
         
         Returns:
-            Dictionary with transactions list, count, and total
+            Transactions list with operations array
         """
-        params = {
-            "limit": min(limit, 100),
-            "offset": offset
-        }
-        return await self._cached_get("/v1/transactions/recent", ttl=15, params=params)
+        params = {"limit": limit}
+        if asset_code:
+            params["asset_code"] = asset_code.upper()
+        return await self._cached_get("/v1/transactions/recent", params=params, ttl=15)
     
     # ========================================================================
     # DISTRIBUTION ENDPOINTS
@@ -395,7 +327,7 @@ class BackendAPIClient:
     
     async def get_distribution_stats(self) -> Dict:
         """
-        Get token distribution statistics for 75/20/5 compliance.
+        Get token distribution statistics.
         
         Returns:
             Distribution statistics including tokens and compliance status
@@ -405,6 +337,20 @@ class BackendAPIClient:
     async def get_token_audit(self, token_code: str = "UBEC") -> Dict:
         """
         Get comprehensive token audit data for transparency reporting.
+        
+        UPDATED v1.4.0 - Backend API v2.5.8 Structure:
+        
+        The response now includes:
+        - token.total_tokens_issued: Includes LP reserves
+        - summary.total_in_accounts: Balance in regular accounts
+        - summary.total_in_liquidity_pools: Balance locked in LPs
+        - token_ecosystem_stewardship.accounts[].breakdown:
+            - direct: Direct account balance
+            - lp_positions: Balance in liquidity pools
+        - token_ecosystem_stewardship.liquidity_pools_summary:
+            - total_locked_in_all_pools: All UBEC in all pools
+            - stewardship_total_in_lp: Stewardship accounts' LP positions
+            - stewardship_lp_by_account: {management, infrastructure, liquidity}
         
         Args:
             token_code: Token to audit (UBEC, UBECrc, UBECgpi, UBECtt)
@@ -422,11 +368,130 @@ class BackendAPIClient:
             token_code: Optional filter by token
         
         Returns:
-            Dictionary with pools list and summary
+            Dictionary with pools list and summary including:
+            - pools[].id, pair, token_code, element
+            - pools[].ubec_position, asset_a, asset_b
+            - pools[].reserves, total_shares, balance
+            - pools[].fee_bp, trustline_count, participant_count
+            - summary.total_pools, total_value_locked, pools_by_token
         """
         if token_code:
             return await self._cached_get(f"/v1/liquidity-pools?token_code={token_code.upper()}", ttl=60)
         return await self._cached_get("/v1/liquidity-pools", ttl=60)
+    
+    # ========================================================================
+    # BIOREGION ENDPOINTS
+    # ========================================================================
+    
+    async def get_bioregions(self) -> Dict:
+        """
+        Get list of bioregions with health metrics.
+        
+        Returns:
+            Bioregions list with health scores
+        """
+        return await self._cached_get("/v1/bioregions", ttl=60)
+    
+    async def get_bioregion_boundaries(self) -> Dict:
+        """
+        Get bioregion boundaries with GeoJSON geometries.
+        
+        Returns:
+            Boundaries list with full metadata
+        """
+        return await self._cached_get("/v1/bioregion-boundaries", ttl=120)
+    
+    async def get_bioregion_bbox(self, bioregion_id: int) -> Dict:
+        """
+        Get bounding box for a specific bioregion.
+        
+        Args:
+            bioregion_id: Bioregion GID
+        
+        Returns:
+            Bbox with min_x, min_y, max_x, max_y (EPSG:3857)
+        """
+        return await self._cached_get(f"/v1/bioregions/{bioregion_id}/bbox", ttl=300)
+    
+    async def get_points_of_interest(
+        self,
+        poi_type: Optional[str] = None,
+        bioregion_gid: Optional[int] = None,
+        visibility: Optional[str] = None,
+        limit: int = 100
+    ) -> Dict:
+        """
+        Get points of interest with optional filters.
+        
+        Args:
+            poi_type: Filter by POI type
+            bioregion_gid: Filter by bioregion
+            visibility: Filter by visibility
+            limit: Maximum POIs to return
+        
+        Returns:
+            POIs list with GeoJSON geometries
+        """
+        params = {"limit": limit}
+        if poi_type:
+            params["poi_type"] = poi_type
+        if bioregion_gid:
+            params["bioregion_gid"] = bioregion_gid
+        if visibility:
+            params["visibility"] = visibility
+        return await self._cached_get("/v1/points-of-interest", params=params, ttl=60)
+    
+    # ========================================================================
+    # GEOGRAPHIC ENDPOINTS
+    # ========================================================================
+    
+    async def get_ecoregions(self, limit: int = 50) -> Dict:
+        """
+        Get ecoregion data from WWF Ecoregions 2017.
+        
+        Args:
+            limit: Maximum ecoregions to return
+        
+        Returns:
+            Ecoregions list with GeoJSON geometries
+        """
+        return await self._cached_get("/v1/ecoregions", params={"limit": limit}, ttl=120)
+    
+    async def get_ecoregion_bbox(self, eco_id: int) -> Dict:
+        """
+        Get bounding box for a specific ecoregion.
+        
+        Args:
+            eco_id: Ecoregion ID
+        
+        Returns:
+            Bbox with min_x, min_y, max_x, max_y (EPSG:3857)
+        """
+        return await self._cached_get(f"/v1/ecoregions/{eco_id}/bbox", ttl=300)
+    
+    async def get_watersheds(self, limit: int = 50) -> Dict:
+        """
+        Get watershed data from FEOW HydroSHEDS.
+        
+        Args:
+            limit: Maximum watersheds to return
+        
+        Returns:
+            Watersheds list with GeoJSON geometries
+        """
+        return await self._cached_get("/v1/watersheds", params={"limit": limit}, ttl=120)
+    
+    async def get_watershed_bbox(self, feow_id: int) -> Dict:
+        """
+        Get bounding box for a specific watershed.
+        
+        Args:
+            feow_id: FEOW watershed ID
+        
+        Returns:
+            Bbox with min_x, min_y, max_x, max_y (EPSG:3857)
+        """
+        return await self._cached_get(f"/v1/watersheds/{feow_id}/bbox", ttl=300)
     
     # ========================================================================
     # HEALTH CHECK
@@ -478,80 +543,106 @@ async def close_backend_client():
 async def test_client():
     """Test the API client against all available endpoints."""
     print("=" * 70)
-    print("API Client Test - v3.0.0")
-    print("Testing against api.ubec.network")
+    print("UBEC Backend API Client Test Suite")
     print("=" * 70)
     
     client = BackendAPIClient()
     
     try:
         # Test 1: Health check
-        print("\n[1/10] Testing health check...")
+        print("\n[1/12] Testing health check...")
         health = await client.health_check()
-        print(f"✓ Health: {health.get('status', 'unknown')}")
+        print(f"✓ Health status: {health.get('status', 'unknown')}")
         
-        # Test 2: Tokens
-        print("\n[2/10] Testing tokens endpoint...")
+        # Test 2: Network stats
+        print("\n[2/12] Testing network stats...")
+        network = await client.get_network_stats()
+        print(f"✓ Participants: {network.get('participants', {}).get('total', 0)}")
+        
+        # Test 3: All tokens
+        print("\n[3/12] Testing token list...")
         tokens = await client.get_all_tokens()
         print(f"✓ Found {len(tokens)} tokens")
-        for token in tokens:
-            name = token.get('name', token.get('code', 'Unknown'))
-            supply = token.get('total_supply', 0)
-            print(f"  - {name}: {supply:,.2f} tokens")
         
-        # Test 3: Network status
-        print("\n[3/10] Testing network status...")
-        network = await client.get_network_status()
-        net_data = network.get('network', network)
-        print(f"✓ Participants: {net_data.get('participants', 0)}")
-        print(f"  Bioregions: {net_data.get('bioregions', 0)}")
+        # Test 4: Token analysis
+        print("\n[4/12] Testing token analysis...")
+        analysis = await client.get_token_analysis("UBEC")
+        supply = analysis.get('analysis', {}).get('supply', {}).get('total', 0)
+        print(f"✓ UBEC total supply: {supply:,.2f}")
         
-        # Test 4: Bioregion count
-        print("\n[4/10] Testing bioregion count...")
-        count = await client.get_bioregion_count()
-        print(f"✓ Bioregion count: {count}")
+        # Test 5: Holonic scores
+        print("\n[5/12] Testing holonic scores...")
+        scores = await client.get_holonic_scores()
+        avg_score = scores.get('average_ubuntu_score', 0)
+        print(f"✓ Average Ubuntu score: {avg_score:.2f}")
         
-        # Test 5: Bioregions list
-        print("\n[5/10] Testing bioregions list...")
-        bioregions_data = await client.get_bioregions(limit=5)
-        bio_count = bioregions_data.get('count', 0) if bioregions_data else 0
-        print(f"✓ Retrieved {bio_count} bioregions")
-        
-        # Test 6: Holonic scores
-        print("\n[6/10] Testing holonic scores...")
-        scores = await client.get_holonic_scores(limit=5)
-        if scores and 'ubuntu_principles' in scores:
-            print(f"✓ Got holonic scores with Ubuntu principles")
-        else:
-            print(f"✓ Got holonic scores response")
+        # Test 6: Bioregions
+        print("\n[6/12] Testing bioregions...")
+        bioregions = await client.get_bioregions()
+        count = len(bioregions.get('bioregions', []))
+        print(f"✓ Found {count} bioregions")
         
         # Test 7: Recent transactions
-        print("\n[7/10] Testing recent transactions...")
+        print("\n[7/12] Testing recent transactions...")
         transactions = await client.get_recent_transactions(limit=5)
-        tx_count = transactions.get('count', 0) if transactions else 0
+        tx_count = len(transactions.get('transactions', []))
         print(f"✓ Retrieved {tx_count} transactions")
         
         # Test 8: Distribution stats
-        print("\n[8/10] Testing distribution stats...")
+        print("\n[8/12] Testing distribution stats...")
         distribution = await client.get_distribution_stats()
         print(f"✓ Got distribution compliance data")
         
-        # Test 9: Token audit
-        print("\n[9/10] Testing token audit...")
+        # Test 9: Token audit (v2.5.8 enhanced)
+        print("\n[9/12] Testing token audit (v2.5.8)...")
         try:
             audit = await client.get_token_audit("UBEC")
-            print(f"✓ Got token audit data")
+            summary = audit.get('summary', {})
+            total_issued = summary.get('total_issued', 0)
+            in_accounts = summary.get('total_in_accounts', 0)
+            in_pools = summary.get('total_in_liquidity_pools', 0)
+            print(f"✓ Total issued: {total_issued:,.2f}")
+            print(f"  └ In accounts: {in_accounts:,.2f}")
+            print(f"  └ In LP pools: {in_pools:,.2f}")
+            
+            # Check v2.5.8 stewardship breakdown
+            stewardship = audit.get('token_ecosystem_stewardship', {})
+            accounts = stewardship.get('accounts', [])
+            for acc in accounts:
+                breakdown = acc.get('breakdown', {})
+                if breakdown:
+                    print(f"  ✓ {acc.get('purpose')}: direct={breakdown.get('direct', 0):,.2f}, lp={breakdown.get('lp_positions', 0):,.2f}")
         except Exception as e:
             print(f"⚠ Token audit not available: {e}")
         
         # Test 10: Liquidity pools
-        print("\n[10/10] Testing liquidity pools...")
+        print("\n[10/12] Testing liquidity pools...")
         try:
             pools = await client.get_liquidity_pools()
             pool_count = len(pools.get('pools', [])) if pools else 0
+            total_locked = pools.get('summary', {}).get('total_value_locked', 0)
             print(f"✓ Found {pool_count} liquidity pools")
+            print(f"  └ Total value locked: {total_locked:,.2f}")
         except Exception as e:
             print(f"⚠ Liquidity pools not available: {e}")
+        
+        # Test 11: Ecoregions
+        print("\n[11/12] Testing ecoregions...")
+        try:
+            ecoregions = await client.get_ecoregions(limit=5)
+            eco_count = len(ecoregions.get('ecoregions', []))
+            print(f"✓ Retrieved {eco_count} ecoregions")
+        except Exception as e:
+            print(f"⚠ Ecoregions not available: {e}")
+        
+        # Test 12: Watersheds
+        print("\n[12/12] Testing watersheds...")
+        try:
+            watersheds = await client.get_watersheds(limit=5)
+            ws_count = len(watersheds.get('watersheds', []))
+            print(f"✓ Retrieved {ws_count} watersheds")
+        except Exception as e:
+            print(f"⚠ Watersheds not available: {e}")
         
         print("\n" + "=" * 70)
         print("✓ All tests completed!")

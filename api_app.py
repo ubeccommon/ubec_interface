@@ -1,21 +1,28 @@
 """
-UBEC DAO Protocol - API Gateway Service
-====================================
+UBEC API Gateway v1.4.1 - Backend API v2.5.8 Compatibility
+==========================================================
 
-Dedicated API gateway for api.ubec.network.
+API Gateway service that proxies requests to the backend API.
+Serves as the public-facing API endpoint at api.ubec.network.
 
-Security:
-    - Public-facing API endpoint
-    - Authenticates to backend using API key
-    - Backend only accepts requests from this gateway
+FIX IN v1.4.1:
+- Added X-API-Gateway-Key header to all backend requests
+- Backend requires this header for authentication (403 without it)
 
-Clean URL structure:
-    https://api.ubec.network/v1/tokens
-    https://api.ubec.network/v1/network-status
-    https://api.ubec.network/docs
+NEW IN v1.4.0 - BACKEND API v2.5.8 SUPPORT:
+- Token audit total supply now includes LP reserves
+- Stewardship accounts include per-account LP breakdown
+- Updated docstrings for new response structure
 
-Run:
-    uvicorn api_app:app --host 0.0.0.0 --port 8002
+Architecture:
+    api.ubec.network (this service, port 8002)
+        ↓ proxies to (with X-API-Gateway-Key header)
+    Backend API (92.205.230.245:8000)
+
+This module implements:
+    - Principle #3: Service pattern with centralized execution
+    - Principle #5: Strict async operations
+    - Principle #10: Separation of concerns (gateway layer)
 
 Attribution:
     This project uses the services of Claude and Anthropic PBC to inform 
@@ -24,104 +31,78 @@ Attribution:
 """
 
 import os
-import aiohttp
 import logging
+from typing import Optional, Dict, Any
 from datetime import datetime
-from typing import Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-
-from config.settings import settings
+from fastapi.responses import JSONResponse
+import aiohttp
 
 # ========================================================================
-# LOGGING CONFIGURATION
+# CONFIGURATION
+# ========================================================================
+
+BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://92.205.230.245:8000")
+API_GATEWAY_KEY = os.getenv("API_GATEWAY_KEY", "")
+TIMEOUT = 30
+
+# ========================================================================
+# LOGGING
 # ========================================================================
 
 logging.basicConfig(
-    level=getattr(logging, settings.LOG_LEVEL),
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# ========================================================================
-# BACKEND CONFIGURATION
-# ========================================================================
-
-BACKEND_URL = "http://92.205.230.245:8000"
-API_GATEWAY_KEY = os.getenv("API_GATEWAY_KEY", "")
-
+# Log configuration on import
 if not API_GATEWAY_KEY:
-    logger.warning("API_GATEWAY_KEY not set - backend requests may fail")
+    logger.warning("API_GATEWAY_KEY not set - backend requests will fail!")
+else:
+    logger.info(f"API Gateway configured for backend: {BACKEND_API_URL}")
 
 # ========================================================================
-# BACKEND CLIENT
-# ========================================================================
-
-async def fetch_from_backend(endpoint: str, params: dict = None) -> Dict:
-    """
-    Fetch data from backend server with API key authentication.
-    
-    Args:
-        endpoint: Backend API endpoint (e.g., "/api/v1/tokens")
-        params: Query parameters
-    
-    Returns:
-        JSON response from backend
-    """
-    url = f"{BACKEND_URL}{endpoint}"
-    headers = {
-        "X-API-Gateway-Key": API_GATEWAY_KEY,
-        "X-Forwarded-For": "92.205.28.58",
-        "User-Agent": "UBEC-API-Gateway/1.0"
-    }
-    
-    logger.debug(f"Backend request: {url}")
-    
-    try:
-        timeout = aiohttp.ClientTimeout(total=30)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.get(url, params=params, headers=headers) as response:
-                if response.status == 403:
-                    logger.error("Backend rejected request - check API_GATEWAY_KEY")
-                    raise HTTPException(status_code=503, detail="Backend authentication failed")
-                response.raise_for_status()
-                return await response.json()
-    except aiohttp.ClientResponseError as e:
-        logger.error(f"Backend error for {url}: {e.status}")
-        raise HTTPException(status_code=e.status, detail=str(e.message))
-    except aiohttp.ClientError as e:
-        logger.error(f"Backend connection error: {e}")
-        raise HTTPException(status_code=503, detail="Backend service unavailable")
-
-# ========================================================================
-# APPLICATION SETUP
+# FASTAPI APP
 # ========================================================================
 
 app = FastAPI(
-    title="UBEC DAO Protocol API",
+    title="UBEC DAO API Gateway",
     description="""
-## Ubuntu Bioregional Economic Commons DAO Protocol - Public API
+## Ubuntu Bioregional Economic Commons DAO - Public API Gateway
 
 ### Base URL
 `https://api.ubec.network`
 
-### Endpoints
-- `/v1/tokens` - All UBEC tokens
-- `/v1/network-status` - Network health metrics
-- `/v1/transactions/recent` - Recent blockchain activity
-- `/v1/holonic-scores` - Ubuntu principle scores
-- `/v1/distribution` - Token distribution compliance
-- `/v1/bioregions` - Bioregion data
-- `/v1/ecoregions` - Ecoregion data
-- `/v1/watersheds` - Watershed data
+### Available Endpoints
+
+**Tokens**
+- `GET /v1/tokens` - All UBEC tokens
+- `GET /v1/tokens/{code}` - Specific token details
+- `GET /v1/tokens/{code}/analysis` - Token analysis
+
+**Network**
+- `GET /v1/network` - Network statistics
+- `GET /v1/network-status` - Network health
+
+**Distribution**
+- `GET /v1/distribution` - Distribution compliance
+- `GET /v1/token-audit/{code}` - Comprehensive token audit
+- `GET /v1/liquidity-pools` - DEX liquidity pools
+
+**Geographic**
+- `GET /v1/bioregions` - Bioregion data
+- `GET /v1/ecoregions` - Ecoregion data  
+- `GET /v1/watersheds` - Watershed data
 
 ### Documentation
-Visit `/docs` for interactive Swagger UI or `/redoc` for ReDoc.
-    """,
-    version="1.0.0",
+- Swagger UI: `/docs`
+- ReDoc: `/redoc`
+""",
+    version="1.4.1",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -152,37 +133,147 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 @app.on_event("startup")
 async def startup_event():
     logger.info("=" * 60)
-    logger.info("Starting UBEC DAO Protocol API Gateway")
-    logger.info(f"Backend: {BACKEND_URL}")
+    logger.info("Starting UBEC DAO API Gateway v1.4.1")
+    logger.info(f"Backend URL: {BACKEND_API_URL}")
     logger.info(f"API Key configured: {'Yes' if API_GATEWAY_KEY else 'NO - WARNING!'}")
     logger.info("=" * 60)
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info("Shutting down API Gateway")
+    logger.info("Shutting down UBEC DAO API Gateway")
 
 # ========================================================================
-# ROOT & HEALTH
+# HELPER FUNCTIONS
+# ========================================================================
+
+async def fetch_from_backend(endpoint: str, params: Dict = None) -> Dict:
+    """
+    Fetch data from backend API with authentication.
+    
+    Args:
+        endpoint: API endpoint path (e.g., "/api/v1/tokens")
+        params: Optional query parameters
+    
+    Returns:
+        JSON response from backend
+    
+    Raises:
+        HTTPException: On backend errors or connection issues
+    """
+    url = f"{BACKEND_API_URL}{endpoint}"
+    
+    # CRITICAL: Include API Gateway Key for backend authentication
+    headers = {
+        "X-API-Gateway-Key": API_GATEWAY_KEY,
+        "User-Agent": "UBEC-API-Gateway/1.4.1",
+        "Accept": "application/json"
+    }
+    
+    logger.debug(f"Backend request: GET {url} params={params}")
+    
+    try:
+        timeout = aiohttp.ClientTimeout(total=TIMEOUT)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(url, params=params, headers=headers) as response:
+                if response.status == 200:
+                    return await response.json()
+                elif response.status == 403:
+                    logger.error(f"Backend authentication failed for {endpoint} - check API_GATEWAY_KEY")
+                    raise HTTPException(
+                        status_code=503,
+                        detail="Backend authentication failed"
+                    )
+                elif response.status == 404:
+                    logger.warning(f"Backend endpoint not found: {endpoint}")
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Endpoint not found: {endpoint}"
+                    )
+                else:
+                    logger.error(f"Backend returned {response.status} for {endpoint}")
+                    raise HTTPException(
+                        status_code=response.status,
+                        detail=f"Backend error: {response.status}"
+                    )
+    except aiohttp.ClientError as e:
+        logger.error(f"Backend connection error for {endpoint}: {e}")
+        raise HTTPException(status_code=503, detail="Backend service unavailable")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error for {endpoint}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+# ========================================================================
+# ROOT & HEALTH ENDPOINTS
 # ========================================================================
 
 @app.get("/", response_class=JSONResponse, include_in_schema=False)
 async def root():
+    """Root endpoint with API information."""
     return {
-        "service": "UBEC DAO Protocol API",
-        "version": "1.0.0",
-        "docs": "/docs"
+        "service": "UBEC DAO API Gateway",
+        "version": "1.4.1",
+        "backend_api_version": "2.5.8",
+        "status": "operational",
+        "documentation": "/docs",
+        "endpoints": {
+            "health": "/v1/health",
+            "network": "/v1/network",
+            "tokens": "/v1/tokens",
+            "token_audit": "/v1/token-audit/{token_code}",
+            "liquidity_pools": "/v1/liquidity-pools",
+            "accounts": "/v1/accounts",
+            "transactions": "/v1/transactions/recent",
+            "bioregions": "/v1/bioregions",
+            "ecoregions": "/v1/ecoregions",
+            "watersheds": "/v1/watersheds"
+        },
+        "timestamp": datetime.now().isoformat()
     }
 
 
 @app.get("/health", response_class=JSONResponse, tags=["System"])
 async def health():
-    return {"status": "healthy", "service": "ubec-api-gateway", "timestamp": datetime.now().isoformat()}
+    """Basic health check."""
+    return {
+        "status": "healthy",
+        "service": "ubec-api-gateway",
+        "version": "1.4.1",
+        "timestamp": datetime.now().isoformat()
+    }
 
 
-@app.get("/v1/health", response_class=JSONResponse, tags=["System"])
+@app.get("/v1/health", response_class=JSONResponse, tags=["System"], summary="Health check")
 async def v1_health():
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    """Check gateway and backend health."""
+    try:
+        backend_health = await fetch_from_backend("/health")
+        return {
+            "gateway_status": "healthy",
+            "backend_status": backend_health.get("status", "unknown"),
+            "backend_version": "2.5.8",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.warning(f"Backend health check failed: {e}")
+        return {
+            "gateway_status": "healthy",
+            "backend_status": "unreachable",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+# ========================================================================
+# NETWORK ENDPOINTS
+# ========================================================================
+
+@app.get("/v1/network", response_class=JSONResponse, tags=["Network"], summary="Get network stats")
+@app.get("/v1/network-status", response_class=JSONResponse, tags=["Network"], summary="Get network status")
+async def get_network_stats():
+    """Get network statistics and health."""
+    return await fetch_from_backend("/api/v1/network")
 
 # ========================================================================
 # TOKEN ENDPOINTS
@@ -190,14 +281,15 @@ async def v1_health():
 
 @app.get("/v1/tokens", response_class=JSONResponse, tags=["Tokens"], summary="Get all tokens")
 async def get_tokens():
-    """Get all four UBEC tokens: UBEC, UBECrc, UBECgpi, UBECtt"""
+    """Get information about all UBEC tokens."""
     data = await fetch_from_backend("/api/v1/tokens")
+    # Handle both formats: {tokens: [...]} or [...]
     if isinstance(data, dict) and "tokens" in data:
         return data["tokens"]
     return data
 
 
-@app.get("/v1/tokens/{token_code}", response_class=JSONResponse, tags=["Tokens"], summary="Get specific token")
+@app.get("/v1/tokens/{token_code}", response_class=JSONResponse, tags=["Tokens"], summary="Get token details")
 async def get_token(token_code: str):
     """Get details for a specific token."""
     data = await fetch_from_backend("/api/v1/tokens")
@@ -207,14 +299,38 @@ async def get_token(token_code: str):
             return token
     raise HTTPException(status_code=404, detail=f"Token {token_code} not found")
 
+
+@app.get("/v1/tokens/{token_code}/analysis", response_class=JSONResponse, tags=["Tokens"], summary="Get token analysis")
+async def get_token_analysis(token_code: str):
+    """Get detailed analysis for a token."""
+    return await fetch_from_backend(f"/api/v1/tokens/{token_code.upper()}/analysis")
+
 # ========================================================================
-# NETWORK ENDPOINTS
+# ACCOUNT ENDPOINTS
 # ========================================================================
 
-@app.get("/v1/network-status", response_class=JSONResponse, tags=["Network"], summary="Get network status")
-async def get_network_status():
-    """Get current network status and health metrics."""
-    return await fetch_from_backend("/api/v1/network-status")
+@app.get("/v1/accounts", response_class=JSONResponse, tags=["Accounts"], summary="Get accounts")
+async def get_accounts(
+    limit: int = Query(default=100, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0)
+):
+    """Get list of accounts."""
+    return await fetch_from_backend("/api/v1/accounts", {"limit": limit, "offset": offset})
+
+
+@app.get("/v1/accounts/{account_id}", response_class=JSONResponse, tags=["Accounts"], summary="Get account details")
+async def get_account(account_id: str):
+    """Get details for a specific account."""
+    return await fetch_from_backend(f"/api/v1/accounts/{account_id}")
+
+# ========================================================================
+# HOLONIC ENDPOINTS
+# ========================================================================
+
+@app.get("/v1/holonic-scores", response_class=JSONResponse, tags=["Holonic"], summary="Get holonic scores")
+async def get_holonic_scores():
+    """Get Ubuntu principle holonic scores."""
+    return await fetch_from_backend("/api/v1/holonic-scores")
 
 # ========================================================================
 # TRANSACTION ENDPOINTS
@@ -223,49 +339,55 @@ async def get_network_status():
 @app.get("/v1/transactions/recent", response_class=JSONResponse, tags=["Transactions"], summary="Get recent transactions")
 async def get_recent_transactions(
     limit: int = Query(default=20, ge=1, le=100),
-    offset: int = Query(default=0, ge=0)
+    asset_code: Optional[str] = Query(None, description="Filter by token")
 ):
-    """Get recent blockchain transactions."""
-    return await fetch_from_backend("/api/v1/transactions/recent", {"limit": limit, "offset": offset})
-
-# ========================================================================
-# HOLONIC ENDPOINTS
-# ========================================================================
-
-@app.get("/v1/holonic-scores", response_class=JSONResponse, tags=["Holonic"], summary="Get holonic scores")
-async def get_holonic_scores(
-    limit: int = Query(default=50, ge=1, le=500),
-    category: Optional[str] = None,
-    min_score: Optional[float] = Query(default=None, ge=0, le=1)
-):
-    """Get Ubuntu principle evaluation scores."""
+    """Get recent transactions with operation details."""
     params = {"limit": limit}
-    if category:
-        params["category"] = category
-    if min_score is not None:
-        params["min_score"] = min_score
-    return await fetch_from_backend("/api/v1/holonic-scores", params)
+    if asset_code:
+        params["asset_code"] = asset_code.upper()
+    return await fetch_from_backend("/api/v1/transactions/recent", params)
 
 # ========================================================================
 # DISTRIBUTION ENDPOINTS
 # ========================================================================
 
 @app.get("/v1/distribution", response_class=JSONResponse, tags=["Distribution"], summary="Get distribution stats")
+@app.get("/v1/distributions", response_class=JSONResponse, tags=["Distribution"], summary="Get distribution stats (alias)")
 async def get_distribution():
-    """Get token distribution statistics for 75/20/5 compliance."""
+    """Get token distribution statistics."""
     return await fetch_from_backend("/api/v1/distribution")
 
 
+@app.get("/v1/token-audit", response_class=JSONResponse, tags=["Distribution"], summary="Get token audit (default UBEC)")
 @app.get("/v1/token-audit/{token_code}", response_class=JSONResponse, tags=["Distribution"], summary="Get token audit")
-async def get_token_audit(token_code: str):
-    """Get comprehensive token audit data."""
+async def get_token_audit(token_code: str = "UBEC"):
+    """
+    Get comprehensive token audit data.
+    
+    UPDATED v1.4.0 - Backend API v2.5.8:
+    - Total supply now includes LP reserves (total_in_accounts + total_in_liquidity_pools)
+    - Stewardship accounts include breakdown (direct, lp_positions)
+    - LP summary includes stewardship_lp_by_account (management, infrastructure, liquidity)
+    
+    Returns:
+        Comprehensive audit data with token info, summary, distribution categories,
+        and compliance indicators.
+    """
     return await fetch_from_backend(f"/api/v1/token-audit/{token_code.upper()}")
 
 
 @app.get("/v1/liquidity-pools", response_class=JSONResponse, tags=["Distribution"], summary="Get liquidity pools")
-async def get_liquidity_pools(token_code: Optional[str] = None):
-    """Get liquidity pool information."""
-    params = {"token_code": token_code.upper()} if token_code else None
+async def get_liquidity_pools(
+    token_code: Optional[str] = Query(None, description="Filter by token (UBEC, UBECrc, UBECgpi, UBECtt)")
+):
+    """
+    Get liquidity pool information.
+    
+    Returns pools with reserves, participants, and summary statistics.
+    """
+    params = None
+    if token_code:
+        params = {"token_code": token_code.upper()}
     return await fetch_from_backend("/api/v1/liquidity-pools", params)
 
 # ========================================================================
@@ -278,16 +400,34 @@ async def get_bioregions(limit: int = Query(default=50, ge=1, le=500)):
     return await fetch_from_backend("/api/v1/bioregions", {"limit": limit})
 
 
-@app.get("/v1/bioregions/count", response_class=JSONResponse, tags=["Bioregions"], summary="Get bioregion count")
-async def get_bioregion_count():
-    """Get total bioregion count."""
-    return await fetch_from_backend("/api/v1/bioregions/count")
+@app.get("/v1/bioregion-boundaries", response_class=JSONResponse, tags=["Bioregions"], summary="Get bioregion boundaries")
+async def get_bioregion_boundaries():
+    """Get bioregion boundaries with GeoJSON geometries."""
+    return await fetch_from_backend("/api/v1/bioregion-boundaries")
 
 
-@app.get("/v1/bioregions/summary", response_class=JSONResponse, tags=["Bioregions"], summary="Get bioregion summary")
-async def get_bioregion_summary():
-    """Get bioregion summary statistics."""
-    return await fetch_from_backend("/api/v1/bioregions/summary")
+@app.get("/v1/bioregions/{gid}/bbox", response_class=JSONResponse, tags=["Bioregions"], summary="Get bioregion bbox")
+async def get_bioregion_bbox(gid: int):
+    """Get bounding box for a bioregion (EPSG:3857)."""
+    return await fetch_from_backend(f"/api/v1/bioregions/{gid}/bbox")
+
+
+@app.get("/v1/points-of-interest", response_class=JSONResponse, tags=["Bioregions"], summary="Get POIs")
+async def get_pois(
+    poi_type: Optional[str] = None,
+    bioregion_gid: Optional[int] = None,
+    visibility: Optional[str] = None,
+    limit: int = Query(default=100, ge=1, le=500)
+):
+    """Get points of interest with optional filters."""
+    params = {"limit": limit}
+    if poi_type:
+        params["poi_type"] = poi_type
+    if bioregion_gid:
+        params["bioregion_gid"] = bioregion_gid
+    if visibility:
+        params["visibility"] = visibility
+    return await fetch_from_backend("/api/v1/points-of-interest", params)
 
 # ========================================================================
 # GEOGRAPHIC ENDPOINTS
@@ -299,10 +439,22 @@ async def get_ecoregions(limit: int = Query(default=50, ge=1, le=500)):
     return await fetch_from_backend("/api/v1/ecoregions", {"limit": limit})
 
 
+@app.get("/v1/ecoregions/{eco_id}/bbox", response_class=JSONResponse, tags=["Geographic"], summary="Get ecoregion bbox")
+async def get_ecoregion_bbox(eco_id: int):
+    """Get bounding box for an ecoregion (EPSG:3857)."""
+    return await fetch_from_backend(f"/api/v1/ecoregions/{eco_id}/bbox")
+
+
 @app.get("/v1/watersheds", response_class=JSONResponse, tags=["Geographic"], summary="Get watersheds")
 async def get_watersheds(limit: int = Query(default=50, ge=1, le=500)):
     """Get watershed data from FEOW HydroSHEDS."""
     return await fetch_from_backend("/api/v1/watersheds", {"limit": limit})
+
+
+@app.get("/v1/watersheds/{feow_id}/bbox", response_class=JSONResponse, tags=["Geographic"], summary="Get watershed bbox")
+async def get_watershed_bbox(feow_id: int):
+    """Get bounding box for a watershed (EPSG:3857)."""
+    return await fetch_from_backend(f"/api/v1/watersheds/{feow_id}/bbox")
 
 # ========================================================================
 # SYSTEM ENDPOINTS
@@ -312,8 +464,16 @@ async def get_watersheds(limit: int = Query(default=50, ge=1, le=500)):
 async def get_system_info():
     """Get API system information."""
     return {
-        "name": "UBEC DAO Protocol API Gateway",
-        "version": "1.0.0",
+        "service": "UBEC DAO API Gateway",
+        "version": "1.4.1",
+        "backend_api_version": "2.5.8",
+        "backend_url": BACKEND_API_URL,
+        "features": {
+            "token_audit_v258": True,
+            "lp_breakdown": True,
+            "bbox_endpoints": True,
+            "gateway_auth": True
+        },
         "timestamp": datetime.now().isoformat()
     }
 
@@ -327,9 +487,19 @@ async def get_system_health():
         "timestamp": datetime.now().isoformat()
     }
     try:
-        backend_health = await fetch_from_backend("/api/v1/health")
+        backend_health = await fetch_from_backend("/health")
         health["backend"] = "healthy"
-        health["backend_status"] = backend_health
-    except:
+        health["backend_details"] = backend_health
+    except Exception as e:
         health["backend"] = "unhealthy"
+        health["backend_error"] = str(e)
     return health
+
+
+# ========================================================================
+# MAIN
+# ========================================================================
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8002)
