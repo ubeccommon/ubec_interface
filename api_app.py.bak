@@ -1,23 +1,24 @@
 """
-UBEC API Gateway v1.6.0 - Backend API v2.7.0 Compatibility
+UBEC API Gateway v1.5.0 - Backend API v2.6.0 Compatibility
 ==========================================================
 
 API Gateway service that proxies requests to the backend API.
 Serves as the public-facing API endpoint at api.ubec.network.
 
-NEW IN v1.6.0 - ENHANCED HOLONIC-SCORES (Backend v2.7.0):
-- Added include_accounts parameter for individual account evaluations
-- Added limit parameter for pagination (default 100, max 500)
-- Added offset parameter for pagination
-- Added category parameter to filter by holonic category
-- Returns 5 holonic dimension scores per account (visualization-ready)
-- Returns 4 Ubuntu principle scores per account (element-specific)
-- Enables frontend visualization reports
-
-NEW IN v1.5.0 - ALIAS REMOVAL (Backend v2.7.0 Compliance):
+NEW IN v1.5.0 - ALIAS REMOVAL (Backend v2.6.0 Compliance):
 - Removed /v1/network-status alias (use /v1/network only)
 - Removed /v1/distributions alias (use /v1/distribution only)
 - Complies with Principle #12 (Method Singularity)
+- 19 unique gateway endpoints (was 21 with aliases)
+
+FIX IN v1.5.0:
+- Added X-API-Gateway-Key header to all backend requests
+- Backend requires this header for authentication (403 without it)
+
+NEW IN v1.4.0 - BACKEND API v2.6.0 SUPPORT:
+- Token audit total supply now includes LP reserves
+- Stewardship accounts include per-account LP breakdown
+- Updated docstrings for new response structure
 
 Architecture:
     api.ubec.network (this service, port 8002)
@@ -93,14 +94,6 @@ app = FastAPI(
 **Network**
 - `GET /v1/network` - Network statistics and health
 
-**Accounts**
-- `GET /v1/accounts` - Account list with holonic metrics
-- `GET /v1/accounts/{account_id}` - Account details
-
-**Analytics**
-- `GET /v1/holonic-scores` - Holonic evaluation scores (supports include_accounts=true)
-- `GET /v1/transactions/recent` - Recent transactions with operations
-
 **Distribution**
 - `GET /v1/distribution` - Distribution compliance
 - `GET /v1/token-audit/{code}` - Comprehensive token audit
@@ -108,19 +101,14 @@ app = FastAPI(
 
 **Geographic**
 - `GET /v1/bioregions` - Bioregion data
-- `GET /v1/bioregions/{gid}/bbox` - Bioregion bounding box
-- `GET /v1/bioregion-boundaries` - Bioregion boundary geometries
-- `GET /v1/points-of-interest` - Points of interest
-- `GET /v1/ecoregions` - Ecoregion data
-- `GET /v1/ecoregions/{eco_id}/bbox` - Ecoregion bounding box
+- `GET /v1/ecoregions` - Ecoregion data  
 - `GET /v1/watersheds` - Watershed data
-- `GET /v1/watersheds/{feow_id}/bbox` - Watershed bounding box
 
 ### Documentation
 - Swagger UI: `/docs`
 - ReDoc: `/redoc`
 """,
-    version="1.6.0",
+    version="1.5.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -233,7 +221,7 @@ async def root():
     return {
         "service": "UBEC API Gateway",
         "version": "1.5.0",
-        "backend_api_version": "2.7.0",
+        "backend_api_version": "2.6.0",
         "status": "operational",
         "documentation": "/docs",
         "endpoints": {
@@ -271,7 +259,7 @@ async def v1_health():
         return {
             "gateway_status": "healthy",
             "backend_status": backend_health.get("status", "unknown"),
-            "backend_version": "2.7.0",
+            "backend_version": "2.6.0",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
@@ -345,30 +333,9 @@ async def get_account(account_id: str):
 # ========================================================================
 
 @app.get("/v1/holonic-scores", response_class=JSONResponse, tags=["Holonic"], summary="Get holonic scores")
-async def get_holonic_scores(
-    include_accounts: bool = Query(default=False, description="Include individual account evaluations"),
-    limit: int = Query(default=100, ge=1, le=500, description="Max accounts when include_accounts=true"),
-    offset: int = Query(default=0, ge=0, description="Pagination offset"),
-    category: Optional[str] = Query(None, description="Filter by holonic category (Observer, Participant, Contributor, Integrator, Exemplar)")
-):
-    """
-    Get Ubuntu principle holonic scores with optional individual account data.
-    
-    NEW IN v2.7.0:
-    - include_accounts=true returns per-account dimension scores for visualization
-    - Returns 5 holonic dimensions + 4 Ubuntu principle scores per account
-    - Supports pagination and category filtering
-    
-    Default (include_accounts=false): Returns aggregate statistics only (backward compatible)
-    """
-    params = {}
-    if include_accounts:
-        params["include_accounts"] = "true"
-        params["limit"] = limit
-        params["offset"] = offset
-    if category:
-        params["category"] = category
-    return await fetch_from_backend("/api/v1/holonic-scores", params if params else None)
+async def get_holonic_scores():
+    """Get Ubuntu principle holonic scores."""
+    return await fetch_from_backend("/api/v1/holonic-scores")
 
 # ========================================================================
 # TRANSACTION ENDPOINTS
@@ -401,7 +368,7 @@ async def get_token_audit(token_code: str = "UBEC"):
     """
     Get comprehensive token audit data.
     
-    UPDATED v1.4.0 - Backend API v2.7.0:
+    UPDATED v1.4.0 - Backend API v2.6.0:
     - Total supply now includes LP reserves (total_in_accounts + total_in_liquidity_pools)
     - Stewardship accounts include breakdown (direct, lp_positions)
     - LP summary includes stewardship_lp_by_account (management, infrastructure, liquidity)
@@ -503,7 +470,7 @@ async def get_system_info():
     return {
         "service": "UBEC API Gateway",
         "version": "1.5.0",
-        "backend_api_version": "2.7.0",
+        "backend_api_version": "2.6.0",
         "backend_url": BACKEND_API_URL,
         "features": {
             "token_audit_v258": True,

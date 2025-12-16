@@ -1,16 +1,9 @@
 """
-Backend API Client v1.6.0 - Backend API v2.7.0 Compatibility
+Backend API Client v1.5.0 - Backend API v2.6.0 Compatibility
 ============================================================
 
 HTTP client for communicating with UBEC backend API service.
 Provides async methods for all API endpoints with intelligent caching.
-
-NEW IN v1.6.0 - ENHANCED HOLONIC-SCORES (Backend v2.7.0):
-- get_holonic_scores() now supports include_accounts parameter
-- Added limit, offset, category parameters for pagination/filtering
-- Returns 5 holonic dimension scores per account (visualization-ready)
-- Returns 4 Ubuntu principle scores per account (element-specific)
-- Backward compatible: default behavior unchanged
 
 NEW IN v1.5.0 - BACKEND API v2.6.0 COMPLIANCE:
 - Backend removed /api/v1/network-status alias (uses /api/v1/network only)
@@ -33,6 +26,11 @@ NEW IN v1.4.0 - BACKEND API v2.5.8 SUPPORT:
 - Updated docstrings for token audit v2.5.8 structure
 - Total supply now includes LP reserves
 - Stewardship accounts include per-account LP breakdown
+
+MAINTAINED FROM v1.3.0:
+- get_liquidity_pools() for LP endpoint
+- get_token_audit() for comprehensive auditing
+- Bbox endpoints for map zooming
 
 This module implements:
     - Principle #3: Service pattern with centralized execution
@@ -307,45 +305,19 @@ class BackendAPIClient:
     # HOLONIC ENDPOINTS
     # ========================================================================
     
-    async def get_holonic_scores(
-        self, 
-        include_accounts: bool = False,
-        limit: int = 100,
-        offset: int = 0,
-        category: str = None
-    ) -> Dict:
+    async def get_holonic_scores(self, limit: int = None) -> Dict:
         """
-        Get holonic scoring metrics with optional individual account data.
-        
-        NEW IN v2.7.0:
-        - include_accounts=True returns per-account dimension scores
-        - Returns 5 holonic dimensions + 4 Ubuntu principle scores per account
-        - Supports pagination and category filtering
+        Get holonic scoring metrics.
         
         Args:
-            include_accounts: Include individual account evaluations (default False)
-            limit: Max accounts when include_accounts=True (default 100, max 500)
-            offset: Pagination offset (default 0)
-            category: Filter by holonic category (Observer, Participant, Contributor, Integrator, Exemplar)
+            limit: Optional limit parameter (ignored, for compatibility)
         
         Returns:
-            When include_accounts=False (default):
-                - ubuntu_principles: Aggregate scores
-                - account_count: Total evaluated accounts
-            
-            When include_accounts=True:
-                - accounts: Array with per-account scores
-                - summary: Category distribution, statistics
-                - pagination: Limit, offset, total, has_more
+            Holonic scores including Ubuntu principle metrics
         """
-        params = {}
-        if include_accounts:
-            params["include_accounts"] = "true"
-            params["limit"] = min(max(1, limit), 500)
-            params["offset"] = max(0, offset)
-        if category:
-            params["category"] = category
-        return await self._cached_get("/v1/holonic-scores", params=params if params else None, ttl=60)
+        # Note: limit parameter is accepted for backward compatibility
+        # with main_web.py but is not used by the API endpoint
+        return await self._cached_get("/v1/holonic-scores", ttl=60)
     
     # ========================================================================
     # TRANSACTION ENDPOINTS
