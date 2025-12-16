@@ -43,8 +43,8 @@ Before building mutualistic relationships, you should be established in the ecos
 1. **Air (UBEC)** — Your gateway and access token
 2. **Water (UBECrc)** — Active participation in reciprocal exchanges
 
-> 📋 **New to UBEC?** Start with the [Air Gateway Guide](/docs/guides/UBEC_Air_Gateway_Guide)
-> 📋 **Need to establish flow?** See the [Water Reciprocity Guide](/docs/guides/UBEC_Water_Reciprocity_Guide)
+> 📋 **New to UBEC?** Start with the [Air Gateway Guide](/docs/guides/air-gateway-guide)
+> 📋 **Need to establish flow?** See the [Water Reciprocity Guide](/docs/guides/water-reciprocity-guide)
 
 ---
 
@@ -253,7 +253,7 @@ When your mutualistic relationships become truly transformative—creating regen
 - Your relationships catalyze transformation in others
 - Your mutual work heals and renews
 
-> 📋 **Ready for transformation?** See the [Fire Regeneration Guide](/docs/guides/UBEC_Fire_Regeneration_Guide)
+> 📋 **Ready for transformation?** See the [Fire Regeneration Guide](/docs/guides/fire-regeneration-guide)
 
 ---
 
@@ -373,5 +373,6 @@ By building mutualistic relationships, you embody the Earth element: grounding, 
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.0  
-**Created:** December 2025
+**Document Version:** 1.1  
+**Created:** December 2025  
+**Last Updated:** December 2025

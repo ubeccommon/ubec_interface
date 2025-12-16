@@ -44,9 +44,9 @@ Fire is the culmination of your UBEC journey. To create regenerative impact, you
 2. **Water (UBECrc)** — Reciprocal exchanges and flow
 3. **Earth (UBECgpi)** — Stable, mutualistic relationships
 
-> 📋 **Start your journey:** [Air Gateway Guide](/docs/guides/UBEC_Air_Gateway_Guide)
-> 📋 **Establish flow:** [Water Reciprocity Guide](/docs/guides/UBEC_Water_Reciprocity_Guide)
-> 📋 **Build foundation:** [Earth Mutualism Guide](/docs/guides/UBEC_Earth_Mutualism_Guide)
+> 📋 **Start your journey:** [Air Gateway Guide](/docs/guides/air-gateway-guide)
+> 📋 **Establish flow:** [Water Reciprocity Guide](/docs/guides/water-reciprocity-guide)
+> 📋 **Build foundation:** [Earth Mutualism Guide](/docs/guides/earth-mutualism-guide)
 
 While progression through the elements is natural, transformative actions can earn UBECtt at any stage of your journey.
 
@@ -418,5 +418,6 @@ Together, these elements create a complete ecosystem of Ubuntu economics—one t
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.0  
-**Created:** December 2025
+**Document Version:** 1.1  
+**Created:** December 2025  
+**Last Updated:** December 2025

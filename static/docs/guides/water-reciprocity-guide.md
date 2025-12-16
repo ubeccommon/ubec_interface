@@ -40,7 +40,7 @@ UBECrc is the **Reciprocity Credit**—earned through balanced giving and receiv
 
 Before participating in reciprocity, you must first have your UBEC (Air) tokens. Air is your gateway to the ecosystem.
 
-> 📋 **Haven't started yet?** See the [UBEC Air Gateway Guide](/docs/guides/UBEC_Air_Gateway_Guide) first.
+> 📋 **Haven't started yet?** See the [UBEC Air Gateway Guide](/docs/guides/air-gateway-guide) first.
 
 Once you have your Stellar wallet set up with UBEC tokens, you're ready to add the Water element.
 
@@ -205,7 +205,7 @@ When your reciprocal relationships become stable and long-term, demonstrating co
 ### 🔥 Fire (UBECtt) — Transformation & Regeneration
 When your exchanges create transformative, regenerative impact in your community, you may earn Fire tokens.
 
-> 📋 **See:** [Earth Guide](/docs/guides/UBEC_Earth_Mutualism_Guide) | [Fire Guide](/docs/guides/UBEC_Fire_Regeneration_Guide)
+> 📋 **See:** [Earth Mutualism Guide](/docs/guides/earth-mutualism-guide) | [Fire Regeneration Guide](/docs/guides/fire-regeneration-guide)
 
 ---
 
@@ -294,5 +294,6 @@ By participating in reciprocity, you embody the Water element: flowing, adapting
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.0  
-**Created:** December 2025
+**Document Version:** 1.1  
+**Created:** December 2025  
+**Last Updated:** December 2025

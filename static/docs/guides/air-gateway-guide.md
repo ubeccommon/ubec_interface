@@ -67,7 +67,7 @@ UBEC tokens live on the Stellar blockchain. You'll need a Stellar wallet to rece
 4. Set a PIN or password for daily access
 5. Your public key (starting with "G") is now ready to share
 
-> 📋 **See:** [UBEC Onboarding User Guides — Technical Setup Section](/docs/guides/UBEC_Onboarding_User_Guides#technical-setup)
+> 📋 **See:** [UBEC Onboarding User Guides — Technical Setup Section](/docs/guides/onboarding-user-guides#technical-setup)
 
 ---
 
@@ -142,7 +142,7 @@ As you participate in the UBEC ecosystem, you'll be evaluated across five dimens
 
 Your holonic score determines your category and governance participation level.
 
-> 📋 **See:** [UBEC Governance Participant Guide](/docs/guides/UBEC_Governance_Participant_Guide)
+> 📋 **See:** [UBEC Governance Participant Guide](/docs/guides/governance-guide)
 
 ---
 
@@ -173,7 +173,7 @@ Recognized for developing stable, mutually beneficial partnerships, reflecting l
 ### 🔥 Fire (UBECtt) — Transformation & Regeneration
 Awarded for actions that transform and heal systems, recognizing your contribution to collective regeneration like fire catalyzing change.
 
-> 📋 **See:** [Water Guide](/docs/guides/UBEC_Water_Reciprocity_Guide) | [Earth Guide](/docs/guides/UBEC_Earth_Mutualism_Guide) | [Fire Guide](/docs/guides/UBEC_Fire_Regeneration_Guide)
+> 📋 **See:** [Water Reciprocity Guide](/docs/guides/water-reciprocity-guide) | [Earth Mutualism Guide](/docs/guides/earth-mutualism-guide) | [Fire Regeneration Guide](/docs/guides/fire-regeneration-guide)
 
 ---
 
@@ -218,7 +218,7 @@ Awarded for actions that transform and heal systems, recognizing your contributi
 - Unfortunately, there is no recovery possible without your secret key
 - This is why secure backup is critical before funding your wallet
 
-> 📋 **See:** [Full Troubleshooting Guide](/docs/guides/UBEC_Onboarding_User_Guides#troubleshooting-common-issues)
+> 📋 **See:** [Full Troubleshooting Guide](/docs/guides/onboarding-user-guides#troubleshooting-common-issues)
 
 ---
 
@@ -241,10 +241,10 @@ Awarded for actions that transform and heal systems, recognizing your contributi
 
 **Community Resources:**
 
-- 📚 [Complete Onboarding Guides](/docs/guides/UBEC_Onboarding_User_Guides)
-- 🏛️ [Governance Participant Guide](/docs/guides/UBEC_Governance_Participant_Guide)
-- 👥 [Community Organizer Guide](/docs/guides/UBEC_Community_Organizer_Guide)
-- ⚙️ [System Administrator Guide](/docs/guides/SYSTEM_ADMINISTRATOR_ONBOARDING_GUIDE)
+- 📚 [Complete Onboarding Guides](/docs/guides/onboarding-user-guides)
+- 🏛️ [Governance Participant Guide](/docs/guides/governance-guide)
+- 👥 [Community Organizer Guide](/docs/guides/community-organizer-guide)
+- ⚙️ [System Administrator Guide](/docs/guides/system-administrator-guide)
 
 **Connect:**
 
@@ -273,5 +273,6 @@ By starting with UBEC (Air), you're taking your first breath in a new kind of ec
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.0  
-**Created:** December 2025
+**Document Version:** 1.1  
+**Created:** December 2025  
+**Last Updated:** December 2025
