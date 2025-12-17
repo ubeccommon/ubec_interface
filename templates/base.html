@@ -213,6 +213,64 @@
             background: var(--primary-gradient-start);
         }
         
+        /* Navigation Dropdown */
+        .nav-dropdown {
+            position: relative;
+        }
+        
+        .nav-dropdown .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .dropdown-arrow {
+            font-size: 0.7rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .nav-dropdown:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--background);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            padding: var(--spacing-sm) 0;
+        }
+        
+        .nav-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: var(--transition-base);
+            white-space: nowrap;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--surface-hover);
+            color: var(--primary-gradient-start);
+        }
+        
         /* Main Content */
         .main-content {
             flex: 1;
@@ -729,6 +787,39 @@
                 text-align: center;
             }
             
+            /* Mobile dropdown */
+            .nav-dropdown {
+                width: 100%;
+            }
+            
+            .nav-dropdown .nav-link {
+                justify-content: center;
+            }
+            
+            .dropdown-menu {
+                position: static;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                box-shadow: none;
+                border: none;
+                background: var(--background-alt);
+                border-radius: var(--radius-sm);
+                margin-top: var(--spacing-xs);
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+            
+            .nav-dropdown:hover .dropdown-menu,
+            .nav-dropdown:focus-within .dropdown-menu {
+                max-height: 200px;
+            }
+            
+            .dropdown-item {
+                text-align: center;
+            }
+            
             /* Single column for all grids on mobile */
             .elements-grid,
             .philosophy-grid,
@@ -769,7 +860,14 @@
                 <a href="/stories" class="nav-link {% if page == 'stories' %}active{% endif %}">Token Stories</a>
                 <a href="/protocol" class="nav-link {% if page == 'protocol' %}active{% endif %}">Protocol</a>
                 <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
-                <a href="/docs" class="nav-link {% if page == 'docs' %}active{% endif %}">Documents</a>
+                <div class="nav-dropdown">
+                    <a href="/docs" class="nav-link {% if page == 'docs' or page == 'apply' %}active{% endif %}">Documents <span class="dropdown-arrow">▾</span></a>
+                    <div class="dropdown-menu">
+                        <a href="/docs" class="dropdown-item">📚 Documentation</a>
+                        <a href="/docs/guides" class="dropdown-item">📖 User Guides</a>
+                        <a href="/apply" class="dropdown-item">📝 Apply to Join</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>

@@ -4,8 +4,8 @@
 
 This guide is part of a comprehensive onboarding system:
 
-- **[Onboarding Overview](./UBEC_Onboarding_Overview.md)** - Common information for all beneficiaries
-- [Farmer Onboarding Guide](./UBEC_Farmer_Onboarding_Guide.md)
+- **[Onboarding Overview](./onboarding-overview)** - Common information for all beneficiaries
+- [Farmer Onboarding Guide](./farmer-onboarding-guide)
 - [Community Onboarding Guide](./UBEC_Community_Onboarding_Guide.md)
 - [Community Activator Onboarding Guide](./UBEC_Community_Activator_Onboarding_Guide.md)
 
@@ -30,7 +30,7 @@ You are a **living lab** if you:
 - Have or can develop technical capacity for sensor deployment
 
 **Living Lab Sites Might Include:**
-- Waldorf/anthroposophical schools with gardens
+- Schools with gardens
 - University field stations or research sites
 - Community education centers with outdoor spaces
 - Bioregional monitoring and research sites
@@ -300,7 +300,7 @@ Include 2-3 draft lesson plans showing:
 ### Step 1: Initial Inquiry
 
 **Contact UBEC:**
-- Email: livinglabs@ubec.protocol
+- Email: living-labs@ubec.network
 - Subject: "Living Lab Application - [Your Institution Name]"
 
 **In Your Initial Email, Include:**
@@ -416,7 +416,7 @@ UBEC team will assess your site through:
 **Who Reviews Your Application:**
 - UBEC team members
 - Experienced living lab operators
-- Educational specialists (especially Waldorf/anthroposophical)
+- Educational specialists (especially anthroposophical)
 - Environmental scientists
 - Technical/IoT experts
 - Community development practitioners
@@ -953,7 +953,7 @@ Your living lab demonstrates reciprocity in action:
 - Video tutorials
 
 **Support Channels:**
-- Technical support email: techsupport@ubec.protocol
+- Technical support email: tech-support@ubec.network
 - Emergency hotline for urgent issues
 - Online troubleshooting knowledge base
 - Scheduled technical office hours
@@ -1009,8 +1009,8 @@ Your living lab demonstrates reciprocity in action:
 
 **Your Questions Answered:**
 - Living Lab FAQ: help.ubec.protocol/livinglabs
-- Email: livinglabs@ubec.protocol
-- Community forum: forums.ubec.protocol/livinglabs
+- Email: living-labs@ubec.network
+- Community forum: forums.ubec.network/livinglabs
 - Scheduled office hours: [times listed on website]
 
 **Emergency Technical Support:**

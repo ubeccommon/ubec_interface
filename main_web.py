@@ -371,6 +371,40 @@ async def dashboard(request: Request):
         )
 
 # ========================================================================
+# APPLICATION PAGES
+# ========================================================================
+
+@app.get("/apply", response_class=HTMLResponse, name="apply")
+async def apply(request: Request):
+    """Application landing page - choose your pathway."""
+    return templates.TemplateResponse("apply.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/farmer", response_class=HTMLResponse, name="apply_farmer")
+async def apply_farmer(request: Request):
+    """Farmer application form."""
+    return templates.TemplateResponse("apply-farmer.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/community", response_class=HTMLResponse, name="apply_community")
+async def apply_community(request: Request):
+    """Community application form."""
+    return templates.TemplateResponse("apply-community.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/activator", response_class=HTMLResponse, name="apply_activator")
+async def apply_activator(request: Request):
+    """Community Activator application form."""
+    return templates.TemplateResponse("apply-activator.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/livinglab", response_class=HTMLResponse, name="apply_livinglab")
+async def apply_livinglab(request: Request):
+    """Living Lab application form."""
+    return templates.TemplateResponse("apply-livinglab.html", {"request": request, "page": "apply"})
+
+
+# ========================================================================
 # DOCUMENTATION PAGES
 # ========================================================================
 
