@@ -20,11 +20,11 @@ UBECgpi is the **Stability Token**—earned through developing deep, mutually be
 
 | Attribute | Details |
 |-----------|---------|
-| **Element** | 🜃 Earth |
+| **Element** | 🌍 Earth |
 | **Ubuntu Principle** | Mutualism |
-| **Token Code** | UBECgpi |
+| **Token Code** | [UBECgpi](https://stellar.expert/explorer/public/asset/UBECgpi-GCPU3LUGRIYLWMPOQEEGIL2HI5Z637PQVK42Z5PYRRQMPFDTNT5SUBEC-1?filter=markets) |
 | **Network** | Stellar Mainnet |
-| **Issuer** | `GCPU3LUGRIYLWMPOQEEGIL2HI5Z637PQVK42Z5PYRRQMPFDTNT5SUBEC` |
+| **Issuer** | [`GCPU3...SUBEC`](https://stellar.expert/explorer/public/account/GCPU3LUGRIYLWMPOQEEGIL2HI5Z637PQVK42Z5PYRRQMPFDTNT5SUBEC) |
 | **Status** | ✅ Live and Operational |
 
 ### What UBECgpi Represents
@@ -373,6 +373,6 @@ By building mutualistic relationships, you embody the Earth element: grounding, 
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.1  
+**Document Version:** 1.2  
 **Created:** December 2025  
 **Last Updated:** December 2025

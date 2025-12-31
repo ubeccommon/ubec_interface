@@ -20,11 +20,11 @@ UBECtt is the **Transform Token**—earned through regenerative actions that cre
 
 | Attribute | Details |
 |-----------|---------|
-| **Element** | 🜂 Fire |
+| **Element** | 🔥 Fire |
 | **Ubuntu Principle** | Regeneration |
-| **Token Code** | UBECtt |
+| **Token Code** | [UBECtt](https://stellar.expert/explorer/public/asset/UBECtt-GBWYGECRQ7R5E6QQKWBTVNYSCFVTIYZLF6MGDHJQBHP2KU2U65Z5UBEC-1?filter=markets) |
 | **Network** | Stellar Mainnet |
-| **Issuer** | `GBWYGECRQ7R5E6QQKWBTVNYSCFVTIYZLF6MGDHJQBHP2KU2U65Z5UBEC` |
+| **Issuer** | [`GBWYG...5UBEC`](https://stellar.expert/explorer/public/account/GBWYGECRQ7R5E6QQKWBTVNYSCFVTIYZLF6MGDHJQBHP2KU2U65Z5UBEC) |
 | **Status** | ✅ Live and Operational |
 
 ### What UBECtt Represents
@@ -418,6 +418,6 @@ Together, these elements create a complete ecosystem of Ubuntu economics—one t
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.1  
+**Document Version:** 1.2  
 **Created:** December 2025  
 **Last Updated:** December 2025

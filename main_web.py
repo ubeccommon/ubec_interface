@@ -3,10 +3,13 @@ UBEC Protocol Web Interface - Main Application
 ================================================
 
 REFACTORED: UI-only frontend that fetches data from api.ubec.network
+EXTENDED: Now includes application submission handling with UI database
 
 This module serves:
     - Public web pages (home, dashboard, about, protocol, stories)
     - Documentation guides
+    - Application forms for beneficiaries
+    - Admin dashboard for reviewing applications
     - Static assets
 
 Data is fetched from the dedicated API gateway at api.ubec.network,
@@ -14,6 +17,9 @@ NOT directly from the backend. This ensures:
     - Single source of truth for all API data
     - Clean separation between UI and API
     - External developers use the same API as the frontend
+
+Application data is stored in the UI-specific database (ubec_ui_interface)
+which is separate from the main protocol database.
 
 Architecture:
     bioregional.ubec.network (this service, port 8001)
@@ -27,6 +33,9 @@ Attribution:
     our decisions and recommendations. This project was made possible with 
     the assistance of Claude and Anthropic PBC.
 """
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before any other imports
+
 
 import logging
 import markdown
@@ -40,6 +49,27 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 from config.settings import settings
 from utils.backend_client import get_backend_client, close_backend_client
+
+# Import UI database connection
+from database.ui_db_connection import init_db_pool, close_db_pool, check_db_health
+
+# Import application routes
+from routes.application_routes import router as application_router
+
+# Import admin routes with graceful fallback
+try:
+    from routes.admin_routes import (
+        router as admin_router,
+        initialize_admin_service,
+        shutdown_admin_service,
+        get_admin_service
+    )
+    ADMIN_ROUTES_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"Admin routes not available: {e}")
+    ADMIN_ROUTES_AVAILABLE = False
+    admin_router = None
+    get_admin_service = None
 
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
@@ -76,6 +106,14 @@ templates = Jinja2Templates(directory="templates")
 # Directory where guide markdown files are stored
 GUIDES_DIR = Path("static/docs/guides")
 
+# Include application routes
+app.include_router(application_router)
+
+# Include admin routes if available
+if ADMIN_ROUTES_AVAILABLE and admin_router:
+    app.include_router(admin_router)
+    logger.info("Admin routes registered")
+
 # ========================================================================
 # LIFECYCLE EVENTS
 # ========================================================================
@@ -87,6 +125,32 @@ async def startup_event():
     logger.info("=" * 60)
     logger.info(f"Environment: {settings.APP_ENV}")
     logger.info(f"API Source: {settings.BACKEND_API_URL}")
+    
+    # Initialize UI database pool
+    db_pool = None
+    try:
+        await init_db_pool()
+        logger.info("UI Database pool initialized")
+        
+        # Try to get the pool for admin service
+        try:
+            from database.ui_db_connection import get_db_pool
+            db_pool = await get_db_pool()
+        except (ImportError, AttributeError):
+            logger.debug("get_db_pool not available in ui_db_connection")
+    except Exception as e:
+        logger.error(f"Failed to initialize UI database: {e}")
+        logger.warning("Application submissions will not work until database is available")
+    
+    # Initialize admin service if available
+    if ADMIN_ROUTES_AVAILABLE:
+        try:
+            await initialize_admin_service(db_pool)
+            logger.info("Admin service initialized")
+        except Exception as e:
+            logger.error(f"Failed to initialize admin service: {e}")
+            logger.warning("Admin dashboard will use mock data")
+    
     logger.info("Web interface ready on port 8001")
     logger.info("NOTE: API moved to api.ubec.network")
 
@@ -95,7 +159,61 @@ async def startup_event():
 async def shutdown_event():
     logger.info("Shutting down UBEC Protocol Web Interface...")
     await close_backend_client()
+    
+    # Shutdown admin service if available
+    if ADMIN_ROUTES_AVAILABLE:
+        try:
+            await shutdown_admin_service()
+            logger.info("Admin service shutdown complete")
+        except Exception as e:
+            logger.warning(f"Error shutting down admin service: {e}")
+    
+    await close_db_pool()
     logger.info("Shutdown complete")
+
+# ========================================================================
+# APPLICATION FORM PAGES
+# ========================================================================
+
+@app.get("/apply", response_class=HTMLResponse, name="apply")
+async def apply_landing(request: Request):
+    """Application landing page with pathway options."""
+    return templates.TemplateResponse("apply.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/farmer", response_class=HTMLResponse, name="apply_farmer")
+async def apply_farmer(request: Request):
+    """Farmer application form."""
+    return templates.TemplateResponse("apply-farmer.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/community", response_class=HTMLResponse, name="apply_community")
+async def apply_community(request: Request):
+    """Community application form."""
+    return templates.TemplateResponse("apply-community.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/activator", response_class=HTMLResponse, name="apply_activator")
+async def apply_activator(request: Request):
+    """Community activator application form."""
+    return templates.TemplateResponse("apply-activator.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/livinglab", response_class=HTMLResponse, name="apply_livinglab")
+async def apply_livinglab(request: Request):
+    """Living lab application form."""
+    return templates.TemplateResponse("apply-livinglab.html", {"request": request, "page": "apply"})
+
+
+@app.get("/apply/success", response_class=HTMLResponse, name="apply_success")
+async def apply_success(request: Request, ref: str = None, type: str = None):
+    """Application submission success page."""
+    return templates.TemplateResponse("apply-success.html", {
+        "request": request,
+        "page": "apply",
+        "reference_number": ref,
+        "application_type": type
+    })
 
 # ========================================================================
 # PUBLIC WEB PAGES
@@ -212,7 +330,7 @@ async def dashboard(request: Request):
                     'average_ubuntu_score': network_data.get('ubuntu_alignment', 0.0),
                     'last_block_time': raw_network_status.get('timestamp', 'Unavailable')
                 }
-                logger.info(f"Network status: {context['network_status']['active_participants']} participants")
+                logger.info(f"Network status loaded: {context['network_status']['active_participants']} participants")
         except Exception as e:
             logger.warning(f"Could not fetch network status: {e}")
         
@@ -220,17 +338,21 @@ async def dashboard(request: Request):
         # HOLONIC SCORES
         # ============================================================
         try:
-            raw_holonic_response = await client.get_holonic_scores(limit=50)
-            if raw_holonic_response and isinstance(raw_holonic_response, dict):
-                principles = raw_holonic_response.get('ubuntu_principles', {})
+            raw_holonic = await client.get_holonic_scores()
+            if raw_holonic and isinstance(raw_holonic, dict):
+                # Transform API response to template-expected format
+                principles = raw_holonic.get('ubuntu_principles', {})
                 
+                # Extract averages from nested structure
                 diversity = principles.get('diversity', {}).get('average', 0) or 0
                 reciprocity = principles.get('reciprocity', {}).get('average', 0) or 0
                 mutualism = principles.get('mutualism', {}).get('average', 0) or 0
                 regeneration = principles.get('regeneration', {}).get('average', 0) or 0
                 
+                # Calculate overall network health
                 overall = (diversity + reciprocity + mutualism + regeneration) / 4
                 
+                # Build template-ready context
                 context["holonic_scores"] = {
                     "overall_network_health": overall,
                     "autonomy_integration": diversity,
@@ -238,35 +360,40 @@ async def dashboard(request: Request):
                     "reciprocity_health": reciprocity,
                     "mutualism_capacity": mutualism,
                     "regeneration_impact": regeneration,
-                    "account_count": raw_holonic_response.get('account_count', 0)
+                    "account_count": raw_holonic.get('account_count', 0)
                 }
-                logger.info(f"Loaded holonic scores: overall={overall:.2%}")
+                logger.info(f"Holonic scores loaded: overall={overall:.2%}, diversity={diversity:.2%}")
             else:
                 context["holonic_scores"] = None
         except Exception as e:
             logger.warning(f"Could not fetch holonic scores: {e}")
         
         # ============================================================
-        # TRANSACTIONS
+        # RECENT TRANSACTIONS
         # ============================================================
         try:
-            raw_transactions_response = await client.get_recent_transactions(limit=20)
-            if raw_transactions_response and isinstance(raw_transactions_response, dict):
-                context["recent_transactions"] = raw_transactions_response
-                tx_count = len(raw_transactions_response.get('transactions', []))
-                logger.info(f"Loaded {tx_count} transactions with operations")
-            else:
-                context["recent_transactions"] = []
+            raw_transactions = await client.get_recent_transactions(limit=10)
+            # Handle both response formats: list directly or {"transactions": [...]}
+            if raw_transactions:
+                if isinstance(raw_transactions, list):
+                    context["recent_transactions"] = raw_transactions
+                    logger.info(f"Loaded {len(raw_transactions)} recent transactions (list format)")
+                elif isinstance(raw_transactions, dict):
+                    # Pass the full dict - template handles extraction
+                    context["recent_transactions"] = raw_transactions
+                    tx_count = len(raw_transactions.get('transactions', []))
+                    logger.info(f"Loaded {tx_count} recent transactions (dict format)")
         except Exception as e:
-            logger.warning(f"Could not fetch transactions: {e}")
-            context["recent_transactions"] = []
+            logger.warning(f"Could not fetch recent transactions: {e}")
         
         # ============================================================
         # DISTRIBUTION STATS
         # ============================================================
         try:
             raw_distribution = await client.get_distribution_stats()
-            context["distribution_stats"] = raw_distribution
+            if raw_distribution and isinstance(raw_distribution, dict):
+                context["distribution_stats"] = raw_distribution
+                logger.info("Distribution stats loaded")
         except Exception as e:
             logger.warning(f"Could not fetch distribution stats: {e}")
         
@@ -274,9 +401,10 @@ async def dashboard(request: Request):
         # TOKEN AUDIT
         # ============================================================
         try:
-            raw_audit = await client.get_token_audit(token_code="UBEC")
-            context["token_audit"] = raw_audit
-            logger.info("Loaded token audit data")
+            raw_audit = await client.get_token_audit()
+            if raw_audit and isinstance(raw_audit, dict):
+                context["token_audit"] = raw_audit
+                logger.info("Token audit loaded")
         except Exception as e:
             logger.warning(f"Could not fetch token audit: {e}")
         
@@ -284,13 +412,12 @@ async def dashboard(request: Request):
         # LIQUIDITY POOLS
         # ============================================================
         try:
-            raw_lp_data = await client.get_liquidity_pools()
-            context["liquidity_pools"] = raw_lp_data
-            pool_count = len(raw_lp_data.get('pools', [])) if raw_lp_data else 0
-            logger.info(f"Loaded {pool_count} liquidity pools")
+            raw_pools = await client.get_liquidity_pools()
+            if raw_pools and isinstance(raw_pools, dict):
+                context["liquidity_pools"] = raw_pools
+                logger.info("Liquidity pools loaded")
         except Exception as e:
             logger.warning(f"Could not fetch liquidity pools: {e}")
-            context["liquidity_pools"] = None
         
         # ============================================================
         # ECOREGIONS
@@ -369,40 +496,6 @@ async def dashboard(request: Request):
                 "page": "error"
             }
         )
-
-# ========================================================================
-# APPLICATION PAGES
-# ========================================================================
-
-@app.get("/apply", response_class=HTMLResponse, name="apply")
-async def apply(request: Request):
-    """Application landing page - choose your pathway."""
-    return templates.TemplateResponse("apply.html", {"request": request, "page": "apply"})
-
-
-@app.get("/apply/farmer", response_class=HTMLResponse, name="apply_farmer")
-async def apply_farmer(request: Request):
-    """Farmer application form."""
-    return templates.TemplateResponse("apply-farmer.html", {"request": request, "page": "apply"})
-
-
-@app.get("/apply/community", response_class=HTMLResponse, name="apply_community")
-async def apply_community(request: Request):
-    """Community application form."""
-    return templates.TemplateResponse("apply-community.html", {"request": request, "page": "apply"})
-
-
-@app.get("/apply/activator", response_class=HTMLResponse, name="apply_activator")
-async def apply_activator(request: Request):
-    """Community Activator application form."""
-    return templates.TemplateResponse("apply-activator.html", {"request": request, "page": "apply"})
-
-
-@app.get("/apply/livinglab", response_class=HTMLResponse, name="apply_livinglab")
-async def apply_livinglab(request: Request):
-    """Living Lab application form."""
-    return templates.TemplateResponse("apply-livinglab.html", {"request": request, "page": "apply"})
-
 
 # ========================================================================
 # DOCUMENTATION PAGES
@@ -506,18 +599,88 @@ async def guide_raw(guide_slug: str):
         raise HTTPException(status_code=500, detail="Unable to download guide")
 
 # ========================================================================
-# HEALTH CHECK
+# HEALTH CHECK - Service Registry Pattern
 # ========================================================================
 
 @app.get("/health", response_class=JSONResponse)
 async def health_check():
-    """Health check endpoint."""
+    """
+    Health check endpoint with comprehensive service status.
+    
+    Follows the standardized service registry pattern:
+    - Checks all registered services
+    - Aggregates overall health status
+    - Returns detailed service-level status
+    """
+    # Track overall health - starts healthy, degrades if any service fails
+    overall_healthy = True
+    
+    # Build services status dictionary
+    services = {}
+    
+    # Check UI database health
+    try:
+        ui_db_health = await check_db_health()
+        services["ui_database"] = {
+            "status": "healthy" if ui_db_health.get("status") == "healthy" else "unhealthy",
+            "details": ui_db_health
+        }
+        if ui_db_health.get("status") != "healthy":
+            overall_healthy = False
+    except Exception as e:
+        logger.warning(f"UI database health check failed: {e}")
+        services["ui_database"] = {
+            "status": "unhealthy",
+            "error": str(e)
+        }
+        overall_healthy = False
+    
+    # Check admin service if available
+    if ADMIN_ROUTES_AVAILABLE and get_admin_service is not None:
+        try:
+            admin_svc = await get_admin_service()
+            if admin_svc and admin_svc.is_initialized():
+                admin_health = await admin_svc.health_check()
+                services["admin_service"] = {
+                    "status": "healthy" if admin_health.get("initialized") else "degraded",
+                    "version": admin_health.get("version", "unknown"),
+                    "active_sessions": admin_health.get("active_sessions", 0),
+                    "database": admin_health.get("database", "unknown")
+                }
+                if not admin_health.get("initialized"):
+                    overall_healthy = False
+            else:
+                services["admin_service"] = {
+                    "status": "not_initialized",
+                    "message": "Admin service not yet initialized"
+                }
+        except Exception as e:
+            logger.warning(f"Admin service health check failed: {e}")
+            services["admin_service"] = {
+                "status": "unavailable",
+                "error": str(e)
+            }
+    else:
+        services["admin_service"] = {
+            "status": "not_installed",
+            "message": "Admin routes module not available"
+        }
+    
+    # Determine overall status
+    if overall_healthy:
+        overall_status = "healthy"
+    elif any(s.get("status") == "healthy" for s in services.values()):
+        overall_status = "degraded"
+    else:
+        overall_status = "unhealthy"
+    
     return {
-        "status": "healthy",
+        "status": overall_status,
         "service": "ubec-web-interface",
         "version": "1.0.0",
         "environment": settings.APP_ENV,
-        "api_note": "API moved to api.ubec.network"
+        "api_note": "API moved to api.ubec.network",
+        "services": services
     }
 
 # ========================================================================

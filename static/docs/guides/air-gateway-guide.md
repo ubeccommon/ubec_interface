@@ -22,11 +22,11 @@ UBEC is the **Gateway Token**—your entry point into the four-element UBEC ecos
 
 | Attribute | Details |
 |-----------|---------|
-| **Element** | 🜁 Air |
+| **Element** | 🌬️ Air |
 | **Ubuntu Principle** | Diversity & Universal Access |
-| **Token Code** | UBEC |
+| **Token Code** | [UBEC](https://stellar.expert/explorer/public/asset/UBEC-GDPNB7S3IOM2J6C3NA2QG4TQAUCRZXPJJ4HSCSIKELEH7ORUCX5UB2VN-1?filter=markets) |
 | **Network** | Stellar Mainnet |
-| **Issuer** | `GDPNB7S3IOM2J6C3NA2QG4TQAUCRZXPJJ4HSCCSIKELEH7ORUCX5UB2VN` |
+| **Issuer** | [`GDPNB7S3IOM2J6C3NA2QG4TQAUCRZXPJJ4HSCSIKELEH7ORUCX5UB2VN`](https://stellar.expert/explorer/public/account/GDPNB7S3IOM2J6C3NA2QG4TQAUCRZXPJJ4HSCSIKELEH7ORUCX5UB2VN) |
 | **Status** | ✅ Live and Operational |
 | **Current Community** | 640+ holders |
 
@@ -95,7 +95,7 @@ Before you can receive UBEC tokens, you need to "trust" them. This is a Stellar 
 
 ```
 Asset Code:  UBEC
-Issuer:      GDPNB7S3IOM2J6C3NA2QG4TQAUCRZXPJJ4HSCCSIKELEH7ORUCX5UB2VN
+Issuer:      GDPNB7S3IOM2J6C3NA2QG4TQAUCRZXPJJ4HSCSIKELEH7ORUCX5UB2VN
 ```
 
 4. Confirm the trustline (costs a tiny amount of XLM)
@@ -273,6 +273,6 @@ By starting with UBEC (Air), you're taking your first breath in a new kind of ec
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.1  
+**Document Version:** 1.2  
 **Created:** December 2025  
 **Last Updated:** December 2025

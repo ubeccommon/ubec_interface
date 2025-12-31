@@ -5,14 +5,14 @@
 This guide is part of a comprehensive onboarding system:
 
 - **[Onboarding Overview](./UBEC_Onboarding_Overview.md)** - Common information for all beneficiaries
-- [Farmer Onboarding Guide](./UBEC_Farmer_Onboarding_Guide.md)
-- [Community Onboarding Guide](./UBEC_Community_Onboarding_Guide.md)
-- [Living Lab Onboarding Guide](./UBEC_Living_Lab_Onboarding_Guide.md)
+- [Farmer Onboarding Guide](./farmer-onboarding-guide)
+- [Community Onboarding Guide](./community-onboarding-guide)
+- [Living Lab Onboarding Guide](./living-lab-onboarding-guide)
 
 **📚 Shared Resources:**
-- [Technical Setup: Creating Your Stellar Wallet](./UBEC_Onboarding_Overview.md#technical-setup-creating-your-stellar-wallet)
-- [Understanding Your Holonic Journey](./UBEC_Onboarding_Overview.md#understanding-your-holonic-journey)
-- [Support and Resources](./UBEC_Onboarding_Overview.md#support-and-resources)
+- [Technical Setup: Creating Your Stellar Wallet](./onboarding-overview#technical-setup-creating-your-stellar-wallet)
+- [Understanding Your Holonic Journey](./understanding-your-holonic-journey)
+- [Support and Resources](./onboarding-overview#support-and-resources)
 
 ---
 

@@ -20,11 +20,11 @@ UBECrc is the **Reciprocity Credit**—earned through balanced giving and receiv
 
 | Attribute | Details |
 |-----------|---------|
-| **Element** | 🜄 Water |
+| **Element** | 💧 Water |
 | **Ubuntu Principle** | Reciprocity |
-| **Token Code** | UBECrc |
+| **Token Code** | [UBECrc](https://stellar.expert/explorer/public/asset/UBECrc-GBYOTGM27KLFNQQU3G6QWVEK7LQB36N6OX2YLYMN4WU3AFM4VRFZUBEC-1?filter=markets) |
 | **Network** | Stellar Mainnet |
-| **Issuer** | `GBYOTGM27KLFNQQU3G6QWVEK7LQB36N6OX2YLYMN4WU3AFM4VRFZUBEC` |
+| **Issuer** | [`GBYOT...ZUBEC`](https://stellar.expert/explorer/public/account/GBYOTGM27KLFNQQU3G6QWVEK7LQB36N6OX2YLYMN4WU3AFM4VRFZUBEC) |
 | **Status** | ✅ Live and Operational |
 
 ### What UBECrc Represents
@@ -294,6 +294,6 @@ By participating in reciprocity, you embody the Water element: flowing, adapting
 
 **Attribution:** This project uses the services of Claude and Anthropic PBC to inform our decisions and recommendations. This project was made possible with the assistance of Claude and Anthropic PBC.
 
-**Document Version:** 1.1  
+**Document Version:** 1.2  
 **Created:** December 2025  
 **Last Updated:** December 2025

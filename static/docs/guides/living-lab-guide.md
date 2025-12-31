@@ -6,13 +6,13 @@ This guide is part of a comprehensive onboarding system:
 
 - **[Onboarding Overview](./onboarding-overview)** - Common information for all beneficiaries
 - [Farmer Onboarding Guide](./farmer-onboarding-guide)
-- [Community Onboarding Guide](./UBEC_Community_Onboarding_Guide.md)
-- [Community Activator Onboarding Guide](./UBEC_Community_Activator_Onboarding_Guide.md)
+- [Community Onboarding Guide](./community-onboarding-guide)
+- [Community Activator Onboarding Guide](./community-activator-onboarding-guide)
 
 **📚 Shared Resources:**
-- [Technical Setup: Creating Your Stellar Wallet](./UBEC_Onboarding_Overview.md#technical-setup-creating-your-stellar-wallet)
-- [Understanding Your Holonic Journey](./UBEC_Onboarding_Overview.md#understanding-your-holonic-journey)
-- [Support and Resources](./UBEC_Onboarding_Overview.md#support-and-resources)
+- [Technical Setup: Creating Your Stellar Wallet](./onboarding-overview#technical-setup-creating-your-stellar-wallet)
+- [Understanding Your Holonic Journey](./understanding-your-holonic-journey)
+- [Support and Resources](./onboarding-overview#support-and-resources)
 
 ---
 
@@ -1043,4 +1043,4 @@ This project uses the services of Claude and Anthropic PBC to inform our decisio
 
 ---
 
-**Return to [Onboarding Overview](./UBEC_Onboarding_Overview.md)**
+**Return to [Onboarding Overview](./onboarding-overview)**
