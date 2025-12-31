@@ -73,8 +73,36 @@ LOCKOUT_DURATION_MINUTES = 30
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-# Templates - will be set during initialization
+# Templates - required, no fallback
 templates: Optional[Jinja2Templates] = None
+
+def _init_templates() -> Jinja2Templates:
+    """Initialize templates. Raises error if not found."""
+    global templates
+    if templates is None:
+        from pathlib import Path
+        possible_paths = [
+            Path(__file__).parent.parent / "templates",  # /app/routes/../templates = /app/templates
+            Path("/srv/ubec-www/app/templates"),
+        ]
+        for path in possible_paths:
+            if path.exists() and (path / "admin").exists():
+                templates = Jinja2Templates(directory=str(path))
+                logger.info(f"Admin templates initialized from: {path}")
+                return templates
+        
+        raise RuntimeError(
+            f"Templates directory not found. Checked: {[str(p) for p in possible_paths]}. "
+            "Create /srv/ubec-www/app/templates/admin/ with required template files."
+        )
+    return templates
+
+
+def get_templates() -> Jinja2Templates:
+    """Get templates instance. Raises error if not initialized."""
+    if templates is None:
+        return _init_templates()
+    return templates
 
 
 # =============================================================================
@@ -421,14 +449,11 @@ async def login_page(request: Request, error: str = None, message: str = None):
     if user:
         return RedirectResponse(url="/admin/dashboard", status_code=302)
     
-    if templates:
-        return templates.TemplateResponse("admin_login.html", {
-            "request": request,
-            "error": error,
-            "message": message
-        })
-    
-    return HTMLResponse(_get_login_html(error, message))
+    return get_templates().TemplateResponse("admin/admin_login.html", {
+        "request": request,
+        "error": error,
+        "message": message
+    })
 
 
 @router.post("/login")
@@ -566,16 +591,13 @@ async def dashboard(request: Request):
     pending = await get_pending_applications(limit=10)
     recent_activity = await get_recent_activity(limit=10)
     
-    if templates:
-        return templates.TemplateResponse("admin_dashboard.html", {
-            "request": request,
-            "user": user,
-            "stats": stats,
-            "pending_applications": pending,
-            "recent_activity": recent_activity
-        })
-    
-    return HTMLResponse(_get_dashboard_html(user, stats, pending, recent_activity))
+    return get_templates().TemplateResponse("admin/admin_dashboard.html", {
+        "request": request,
+        "user": user,
+        "stats": stats,
+        "pending_applications": pending,
+        "recent_activity": recent_activity
+    })
 
 
 # =============================================================================
@@ -620,6 +642,22 @@ async def view_application_page(request: Request, app_id: int):
         history_list = [dict(h) for h in history]
         docs_list = [dict(d) for d in documents]
         
+        # Parse application_data JSON if it's a string
+        if app_dict.get('application_data'):
+            logger.info(f"application_data type: {type(app_dict['application_data'])}")
+            if isinstance(app_dict['application_data'], str):
+                try:
+                    app_dict['application_data'] = json.loads(app_dict['application_data'])
+                    logger.info(f"Parsed application_data keys: {list(app_dict['application_data'].keys())}")
+                except json.JSONDecodeError:
+                    logger.warning(f"Failed to parse application_data JSON for app {app_id}")
+                    app_dict['application_data'] = {}
+            elif isinstance(app_dict['application_data'], dict):
+                logger.info(f"application_data already dict, keys: {list(app_dict['application_data'].keys())}")
+        else:
+            logger.info(f"application_data is empty or None for app {app_id}")
+            app_dict['application_data'] = {}
+        
         # Log the view
         client_ip = request.client.host if request.client else None
         await log_audit_event(
@@ -630,18 +668,14 @@ async def view_application_page(request: Request, app_id: int):
             ip_address=client_ip
         )
         
-        if templates:
-            return templates.TemplateResponse("admin/application_detail.html", {
-                "request": request,
-                "user": user,
-                "application": app_dict,
-                "history": history_list,
-                "documents": docs_list,
-                "page_title": f"Application #{app_id}"
-            })
-        
-        # Fallback to inline HTML
-        return HTMLResponse(_get_application_detail_html(user, app_dict, history_list, docs_list))
+        return get_templates().TemplateResponse("admin/admin_application_detail.html", {
+            "request": request,
+            "user": user,
+            "application": app_dict,
+            "history": history_list,
+            "documents": docs_list,
+            "page_title": f"Application #{app_id}"
+        })
         
     except HTTPException:
         raise
@@ -655,6 +689,41 @@ async def health_check():
     """Return service health status."""
     status = await _admin_service.health_check()
     return JSONResponse(status)
+
+
+@router.get("/api/application/{app_id}/debug")
+@require_permission("applications.view")
+async def debug_application_data(request: Request, app_id: int):
+    """Debug endpoint to view raw application_data."""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    try:
+        async with _admin_service.db_pool.acquire() as conn:
+            app = await conn.fetchrow("""
+                SELECT id, reference_number, application_data
+                FROM ubec_ui.applications
+                WHERE id = $1
+            """, app_id)
+            
+            if not app:
+                return JSONResponse({"error": "Application not found"})
+            
+            app_dict = dict(app)
+            raw_data = app_dict.get('application_data')
+            
+            return JSONResponse({
+                "id": app_dict['id'],
+                "reference_number": app_dict['reference_number'],
+                "application_data_type": str(type(raw_data)),
+                "application_data_is_none": raw_data is None,
+                "application_data": raw_data if isinstance(raw_data, dict) else (
+                    json.loads(raw_data) if isinstance(raw_data, str) and raw_data else None
+                )
+            })
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
 
 
 # =============================================================================
@@ -1323,653 +1392,13 @@ async def get_recent_activity(limit: int = 10) -> List[Dict[str, Any]]:
         return []
 
 
-# =============================================================================
-# HTML Templates (Inline Fallbacks)
-# =============================================================================
-
-def _get_login_html(error: str = None, message: str = None) -> str:
-    """Generate login page HTML."""
-    error_html = f'<div class="alert alert-error">{error}</div>' if error else ''
-    message_html = f'<div class="alert alert-success">{message}</div>' if message else ''
-    
-    return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBEC Admin Login</title>
-    <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }}
-        .login-container {{
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-            padding: 40px;
-            width: 100%;
-            max-width: 420px;
-        }}
-        .logo {{ text-align: center; margin-bottom: 30px; }}
-        .logo h1 {{ font-size: 2em; color: #667eea; }}
-        .logo p {{ color: #6c757d; font-size: 0.9em; }}
-        .alert {{ padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; }}
-        .alert-error {{ background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }}
-        .alert-success {{ background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }}
-        .form-group {{ margin-bottom: 20px; }}
-        label {{ display: block; margin-bottom: 6px; font-weight: 500; color: #374151; }}
-        input {{ 
-            width: 100%; 
-            padding: 12px 16px; 
-            border: 2px solid #e5e7eb; 
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.2s;
-        }}
-        input:focus {{ outline: none; border-color: #667eea; }}
-        button {{
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }}
-        button:hover {{ transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }}
-        .footer {{ text-align: center; margin-top: 20px; color: #9ca3af; font-size: 0.85em; }}
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <div class="logo">
-            <h1>🌍 UBEC Admin</h1>
-            <p>"I am because we are"</p>
-        </div>
-        {error_html}
-        {message_html}
-        <form method="POST" action="/admin/login">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required placeholder="admin@ubec.network">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••">
-            </div>
-            <button type="submit">Sign In</button>
-        </form>
-        <div class="footer">
-            <p>UBEC Protocol Admin Panel</p>
-        </div>
-    </div>
-</body>
-</html>"""
-
-
-def _get_dashboard_html(user: Dict, stats: Dict, pending: List, activity: List) -> str:
-    """Generate dashboard page HTML."""
-    app_stats = stats.get("applications", {})
-    user_stats = stats.get("users", {})
-    
-    pending_rows = ""
-    for app in pending[:10]:
-        pending_rows += f"""
-        <tr>
-            <td><strong>{app.get('reference_number', 'N/A')}</strong></td>
-            <td>{app.get('application_type', 'N/A')}</td>
-            <td>{app.get('contact_name', 'N/A')}</td>
-            <td>{app.get('organization_name', 'N/A') or '-'}</td>
-            <td>{app.get('days_pending', 0)} days</td>
-            <td>
-                <a href="/admin/application/{app.get('id')}" class="btn btn-sm">Review</a>
-                <form method="POST" action="/admin/api/application/{app.get('id')}/delete" style="display:inline;" 
-                      onsubmit="return confirm('Delete application {app.get('reference_number')}? This cannot be undone.');">
-                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>"""
-    
-    if not pending_rows:
-        pending_rows = '<tr><td colspan="6" style="text-align:center;color:#6c757d;">No pending applications</td></tr>'
-    
-    activity_rows = ""
-    for act in activity[:10]:
-        created = act.get('created_at')
-        time_str = created.strftime('%Y-%m-%d %H:%M') if created else 'N/A'
-        activity_rows += f"""
-        <tr>
-            <td>{act.get('user_email', 'System')}</td>
-            <td><code>{act.get('action', 'N/A')}</code></td>
-            <td>{act.get('resource_type', '-') or '-'}</td>
-            <td>{time_str}</td>
-        </tr>"""
-    
-    if not activity_rows:
-        activity_rows = '<tr><td colspan="4" style="text-align:center;color:#6c757d;">No recent activity</td></tr>'
-    
-    return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBEC Admin Dashboard</title>
-    <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }}
-        .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .header h1 {{ font-size: 1.5em; }}
-        .header-user {{ display: flex; align-items: center; gap: 15px; }}
-        .header-user a {{ color: white; text-decoration: none; opacity: 0.9; }}
-        .header-user a:hover {{ opacity: 1; }}
-        .container {{ max-width: 1400px; margin: 0 auto; padding: 30px; }}
-        .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }}
-        .stat-card {{ background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }}
-        .stat-card h3 {{ color: #6c757d; font-size: 0.9em; font-weight: 500; margin-bottom: 8px; }}
-        .stat-card .value {{ font-size: 2.5em; font-weight: 700; color: #1f2937; }}
-        .stat-card.pending .value {{ color: #f59e0b; }}
-        .stat-card.approved .value {{ color: #10b981; }}
-        .card {{ background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }}
-        .card h2 {{ margin-bottom: 20px; color: #1f2937; font-size: 1.25em; }}
-        table {{ width: 100%; border-collapse: collapse; }}
-        th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }}
-        th {{ background: #f9fafb; font-weight: 600; color: #6b7280; font-size: 0.85em; text-transform: uppercase; }}
-        tr:hover {{ background: #f9fafb; }}
-        .btn {{ 
-            padding: 6px 12px; 
-            background: #667eea; 
-            color: white; 
-            border-radius: 6px; 
-            text-decoration: none;
-            font-size: 0.85em;
-            border: none;
-            cursor: pointer;
-        }}
-        .btn:hover {{ background: #5a6fd6; }}
-        .btn-danger {{ background: #ef4444; }}
-        .btn-danger:hover {{ background: #dc2626; }}
-        code {{ background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }}
-        .role-badge {{
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }}
-        .role-super_admin {{ background: #fef3c7; color: #92400e; }}
-        .role-admin {{ background: #dbeafe; color: #1e40af; }}
-        .role-reviewer {{ background: #d1fae5; color: #065f46; }}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>🌍 UBEC Admin Dashboard</h1>
-        <div class="header-user">
-            <span>{user.get('display_name', 'Admin')}</span>
-            <span class="role-badge role-{user.get('role', 'user')}">{user.get('role', 'user')}</span>
-            <a href="/admin/logout">Logout</a>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card pending">
-                <h3>Pending Applications</h3>
-                <div class="value">{app_stats.get('pending', 0)}</div>
-            </div>
-            <div class="stat-card">
-                <h3>Under Review</h3>
-                <div class="value">{app_stats.get('under_review', 0)}</div>
-            </div>
-            <div class="stat-card approved">
-                <h3>Approved</h3>
-                <div class="value">{app_stats.get('approved', 0)}</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Applications</h3>
-                <div class="value">{app_stats.get('total', 0)}</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Users</h3>
-                <div class="value">{user_stats.get('total', 0)}</div>
-            </div>
-            <div class="stat-card">
-                <h3>New Messages</h3>
-                <div class="value">{stats.get('new_messages', 0)}</div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h2>📋 Pending Applications</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Reference</th>
-                        <th>Type</th>
-                        <th>Contact</th>
-                        <th>Organization</th>
-                        <th>Age</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {pending_rows}
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="card">
-            <h2>📝 Recent Activity</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Resource</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {activity_rows}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</body>
-</html>"""
-
-
-def _get_application_detail_html(user: Dict, app: Dict, history: List, documents: List) -> str:
-    """Generate application detail page HTML."""
-    
-    # Format dates
-    submitted = app.get('submitted_at')
-    submitted_str = submitted.strftime('%Y-%m-%d %H:%M') if submitted else 'N/A'
-    
-    reviewed = app.get('reviewed_at')
-    reviewed_str = reviewed.strftime('%Y-%m-%d %H:%M') if reviewed else 'Not yet reviewed'
-    
-    decided = app.get('decided_at')
-    decided_str = decided.strftime('%Y-%m-%d %H:%M') if decided else 'Pending'
-    
-    # Status badge color
-    status = app.get('status', 'pending')
-    status_colors = {
-        'pending': '#f59e0b',
-        'under_review': '#3b82f6',
-        'approved': '#10b981',
-        'rejected': '#ef4444'
-    }
-    status_color = status_colors.get(status, '#6b7280')
-    
-    # Build history rows
-    history_rows = ""
-    for h in history:
-        changed_at = h.get('changed_at')
-        time_str = changed_at.strftime('%Y-%m-%d %H:%M') if changed_at else 'N/A'
-        old_color = status_colors.get(h.get('old_status'), '#6b7280')
-        new_color = status_colors.get(h.get('new_status'), '#6b7280')
-        history_rows += f"""
-        <tr>
-            <td><span class="status-badge" style="background:{old_color}20;color:{old_color}">{h.get('old_status', 'N/A')}</span></td>
-            <td>→</td>
-            <td><span class="status-badge" style="background:{new_color}20;color:{new_color}">{h.get('new_status', 'N/A')}</span></td>
-            <td>{h.get('changed_by', 'System')}</td>
-            <td>{h.get('change_reason') or '-'}</td>
-            <td>{time_str}</td>
-        </tr>"""
-    
-    if not history_rows:
-        history_rows = '<tr><td colspan="6" style="text-align:center;color:#6c757d;">No status changes recorded</td></tr>'
-    
-    # Build documents rows
-    docs_rows = ""
-    for d in documents:
-        uploaded = d.get('uploaded_at')
-        time_str = uploaded.strftime('%Y-%m-%d %H:%M') if uploaded else 'N/A'
-        size = d.get('file_size', 0)
-        size_str = f"{size / 1024:.1f} KB" if size else 'N/A'
-        docs_rows += f"""
-        <tr>
-            <td>{d.get('document_type', 'Document')}</td>
-            <td>{d.get('filename', 'N/A')}</td>
-            <td>{size_str}</td>
-            <td>{time_str}</td>
-        </tr>"""
-    
-    if not docs_rows:
-        docs_rows = '<tr><td colspan="4" style="text-align:center;color:#6c757d;">No documents uploaded</td></tr>'
-    
-    requested_amount = app.get('requested_amount') or 0
-    approved_amount = app.get('approved_amount') or 0
-    
-    # Build the page
-    return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application #{app.get('id')} - UBEC Admin</title>
-    <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }}
-        .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .header h1 {{ font-size: 1.5em; }}
-        .header-nav {{ display: flex; align-items: center; gap: 20px; }}
-        .header-nav a {{ color: white; text-decoration: none; opacity: 0.9; }}
-        .header-nav a:hover {{ opacity: 1; }}
-        .container {{ max-width: 1200px; margin: 0 auto; padding: 30px; }}
-        .breadcrumb {{ margin-bottom: 20px; color: #6b7280; }}
-        .breadcrumb a {{ color: #667eea; text-decoration: none; }}
-        .breadcrumb a:hover {{ text-decoration: underline; }}
-        .page-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }}
-        .page-header h2 {{ font-size: 1.75em; color: #1f2937; }}
-        .status-badge {{
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }}
-        .card {{ background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }}
-        .card h3 {{ margin-bottom: 20px; color: #1f2937; font-size: 1.1em; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }}
-        .info-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }}
-        .info-item label {{ display: block; font-size: 0.8em; color: #6b7280; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }}
-        .info-item .value {{ font-size: 1em; color: #1f2937; }}
-        table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
-        th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }}
-        th {{ background: #f9fafb; font-weight: 600; color: #6b7280; font-size: 0.85em; text-transform: uppercase; }}
-        tr:hover {{ background: #f9fafb; }}
-        .notes-box {{ background: #f9fafb; border-radius: 8px; padding: 16px; white-space: pre-wrap; font-family: inherit; line-height: 1.6; }}
-        .btn {{
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }}
-        .btn-primary {{ background: #667eea; color: white; }}
-        .btn-primary:hover {{ background: #5a6fd6; }}
-        .btn-success {{ background: #10b981; color: white; }}
-        .btn-success:hover {{ background: #059669; }}
-        .btn-danger {{ background: #ef4444; color: white; }}
-        .btn-danger:hover {{ background: #dc2626; }}
-        .btn-secondary {{ background: #e5e7eb; color: #374151; }}
-        .btn-secondary:hover {{ background: #d1d5db; }}
-        textarea {{ width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; font-family: inherit; resize: vertical; min-height: 100px; }}
-        textarea:focus {{ outline: none; border-color: #667eea; }}
-        .form-group {{ margin-bottom: 16px; }}
-        .form-group label {{ display: block; margin-bottom: 6px; font-weight: 500; color: #374151; }}
-        input[type="number"] {{ width: 200px; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; }}
-        input[type="number"]:focus {{ outline: none; border-color: #667eea; }}
-        input[type="text"] {{ padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; }}
-        input[type="text"]:focus {{ outline: none; border-color: #667eea; }}
-        .action-buttons {{ display: flex; gap: 12px; margin-top: 20px; }}
-        .role-badge {{
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }}
-        .role-super_admin {{ background: #fef3c7; color: #92400e; }}
-        .role-admin {{ background: #dbeafe; color: #1e40af; }}
-        .role-reviewer {{ background: #d1fae5; color: #065f46; }}
-        hr {{ border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>🌍 UBEC Admin</h1>
-        <div class="header-nav">
-            <a href="/admin/dashboard">Dashboard</a>
-            <span>{user.get('display_name', 'Admin')}</span>
-            <span class="role-badge role-{user.get('role', 'user')}">{user.get('role', 'user')}</span>
-            <a href="/admin/logout">Logout</a>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="breadcrumb">
-            <a href="/admin/dashboard">Dashboard</a> / Application #{app.get('id')}
-        </div>
-        
-        <div class="page-header">
-            <h2>Application: {app.get('reference_number', 'N/A')}</h2>
-            <span class="status-badge" style="background:{status_color}20;color:{status_color}">{status}</span>
-        </div>
-        
-        <!-- Application Info -->
-        <div class="card">
-            <h3>📋 Application Information</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Reference Number</label>
-                    <div class="value">{app.get('reference_number', 'N/A')}</div>
-                </div>
-                <div class="info-item">
-                    <label>Application Type</label>
-                    <div class="value">{app.get('application_type', 'N/A')}</div>
-                </div>
-                <div class="info-item">
-                    <label>Submitted</label>
-                    <div class="value">{submitted_str}</div>
-                </div>
-                <div class="info-item">
-                    <label>Status</label>
-                    <div class="value"><span class="status-badge" style="background:{status_color}20;color:{status_color}">{status}</span></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Contact Info -->
-        <div class="card">
-            <h3>👤 Contact Information</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Contact Name</label>
-                    <div class="value">{app.get('contact_name', 'N/A')}</div>
-                </div>
-                <div class="info-item">
-                    <label>Email</label>
-                    <div class="value">{app.get('contact_email', 'N/A')}</div>
-                </div>
-                <div class="info-item">
-                    <label>Phone</label>
-                    <div class="value">{app.get('contact_phone') or 'N/A'}</div>
-                </div>
-                <div class="info-item">
-                    <label>Organization</label>
-                    <div class="value">{app.get('organization_name') or 'N/A'}</div>
-                </div>
-                <div class="info-item">
-                    <label>Location</label>
-                    <div class="value">{app.get('location') or 'N/A'}</div>
-                </div>
-                <div class="info-item">
-                    <label>Bioregion</label>
-                    <div class="value">{app.get('bioregion') or 'N/A'}</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Financial Info -->
-        <div class="card">
-            <h3>💰 Financial Information</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Requested Amount</label>
-                    <div class="value">{requested_amount:,} UBEC</div>
-                </div>
-                <div class="info-item">
-                    <label>Approved Amount</label>
-                    <div class="value">{approved_amount:,} UBEC</div>
-                </div>
-                <div class="info-item">
-                    <label>Reviewed At</label>
-                    <div class="value">{reviewed_str}</div>
-                </div>
-                <div class="info-item">
-                    <label>Decided At</label>
-                    <div class="value">{decided_str}</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Description -->
-        <div class="card">
-            <h3>📝 Description</h3>
-            <div class="notes-box">{app.get('description') or 'No description provided.'}</div>
-        </div>
-        
-        <!-- Reviewer Notes -->
-        <div class="card">
-            <h3>📋 Reviewer Notes</h3>
-            <div class="notes-box">{app.get('reviewer_notes') or 'No reviewer notes yet.'}</div>
-        </div>
-        
-        <!-- Documents -->
-        <div class="card">
-            <h3>📎 Documents</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Filename</th>
-                        <th>Size</th>
-                        <th>Uploaded</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {docs_rows}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Status History -->
-        <div class="card">
-            <h3>📊 Status History</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>From</th>
-                        <th></th>
-                        <th>To</th>
-                        <th>Changed By</th>
-                        <th>Reason</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {history_rows}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Contact Applicant -->
-        <div class="card">
-            <h3>✉️ Contact Applicant</h3>
-            <p style="color: #6b7280; margin-bottom: 15px;">Send an email to <strong>{app.get('contact_name', 'Applicant')}</strong> ({app.get('contact_email', 'N/A')})</p>
-            <form method="POST" action="/admin/api/application/{app.get('id')}/send-email">
-                <div class="form-group">
-                    <label for="email_subject">Subject</label>
-                    <input type="text" id="email_subject" name="subject" 
-                           placeholder="Re: Your UBEC Application" 
-                           value="Regarding your {app.get('application_type', '')} application"
-                           style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em;"
-                           required>
-                </div>
-                <div class="form-group">
-                    <label for="email_message">Message</label>
-                    <textarea id="email_message" name="message" 
-                              placeholder="Enter your message to the applicant..." 
-                              style="min-height: 150px;" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">📧 Send Email</button>
-            </form>
-        </div>
-        
-        <!-- Review Actions -->
-        <div class="card">
-            <h3>⚡ Actions</h3>
-            
-            <form method="POST" action="/admin/api/application/{app.get('id')}/review" style="margin-bottom: 20px;">
-                <div class="form-group">
-                    <label for="notes">Add Review Notes</label>
-                    <textarea id="notes" name="notes" placeholder="Enter your review notes..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">💬 Add Notes</button>
-            </form>
-            
-            <hr>
-            
-            <form method="POST" action="/admin/api/application/{app.get('id')}/decide">
-                <div class="form-group">
-                    <label for="approved_amount">Approved Amount (UBEC)</label>
-                    <input type="number" id="approved_amount" name="approved_amount" value="{requested_amount}" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="decision_notes">Decision Notes</label>
-                    <textarea id="decision_notes" name="notes" placeholder="Enter decision notes..."></textarea>
-                </div>
-                <div class="action-buttons">
-                    <button type="submit" name="decision" value="approved" class="btn btn-success">✅ Approve</button>
-                    <button type="submit" name="decision" value="rejected" class="btn btn-danger">❌ Reject</button>
-                    <a href="/admin/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
-                </div>
-            </form>
-        </div>
-    </div>
-</body>
-</html>"""
-
 
 # =============================================================================
 # Module Initialization
 # =============================================================================
 
 def init_templates(templates_instance: Jinja2Templates) -> None:
-    """Initialize templates for the admin module."""
+    """Initialize templates for the admin module (alternative to auto-discovery)."""
     global templates
     templates = templates_instance
-    logger.info("Admin templates initialized")
+    logger.info("Admin templates initialized via init_templates()")

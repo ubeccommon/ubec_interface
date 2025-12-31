@@ -559,7 +559,7 @@ class SchemaDocumenter:
         ext_map = {'markdown': 'md', 'json': 'json', 'html': 'html'}
         
         if not output_file:
-            output_file = f"ubec_schema_documentation_{timestamp}.{ext_map.get(output_format, 'md')}"
+            output_file = f"database/ubec_ui_schema_documentation_{timestamp}.{ext_map.get(output_format, 'md')}"
         
         if output_format == 'markdown':
             self._save_markdown(output_file)

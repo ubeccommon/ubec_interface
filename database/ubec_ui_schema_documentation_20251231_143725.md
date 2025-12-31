@@ -8,9 +8,9 @@
 
 | Property | Value |
 |----------|-------|
-| Generated | 2025-12-31T05:14:26.066741 |
+| Generated | 2025-12-31T14:37:25.364612 |
 | Database | `ubec_ui_interface` |
-| Size | 9793 kB |
+| Size | 10225 kB |
 | PostGIS | ❌ |
 
 ## The Four Elements
@@ -27,12 +27,12 @@
 | Metric | Count |
 |--------|-------|
 | Total Schemas | 1 |
-| Total Tables | 11 |
-| Total Columns | 118 |
-| Total Relationships | 5 |
-| Total Indexes | 48 |
+| Total Tables | 15 |
+| Total Columns | 152 |
+| Total Relationships | 8 |
+| Total Indexes | 65 |
 | Spatial Tables | 0 |
-| Ubec Core Tables | 1 |
+| Ubec Core Tables | 3 |
 
 ---
 
@@ -52,6 +52,41 @@
 | `details` | jsonb | ✓ | - |
 | `ip_address` | inet | ✓ | - |
 | `user_agent` | text | ✓ | - |
+| `created_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
+
+### admin_audit_log 🏛️
+
+> Admin action audit trail
+
+**Category:** `admin` | **Rows:** 41 | **Size:** 96 kB
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|--------|
+| `id` | integer | ✗ | nextval('ubec_ui.admin_au |
+| `user_id` | integer | ✓ | - |
+| `user_email` | varchar(255) | ✓ | - |
+| `action` | varchar(100) | ✗ | - |
+| `resource_type` | varchar(100) | ✓ | - |
+| `resource_id` | integer | ✓ | - |
+| `details` | jsonb | ✓ | - |
+| `ip_address` | inet | ✓ | - |
+| `user_agent` | text | ✓ | - |
+| `created_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
+
+### admin_sessions 🏛️
+
+> Admin session management
+
+**Category:** `admin` | **Rows:** 0 | **Size:** 48 kB
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|--------|
+| `id` | integer | ✗ | nextval('ubec_ui.admin_se |
+| `user_id` | integer | ✗ | - |
+| `session_token` | varchar(255) | ✗ | - |
+| `ip_address` | inet | ✓ | - |
+| `user_agent` | text | ✓ | - |
+| `expires_at` | timestamp with time zone | ✗ | - |
 | `created_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
 
 ### announcements
@@ -105,7 +140,7 @@
 
 > UI beneficiary application submissions
 
-**Category:** `ui` | **Rows:** 5 | **Size:** 160 kB
+**Category:** `ui` | **Rows:** 1 | **Size:** 160 kB
 
 | Column | Type | Nullable | Default |
 |--------|------|----------|--------|
@@ -199,6 +234,32 @@
 | `used_at` | timestamp with time zone | ✓ | - |
 | `created_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
 
+### permissions
+
+**Category:** `other` | **Rows:** 27 | **Size:** 64 kB
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|--------|
+| `id` | integer | ✗ | nextval('ubec_ui.permissi |
+| `name` | varchar(100) | ✗ | - |
+| `display_name` | varchar(255) | ✗ | - |
+| `description` | text | ✓ | - |
+| `category` | varchar(50) | ✗ | 'general'::character vary |
+| `is_system` | boolean | ✓ | false |
+| `created_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
+
+### role_permissions
+
+**Category:** `other` | **Rows:** 56 | **Size:** 72 kB
+
+| Column | Type | Nullable | Default |
+|--------|------|----------|--------|
+| `id` | integer | ✗ | nextval('ubec_ui.role_per |
+| `role` | varchar(50) | ✗ | - |
+| `permission_id` | integer | ✗ | - |
+| `granted_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
+| `granted_by` | varchar(255) | ✓ | - |
+
 ### user_sessions
 
 **Category:** `ui` | **Rows:** 0 | **Size:** 48 kB
@@ -215,7 +276,7 @@
 
 ### users
 
-**Category:** `other` | **Rows:** 1 | **Size:** 112 kB
+**Category:** `other` | **Rows:** 3 | **Size:** 112 kB
 
 | Column | Type | Nullable | Default |
 |--------|------|----------|--------|
@@ -234,6 +295,11 @@
 | `last_login_at` | timestamp with time zone | ✓ | - |
 | `created_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
 | `updated_at` | timestamp with time zone | ✓ | CURRENT_TIMESTAMP |
+| `failed_login_attempts` | integer | ✓ | 0 |
+| `is_locked` | boolean | ✓ | false |
+| `locked_until` | timestamp with time zone | ✓ | - |
+| `password_changed_at` | timestamp with time zone | ✓ | - |
+| `is_admin` | boolean | ✓ | false |
 
 ### Relationships
 
@@ -241,9 +307,12 @@
 |------|---|----|-----------|
 | `user_sessions.user_id` | → | `users.id` | CASCADE |
 | `password_reset_tokens.user_id` | → | `users.id` | CASCADE |
+| `role_permissions.permission_id` | → | `permissions.id` | CASCADE |
+| `admin_audit_log.user_id` | → | `users.id` | SET NULL |
 | `activity_log.user_id` | → | `users.id` | SET NULL |
 | `application_status_history.application_id` | → | `applications.id` | CASCADE |
 | `application_documents.application_id` | → | `applications.id` | CASCADE |
+| `admin_sessions.user_id` | → | `users.id` | CASCADE |
 
 ---
 

@@ -174,7 +174,7 @@ This might be neighbors, local food advocates, other farmers, community leaders,
 ### Step 1: Initial Inquiry
 
 **How to Start:**
-- Visit the UBEC application portal at [apply.ubec.network](https://apply.ubec.network)
+- Visit the UBEC application portal at [https://bioregional.ubec.network/apply](https://bioregional.ubec.network/apply)
 - Fill out the initial interest form (basic contact info and farm overview)
 - Or: Ask a community member who's already in UBEC to refer you
 - Or: Contact UBEC directly via email at beneficiaries@ubec.network
