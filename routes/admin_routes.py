@@ -28,7 +28,7 @@ Attribution:
     our decisions and recommendations. This project was made possible with
     the assistance of Claude and Anthropic PBC.
 
-Version: 2.0.0
+Version: 2.1.0
 """
 
 import os
@@ -88,7 +88,7 @@ class AdminService:
     """
     
     SERVICE_NAME = "admin_service"
-    SERVICE_VERSION = "2.0.0"
+    SERVICE_VERSION = "2.1.0"
     
     def __init__(self):
         self._db_pool = None
@@ -217,24 +217,25 @@ def create_session(user_data: Dict[str, Any]) -> str:
         "user_id": user_data["id"],
         "email": user_data["email"],
         "role": user_data["role"],
-        "display_name": user_data.get("display_name") or user_data.get("full_name", "User"),
+        "display_name": user_data.get("display_name") or user_data.get("full_name") or user_data["email"].split("@")[0],
         "permissions": user_data.get("permissions", []),
-        "created_at": datetime.utcnow().isoformat(),
-        "expires_at": expires_at.isoformat()
+        "expires_at": expires_at,
+        "created_at": datetime.utcnow()
     }
     
     return session_id
 
 
 def get_session(session_id: str) -> Optional[Dict[str, Any]]:
-    """Get session data if valid and not expired."""
-    if not session_id or session_id not in _admin_service.session_cache:
+    """Get session data by session ID."""
+    if not session_id:
         return None
     
-    session = _admin_service.session_cache[session_id]
-    expires_at = datetime.fromisoformat(session["expires_at"])
+    session = _admin_service.session_cache.get(session_id)
+    if not session:
+        return None
     
-    if datetime.utcnow() > expires_at:
+    if session["expires_at"] < datetime.utcnow():
         del _admin_service.session_cache[session_id]
         return None
     
@@ -243,22 +244,18 @@ def get_session(session_id: str) -> Optional[Dict[str, Any]]:
 
 def delete_session(session_id: str) -> None:
     """Delete a session."""
-    if session_id in _admin_service.session_cache:
+    if session_id and session_id in _admin_service.session_cache:
         del _admin_service.session_cache[session_id]
 
 
 async def get_current_user(request: Request) -> Optional[Dict[str, Any]]:
-    """Get current authenticated user from session cookie."""
+    """Get the current authenticated user from the request."""
     session_id = request.cookies.get(SESSION_COOKIE_NAME)
-    return get_session(session_id) if session_id else None
+    return get_session(session_id)
 
-
-# =============================================================================
-# Database Operations
-# =============================================================================
 
 async def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
-    """Get user by email from database."""
+    """Get user from database by email."""
     if not _admin_service.is_initialized():
         logger.error("Admin service not initialized")
         return None
@@ -266,21 +263,22 @@ async def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
     try:
         async with _admin_service.db_pool.acquire() as conn:
             row = await conn.fetchrow("""
-                SELECT id, uuid, email, password_hash, full_name, display_name,
+                SELECT id, uuid, email, full_name, display_name, password_hash,
                        role, is_active, is_verified, is_locked, is_admin,
-                       failed_login_attempts, locked_until, last_login_at
+                       failed_login_attempts, locked_until,
+                       last_login_at, created_at
                 FROM ubec_ui.users
-                WHERE LOWER(email) = LOWER($1)
-            """, email)
+                WHERE email = $1
+            """, email.lower().strip())
             
             return dict(row) if row else None
     except Exception as e:
-        logger.error(f"Error fetching user by email: {e}")
+        logger.error(f"Error getting user by email: {e}")
         return None
 
 
 async def get_user_permissions(role: str) -> List[str]:
-    """Get all permissions for a role."""
+    """Get permissions for a role."""
     if not _admin_service.is_initialized():
         return []
     
@@ -289,18 +287,18 @@ async def get_user_permissions(role: str) -> List[str]:
             rows = await conn.fetch("""
                 SELECT p.name
                 FROM ubec_ui.permissions p
-                JOIN ubec_ui.role_permissions rp ON rp.permission_id = p.id
+                JOIN ubec_ui.role_permissions rp ON p.id = rp.permission_id
                 WHERE rp.role = $1
             """, role)
             
-            return [row['name'] for row in rows]
+            return [row["name"] for row in rows]
     except Exception as e:
-        logger.error(f"Error fetching permissions for role {role}: {e}")
+        logger.error(f"Error getting permissions: {e}")
         return []
 
 
 async def update_login_success(user_id: int) -> None:
-    """Update user record on successful login."""
+    """Update user after successful login."""
     if not _admin_service.is_initialized():
         return
     
@@ -308,11 +306,10 @@ async def update_login_success(user_id: int) -> None:
         async with _admin_service.db_pool.acquire() as conn:
             await conn.execute("""
                 UPDATE ubec_ui.users
-                SET failed_login_attempts = 0,
+                SET last_login_at = CURRENT_TIMESTAMP,
+                    failed_login_attempts = 0,
                     is_locked = FALSE,
-                    locked_until = NULL,
-                    last_login_at = CURRENT_TIMESTAMP,
-                    updated_at = CURRENT_TIMESTAMP
+                    locked_until = NULL
                 WHERE id = $1
             """, user_id)
     except Exception as e:
@@ -320,36 +317,28 @@ async def update_login_success(user_id: int) -> None:
 
 
 async def update_login_failure(user_id: int) -> None:
-    """Update user record on failed login."""
+    """Update user after failed login attempt."""
     if not _admin_service.is_initialized():
         return
     
     try:
         async with _admin_service.db_pool.acquire() as conn:
-            current = await conn.fetchval("""
-                SELECT COALESCE(failed_login_attempts, 0) 
-                FROM ubec_ui.users WHERE id = $1
+            # Increment failure count
+            result = await conn.fetchrow("""
+                UPDATE ubec_ui.users
+                SET failed_login_attempts = COALESCE(failed_login_attempts, 0) + 1
+                WHERE id = $1
+                RETURNING failed_login_attempts
             """, user_id)
             
-            new_attempts = (current or 0) + 1
-            
-            if new_attempts >= MAX_FAILED_ATTEMPTS:
-                locked_until = datetime.utcnow() + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+            # Lock if max attempts exceeded
+            if result and result["failed_login_attempts"] >= MAX_FAILED_ATTEMPTS:
                 await conn.execute("""
                     UPDATE ubec_ui.users
-                    SET failed_login_attempts = $2,
-                        is_locked = TRUE,
-                        locked_until = $3,
-                        updated_at = CURRENT_TIMESTAMP
+                    SET is_locked = TRUE,
+                        locked_until = CURRENT_TIMESTAMP + INTERVAL '%s minutes'
                     WHERE id = $1
-                """, user_id, new_attempts, locked_until)
-            else:
-                await conn.execute("""
-                    UPDATE ubec_ui.users
-                    SET failed_login_attempts = $2,
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE id = $1
-                """, user_id, new_attempts)
+                """ % LOCKOUT_DURATION_MINUTES, user_id)
     except Exception as e:
         logger.error(f"Error updating login failure: {e}")
 
@@ -362,30 +351,29 @@ async def log_audit_event(
     details: Dict = None,
     ip_address: str = None
 ) -> None:
-    """Log an admin action to the audit log."""
+    """Log an admin audit event."""
     if not _admin_service.is_initialized():
         return
     
     try:
         async with _admin_service.db_pool.acquire() as conn:
-            user_email = await conn.fetchval("""
-                SELECT email FROM ubec_ui.users WHERE id = $1
-            """, user_id) if user_id else None
-            
-            details_json = json.dumps(details) if details else None
+            # Get user email for denormalization
+            email = await conn.fetchval(
+                "SELECT email FROM ubec_ui.users WHERE id = $1", user_id
+            )
             
             await conn.execute("""
-                INSERT INTO ubec_ui.admin_audit_log 
+                INSERT INTO ubec_ui.admin_audit_log
                 (user_id, user_email, action, resource_type, resource_id, details, ip_address)
-                VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::inet)
-            """, user_id, user_email, action, resource_type, resource_id, 
-                details_json, ip_address)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            """, user_id, email, action, resource_type, resource_id,
+                json.dumps(details) if details else None, ip_address)
     except Exception as e:
         logger.error(f"Error logging audit event: {e}")
 
 
 # =============================================================================
-# Authentication Decorators
+# Permission Decorator
 # =============================================================================
 
 def require_permission(*permissions):
@@ -394,17 +382,27 @@ def require_permission(*permissions):
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
             user = await get_current_user(request)
-            
             if not user:
-                if request.url.path.startswith("/admin/api/"):
+                if request.url.path.startswith("/admin/api"):
                     raise HTTPException(status_code=401, detail="Not authenticated")
                 return RedirectResponse(url="/admin/login", status_code=302)
             
+            # Super admin bypasses all permission checks
+            if user.get("role") == "super_admin":
+                request.state.user = user
+                return await func(request, *args, **kwargs)
+            
+            # Check permissions
             user_perms = user.get("permissions", [])
-            if permissions and not any(p in user_perms for p in permissions):
-                if request.url.path.startswith("/admin/api/"):
-                    raise HTTPException(status_code=403, detail="Permission denied")
-                raise HTTPException(status_code=403, detail="You don't have permission to access this resource")
+            has_permission = any(p in user_perms for p in permissions)
+            
+            if not has_permission:
+                if request.url.path.startswith("/admin/api"):
+                    raise HTTPException(status_code=403, detail="Insufficient permissions")
+                return HTMLResponse(
+                    "<h1>403 Forbidden</h1><p>You don't have permission to access this page.</p>",
+                    status_code=403
+                )
             
             request.state.user = user
             return await func(request, *args, **kwargs)
@@ -413,12 +411,12 @@ def require_permission(*permissions):
 
 
 # =============================================================================
-# Login Routes
+# Authentication Routes
 # =============================================================================
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, error: str = None, message: str = None):
-    """Render the admin login page."""
+    """Render the login page."""
     user = await get_current_user(request)
     if user:
         return RedirectResponse(url="/admin/dashboard", status_code=302)
@@ -430,7 +428,6 @@ async def login_page(request: Request, error: str = None, message: str = None):
             "message": message
         })
     
-    # Inline login template
     return HTMLResponse(_get_login_html(error, message))
 
 
@@ -443,55 +440,38 @@ async def login_submit(
     """Handle login form submission."""
     client_ip = request.client.host if request.client else None
     
-    # Get user from database
+    # Validate input
+    if not email or not password:
+        return RedirectResponse(
+            url="/admin/login?error=Email+and+password+required",
+            status_code=302
+        )
+    
+    # Get user
     user = await get_user_by_email(email)
     
     if not user:
-        await log_audit_event(
-            user_id=0, action="login_failed",
-            details={"reason": "user_not_found", "email": email},
-            ip_address=client_ip
-        )
+        logger.warning(f"Login attempt for non-existent user: {email}")
         return RedirectResponse(
             url="/admin/login?error=Invalid+email+or+password",
             status_code=302
         )
     
-    # Check account status
-    if not user.get("is_active"):
-        await log_audit_event(
-            user_id=user["id"], action="login_failed",
-            details={"reason": "account_inactive"},
-            ip_address=client_ip
-        )
-        return RedirectResponse(
-            url="/admin/login?error=Account+is+inactive",
-            status_code=302
-        )
-    
-    # Check lockout
+    # Check if account is locked
     if user.get("is_locked"):
         locked_until = user.get("locked_until")
-        if locked_until and datetime.utcnow() < locked_until.replace(tzinfo=None):
-            await log_audit_event(
-                user_id=user["id"], action="login_failed",
-                details={"reason": "account_locked"},
-                ip_address=client_ip
-            )
+        if locked_until and locked_until > datetime.utcnow():
+            logger.warning(f"Login attempt for locked account: {email}")
             return RedirectResponse(
-                url="/admin/login?error=Account+is+temporarily+locked.+Try+again+later.",
+                url="/admin/login?error=Account+is+locked.+Please+try+again+later.",
                 status_code=302
             )
     
-    # Check admin access
-    if user.get("role") == "applicant" and not user.get("is_admin"):
-        await log_audit_event(
-            user_id=user["id"], action="login_failed",
-            details={"reason": "no_admin_access"},
-            ip_address=client_ip
-        )
+    # Check if account is active
+    if not user.get("is_active", True):
+        logger.warning(f"Login attempt for inactive account: {email}")
         return RedirectResponse(
-            url="/admin/login?error=You+do+not+have+admin+access",
+            url="/admin/login?error=Account+is+inactive",
             status_code=302
         )
     
@@ -508,22 +488,36 @@ async def login_submit(
             status_code=302
         )
     
-    # Successful login
-    await update_login_success(user["id"])
+    # Check if user has admin access
+    role = user.get("role", "applicant")
+    if role == "applicant" and not user.get("is_admin"):
+        await log_audit_event(
+            user_id=user["id"], action="login_denied",
+            details={"reason": "no_admin_access"},
+            ip_address=client_ip
+        )
+        return RedirectResponse(
+            url="/admin/login?error=You+do+not+have+admin+access",
+            status_code=302
+        )
     
     # Get permissions
-    permissions = await get_user_permissions(user["role"])
+    permissions = await get_user_permissions(role)
     user["permissions"] = permissions
+    
+    # Update login success
+    await update_login_success(user["id"])
     
     # Create session
     session_id = create_session(user)
     
+    # Log successful login
     await log_audit_event(
         user_id=user["id"], action="login_success",
-        details={"role": user["role"], "permissions_count": len(permissions)},
         ip_address=client_ip
     )
     
+    # Set cookie and redirect
     response = RedirectResponse(url="/admin/dashboard", status_code=302)
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
@@ -582,6 +576,78 @@ async def dashboard(request: Request):
         })
     
     return HTMLResponse(_get_dashboard_html(user, stats, pending, recent_activity))
+
+
+# =============================================================================
+# Application Detail Page Route
+# =============================================================================
+
+@router.get("/application/{app_id}", response_class=HTMLResponse)
+@require_permission("applications.view")
+async def view_application_page(request: Request, app_id: int):
+    """Display single application detail page."""
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/admin/login", status_code=302)
+    
+    try:
+        async with _admin_service.db_pool.acquire() as conn:
+            # Get application details (no user_id in applications table)
+            app = await conn.fetchrow("""
+                SELECT a.*
+                FROM ubec_ui.applications a
+                WHERE a.id = $1
+            """, app_id)
+            
+            if not app:
+                raise HTTPException(status_code=404, detail="Application not found")
+            
+            # Get status history (changed_by stores email directly)
+            history = await conn.fetch("""
+                SELECT * FROM ubec_ui.application_status_history
+                WHERE application_id = $1
+                ORDER BY changed_at DESC
+            """, app_id)
+            
+            # Get documents
+            documents = await conn.fetch("""
+                SELECT * FROM ubec_ui.application_documents
+                WHERE application_id = $1
+                ORDER BY uploaded_at DESC
+            """, app_id)
+        
+        app_dict = dict(app)
+        history_list = [dict(h) for h in history]
+        docs_list = [dict(d) for d in documents]
+        
+        # Log the view
+        client_ip = request.client.host if request.client else None
+        await log_audit_event(
+            user_id=user["user_id"],
+            action="application_viewed",
+            resource_type="application",
+            resource_id=app_id,
+            ip_address=client_ip
+        )
+        
+        if templates:
+            return templates.TemplateResponse("admin/application_detail.html", {
+                "request": request,
+                "user": user,
+                "application": app_dict,
+                "history": history_list,
+                "documents": docs_list,
+                "page_title": f"Application #{app_id}"
+            })
+        
+        # Fallback to inline HTML
+        return HTMLResponse(_get_application_detail_html(user, app_dict, history_list, docs_list))
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error viewing application {app_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error loading application")
 
 
 @router.get("/health")
@@ -690,7 +756,7 @@ async def api_review_application(
             await conn.execute("""
                 UPDATE ubec_ui.applications
                 SET status = 'under_review',
-                    reviewer_notes = COALESCE(reviewer_notes || E'\n\n', '') || $2,
+                    reviewer_notes = COALESCE(reviewer_notes || E'\\n\\n', '') || $2,
                     reviewed_by = $3,
                     reviewed_at = CURRENT_TIMESTAMP,
                     updated_at = CURRENT_TIMESTAMP
@@ -712,7 +778,11 @@ async def api_review_application(
             ip_address=client_ip
         )
         
-        return {"success": True, "message": "Review notes added"}
+        # Redirect back to application page
+        return RedirectResponse(
+            url=f"/admin/application/{app_id}?message=Review+notes+added",
+            status_code=302
+        )
     except Exception as e:
         logger.error(f"Error reviewing application {app_id}: {e}")
         raise HTTPException(status_code=500, detail="Database error")
@@ -770,12 +840,278 @@ async def api_decide_application(
             ip_address=client_ip
         )
         
-        return {"success": True, "message": f"Application {decision}"}
+        # Redirect back to application page
+        return RedirectResponse(
+            url=f"/admin/application/{app_id}?message=Application+{decision}",
+            status_code=302
+        )
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error deciding application {app_id}: {e}")
         raise HTTPException(status_code=500, detail="Database error")
+
+
+@router.post("/api/application/{app_id}/delete")
+@require_permission("applications.delete")
+async def api_delete_application(request: Request, app_id: int):
+    """Delete an application (super_admin only)."""
+    user = request.state.user
+    client_ip = request.client.host if request.client else None
+    
+    try:
+        async with _admin_service.db_pool.acquire() as conn:
+            # Get application info for audit log
+            app_info = await conn.fetchrow("""
+                SELECT reference_number, status, contact_email
+                FROM ubec_ui.applications WHERE id = $1
+            """, app_id)
+            
+            if not app_info:
+                raise HTTPException(status_code=404, detail="Application not found")
+            
+            # Delete related records first (cascade should handle this, but be explicit)
+            await conn.execute("""
+                DELETE FROM ubec_ui.application_documents WHERE application_id = $1
+            """, app_id)
+            
+            await conn.execute("""
+                DELETE FROM ubec_ui.application_status_history WHERE application_id = $1
+            """, app_id)
+            
+            # Delete the application
+            await conn.execute("""
+                DELETE FROM ubec_ui.applications WHERE id = $1
+            """, app_id)
+        
+        await log_audit_event(
+            user_id=user["user_id"], action="application_deleted",
+            resource_type="application", resource_id=app_id,
+            details={
+                "reference_number": app_info["reference_number"],
+                "status": app_info["status"],
+                "contact_email": app_info["contact_email"]
+            },
+            ip_address=client_ip
+        )
+        
+        logger.info(f"Application {app_id} ({app_info['reference_number']}) deleted by {user['email']}")
+        
+        # Redirect to dashboard
+        return RedirectResponse(
+            url="/admin/dashboard?message=Application+deleted+successfully",
+            status_code=302
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting application {app_id}: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+
+@router.post("/api/application/{app_id}/send-email")
+@require_permission("applications.review")
+async def api_send_applicant_email(
+    request: Request,
+    app_id: int,
+    subject: str = Form(...),
+    message: str = Form(...)
+):
+    """Send an email to the applicant."""
+    user = request.state.user
+    client_ip = request.client.host if request.client else None
+    
+    try:
+        async with _admin_service.db_pool.acquire() as conn:
+            # Get application and contact info
+            app_info = await conn.fetchrow("""
+                SELECT id, reference_number, contact_name, contact_email, application_type
+                FROM ubec_ui.applications WHERE id = $1
+            """, app_id)
+            
+            if not app_info:
+                raise HTTPException(status_code=404, detail="Application not found")
+            
+            recipient_email = app_info["contact_email"]
+            recipient_name = app_info["contact_name"]
+            reference_number = app_info["reference_number"]
+            
+            if not recipient_email:
+                raise HTTPException(status_code=400, detail="No email address for this applicant")
+            
+            # Try to send email
+            email_sent = False
+            error_message = None
+            
+            try:
+                email_sent = await send_applicant_notification(
+                    to_email=recipient_email,
+                    to_name=recipient_name,
+                    subject=subject,
+                    message_body=message,
+                    reference_number=reference_number,
+                    sender_name=user.get("display_name", user["email"])
+                )
+            except Exception as e:
+                error_message = str(e)
+                logger.error(f"Failed to send email to {recipient_email}: {e}")
+            
+            # Log the email attempt
+            await conn.execute("""
+                INSERT INTO ubec_ui.email_log 
+                (recipient_email, email_type, subject, reference_type, reference_id, status, error_message)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            """, 
+                recipient_email, 
+                'admin_notification',
+                subject,
+                'application',
+                app_id,
+                'sent' if email_sent else 'failed',
+                error_message
+            )
+            
+            # Add note to reviewer notes
+            timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+            email_note = f"[{timestamp}] EMAIL SENT by {user['email']}\nSubject: {subject}\nMessage: {message}"
+            
+            await conn.execute("""
+                UPDATE ubec_ui.applications
+                SET reviewer_notes = COALESCE(reviewer_notes || E'\\n\\n', '') || $2,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = $1
+            """, app_id, email_note)
+        
+        # Audit log
+        await log_audit_event(
+            user_id=user["user_id"], action="applicant_email_sent",
+            resource_type="application", resource_id=app_id,
+            details={"recipient": recipient_email, "subject": subject, "success": email_sent},
+            ip_address=client_ip
+        )
+        
+        if email_sent:
+            return RedirectResponse(
+                url=f"/admin/application/{app_id}?message=Email+sent+to+{recipient_email}",
+                status_code=302
+            )
+        else:
+            return RedirectResponse(
+                url=f"/admin/application/{app_id}?error=Failed+to+send+email",
+                status_code=302
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending email for application {app_id}: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+
+async def send_applicant_notification(
+    to_email: str,
+    to_name: str,
+    subject: str,
+    message_body: str,
+    reference_number: str,
+    sender_name: str
+) -> bool:
+    """
+    Send email notification to applicant.
+    Uses SMTP configuration from environment variables.
+    """
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    
+    # Get SMTP settings from environment
+    smtp_host = os.getenv("SMTP_HOST", "localhost")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    smtp_user = os.getenv("SMTP_USER", "")
+    smtp_password = os.getenv("SMTP_PASSWORD", "")
+    smtp_from = os.getenv("SMTP_FROM", "noreply@ubec.network")
+    smtp_from_name = os.getenv("SMTP_FROM_NAME", "UBEC Protocol")
+    use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+    
+    # Build email
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = f"[{reference_number}] {subject}"
+    msg['From'] = f"{smtp_from_name} <{smtp_from}>"
+    msg['To'] = to_email
+    msg['Reply-To'] = smtp_from
+    
+    # Plain text version
+    text_content = f"""Dear {to_name},
+
+{message_body}
+
+---
+Reference: {reference_number}
+From: {sender_name}
+UBEC Protocol - "I am because we are"
+
+This message was sent regarding your UBEC application.
+If you have questions, please reply to this email.
+"""
+    
+    # HTML version
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }}
+        .content {{ background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }}
+        .footer {{ background: #1f2937; color: #9ca3af; padding: 15px 20px; border-radius: 0 0 8px 8px; font-size: 0.85em; }}
+        .reference {{ background: #e5e7eb; padding: 8px 12px; border-radius: 4px; font-family: monospace; display: inline-block; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="margin:0;">🌍 UBEC Protocol</h2>
+            <p style="margin:5px 0 0 0;opacity:0.9;">"I am because we are"</p>
+        </div>
+        <div class="content">
+            <p>Dear <strong>{to_name}</strong>,</p>
+            <div style="white-space: pre-wrap;">{message_body}</div>
+            <p style="margin-top: 20px;">
+                <span class="reference">{reference_number}</span>
+            </p>
+        </div>
+        <div class="footer">
+            <p style="margin:0;">From: {sender_name}</p>
+            <p style="margin:5px 0 0 0;">UBEC Protocol Administration</p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+    
+    msg.attach(MIMEText(text_content, 'plain'))
+    msg.attach(MIMEText(html_content, 'html'))
+    
+    # Send email
+    try:
+        if use_tls:
+            server = smtplib.SMTP(smtp_host, smtp_port)
+            server.starttls()
+        else:
+            server = smtplib.SMTP(smtp_host, smtp_port)
+        
+        if smtp_user and smtp_password:
+            server.login(smtp_user, smtp_password)
+        
+        server.sendmail(smtp_from, [to_email], msg.as_string())
+        server.quit()
+        
+        logger.info(f"Email sent successfully to {to_email}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"SMTP error sending to {to_email}: {e}")
+        raise
 
 
 # =============================================================================
@@ -1097,6 +1433,10 @@ def _get_dashboard_html(user: Dict, stats: Dict, pending: List, activity: List) 
             <td>{app.get('days_pending', 0)} days</td>
             <td>
                 <a href="/admin/application/{app.get('id')}" class="btn btn-sm">Review</a>
+                <form method="POST" action="/admin/api/application/{app.get('id')}/delete" style="display:inline;" 
+                      onsubmit="return confirm('Delete application {app.get('reference_number')}? This cannot be undone.');">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
             </td>
         </tr>"""
     
@@ -1163,8 +1503,12 @@ def _get_dashboard_html(user: Dict, stats: Dict, pending: List, activity: List) 
             border-radius: 6px; 
             text-decoration: none;
             font-size: 0.85em;
+            border: none;
+            cursor: pointer;
         }}
         .btn:hover {{ background: #5a6fd6; }}
+        .btn-danger {{ background: #ef4444; }}
+        .btn-danger:hover {{ background: #dc2626; }}
         code {{ background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }}
         .role-badge {{
             display: inline-block;
@@ -1251,6 +1595,369 @@ def _get_dashboard_html(user: Dict, stats: Dict, pending: List, activity: List) 
                     {activity_rows}
                 </tbody>
             </table>
+        </div>
+    </div>
+</body>
+</html>"""
+
+
+def _get_application_detail_html(user: Dict, app: Dict, history: List, documents: List) -> str:
+    """Generate application detail page HTML."""
+    
+    # Format dates
+    submitted = app.get('submitted_at')
+    submitted_str = submitted.strftime('%Y-%m-%d %H:%M') if submitted else 'N/A'
+    
+    reviewed = app.get('reviewed_at')
+    reviewed_str = reviewed.strftime('%Y-%m-%d %H:%M') if reviewed else 'Not yet reviewed'
+    
+    decided = app.get('decided_at')
+    decided_str = decided.strftime('%Y-%m-%d %H:%M') if decided else 'Pending'
+    
+    # Status badge color
+    status = app.get('status', 'pending')
+    status_colors = {
+        'pending': '#f59e0b',
+        'under_review': '#3b82f6',
+        'approved': '#10b981',
+        'rejected': '#ef4444'
+    }
+    status_color = status_colors.get(status, '#6b7280')
+    
+    # Build history rows
+    history_rows = ""
+    for h in history:
+        changed_at = h.get('changed_at')
+        time_str = changed_at.strftime('%Y-%m-%d %H:%M') if changed_at else 'N/A'
+        old_color = status_colors.get(h.get('old_status'), '#6b7280')
+        new_color = status_colors.get(h.get('new_status'), '#6b7280')
+        history_rows += f"""
+        <tr>
+            <td><span class="status-badge" style="background:{old_color}20;color:{old_color}">{h.get('old_status', 'N/A')}</span></td>
+            <td>→</td>
+            <td><span class="status-badge" style="background:{new_color}20;color:{new_color}">{h.get('new_status', 'N/A')}</span></td>
+            <td>{h.get('changed_by', 'System')}</td>
+            <td>{h.get('change_reason') or '-'}</td>
+            <td>{time_str}</td>
+        </tr>"""
+    
+    if not history_rows:
+        history_rows = '<tr><td colspan="6" style="text-align:center;color:#6c757d;">No status changes recorded</td></tr>'
+    
+    # Build documents rows
+    docs_rows = ""
+    for d in documents:
+        uploaded = d.get('uploaded_at')
+        time_str = uploaded.strftime('%Y-%m-%d %H:%M') if uploaded else 'N/A'
+        size = d.get('file_size', 0)
+        size_str = f"{size / 1024:.1f} KB" if size else 'N/A'
+        docs_rows += f"""
+        <tr>
+            <td>{d.get('document_type', 'Document')}</td>
+            <td>{d.get('filename', 'N/A')}</td>
+            <td>{size_str}</td>
+            <td>{time_str}</td>
+        </tr>"""
+    
+    if not docs_rows:
+        docs_rows = '<tr><td colspan="4" style="text-align:center;color:#6c757d;">No documents uploaded</td></tr>'
+    
+    requested_amount = app.get('requested_amount') or 0
+    approved_amount = app.get('approved_amount') or 0
+    
+    # Build the page
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application #{app.get('id')} - UBEC Admin</title>
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }}
+        .header {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        .header h1 {{ font-size: 1.5em; }}
+        .header-nav {{ display: flex; align-items: center; gap: 20px; }}
+        .header-nav a {{ color: white; text-decoration: none; opacity: 0.9; }}
+        .header-nav a:hover {{ opacity: 1; }}
+        .container {{ max-width: 1200px; margin: 0 auto; padding: 30px; }}
+        .breadcrumb {{ margin-bottom: 20px; color: #6b7280; }}
+        .breadcrumb a {{ color: #667eea; text-decoration: none; }}
+        .breadcrumb a:hover {{ text-decoration: underline; }}
+        .page-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }}
+        .page-header h2 {{ font-size: 1.75em; color: #1f2937; }}
+        .status-badge {{
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }}
+        .card {{ background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }}
+        .card h3 {{ margin-bottom: 20px; color: #1f2937; font-size: 1.1em; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }}
+        .info-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }}
+        .info-item label {{ display: block; font-size: 0.8em; color: #6b7280; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }}
+        .info-item .value {{ font-size: 1em; color: #1f2937; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
+        th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }}
+        th {{ background: #f9fafb; font-weight: 600; color: #6b7280; font-size: 0.85em; text-transform: uppercase; }}
+        tr:hover {{ background: #f9fafb; }}
+        .notes-box {{ background: #f9fafb; border-radius: 8px; padding: 16px; white-space: pre-wrap; font-family: inherit; line-height: 1.6; }}
+        .btn {{
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .btn-primary {{ background: #667eea; color: white; }}
+        .btn-primary:hover {{ background: #5a6fd6; }}
+        .btn-success {{ background: #10b981; color: white; }}
+        .btn-success:hover {{ background: #059669; }}
+        .btn-danger {{ background: #ef4444; color: white; }}
+        .btn-danger:hover {{ background: #dc2626; }}
+        .btn-secondary {{ background: #e5e7eb; color: #374151; }}
+        .btn-secondary:hover {{ background: #d1d5db; }}
+        textarea {{ width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; font-family: inherit; resize: vertical; min-height: 100px; }}
+        textarea:focus {{ outline: none; border-color: #667eea; }}
+        .form-group {{ margin-bottom: 16px; }}
+        .form-group label {{ display: block; margin-bottom: 6px; font-weight: 500; color: #374151; }}
+        input[type="number"] {{ width: 200px; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; }}
+        input[type="number"]:focus {{ outline: none; border-color: #667eea; }}
+        input[type="text"] {{ padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em; }}
+        input[type="text"]:focus {{ outline: none; border-color: #667eea; }}
+        .action-buttons {{ display: flex; gap: 12px; margin-top: 20px; }}
+        .role-badge {{
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }}
+        .role-super_admin {{ background: #fef3c7; color: #92400e; }}
+        .role-admin {{ background: #dbeafe; color: #1e40af; }}
+        .role-reviewer {{ background: #d1fae5; color: #065f46; }}
+        hr {{ border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌍 UBEC Admin</h1>
+        <div class="header-nav">
+            <a href="/admin/dashboard">Dashboard</a>
+            <span>{user.get('display_name', 'Admin')}</span>
+            <span class="role-badge role-{user.get('role', 'user')}">{user.get('role', 'user')}</span>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/admin/dashboard">Dashboard</a> / Application #{app.get('id')}
+        </div>
+        
+        <div class="page-header">
+            <h2>Application: {app.get('reference_number', 'N/A')}</h2>
+            <span class="status-badge" style="background:{status_color}20;color:{status_color}">{status}</span>
+        </div>
+        
+        <!-- Application Info -->
+        <div class="card">
+            <h3>📋 Application Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Reference Number</label>
+                    <div class="value">{app.get('reference_number', 'N/A')}</div>
+                </div>
+                <div class="info-item">
+                    <label>Application Type</label>
+                    <div class="value">{app.get('application_type', 'N/A')}</div>
+                </div>
+                <div class="info-item">
+                    <label>Submitted</label>
+                    <div class="value">{submitted_str}</div>
+                </div>
+                <div class="info-item">
+                    <label>Status</label>
+                    <div class="value"><span class="status-badge" style="background:{status_color}20;color:{status_color}">{status}</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Info -->
+        <div class="card">
+            <h3>👤 Contact Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Contact Name</label>
+                    <div class="value">{app.get('contact_name', 'N/A')}</div>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <div class="value">{app.get('contact_email', 'N/A')}</div>
+                </div>
+                <div class="info-item">
+                    <label>Phone</label>
+                    <div class="value">{app.get('contact_phone') or 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <label>Organization</label>
+                    <div class="value">{app.get('organization_name') or 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <label>Location</label>
+                    <div class="value">{app.get('location') or 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <label>Bioregion</label>
+                    <div class="value">{app.get('bioregion') or 'N/A'}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Financial Info -->
+        <div class="card">
+            <h3>💰 Financial Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Requested Amount</label>
+                    <div class="value">{requested_amount:,} UBEC</div>
+                </div>
+                <div class="info-item">
+                    <label>Approved Amount</label>
+                    <div class="value">{approved_amount:,} UBEC</div>
+                </div>
+                <div class="info-item">
+                    <label>Reviewed At</label>
+                    <div class="value">{reviewed_str}</div>
+                </div>
+                <div class="info-item">
+                    <label>Decided At</label>
+                    <div class="value">{decided_str}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Description -->
+        <div class="card">
+            <h3>📝 Description</h3>
+            <div class="notes-box">{app.get('description') or 'No description provided.'}</div>
+        </div>
+        
+        <!-- Reviewer Notes -->
+        <div class="card">
+            <h3>📋 Reviewer Notes</h3>
+            <div class="notes-box">{app.get('reviewer_notes') or 'No reviewer notes yet.'}</div>
+        </div>
+        
+        <!-- Documents -->
+        <div class="card">
+            <h3>📎 Documents</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Filename</th>
+                        <th>Size</th>
+                        <th>Uploaded</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {docs_rows}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Status History -->
+        <div class="card">
+            <h3>📊 Status History</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th></th>
+                        <th>To</th>
+                        <th>Changed By</th>
+                        <th>Reason</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {history_rows}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Contact Applicant -->
+        <div class="card">
+            <h3>✉️ Contact Applicant</h3>
+            <p style="color: #6b7280; margin-bottom: 15px;">Send an email to <strong>{app.get('contact_name', 'Applicant')}</strong> ({app.get('contact_email', 'N/A')})</p>
+            <form method="POST" action="/admin/api/application/{app.get('id')}/send-email">
+                <div class="form-group">
+                    <label for="email_subject">Subject</label>
+                    <input type="text" id="email_subject" name="subject" 
+                           placeholder="Re: Your UBEC Application" 
+                           value="Regarding your {app.get('application_type', '')} application"
+                           style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em;"
+                           required>
+                </div>
+                <div class="form-group">
+                    <label for="email_message">Message</label>
+                    <textarea id="email_message" name="message" 
+                              placeholder="Enter your message to the applicant..." 
+                              style="min-height: 150px;" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">📧 Send Email</button>
+            </form>
+        </div>
+        
+        <!-- Review Actions -->
+        <div class="card">
+            <h3>⚡ Actions</h3>
+            
+            <form method="POST" action="/admin/api/application/{app.get('id')}/review" style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label for="notes">Add Review Notes</label>
+                    <textarea id="notes" name="notes" placeholder="Enter your review notes..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">💬 Add Notes</button>
+            </form>
+            
+            <hr>
+            
+            <form method="POST" action="/admin/api/application/{app.get('id')}/decide">
+                <div class="form-group">
+                    <label for="approved_amount">Approved Amount (UBEC)</label>
+                    <input type="number" id="approved_amount" name="approved_amount" value="{requested_amount}" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="decision_notes">Decision Notes</label>
+                    <textarea id="decision_notes" name="notes" placeholder="Enter decision notes..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" name="decision" value="approved" class="btn btn-success">✅ Approve</button>
+                    <button type="submit" name="decision" value="rejected" class="btn btn-danger">❌ Reject</button>
+                    <a href="/admin/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+                </div>
+            </form>
         </div>
     </div>
 </body>
