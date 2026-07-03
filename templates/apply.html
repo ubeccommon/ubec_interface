@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{#
+    apply.html — Beneficiary application landing / pathway chooser
+    UBEC Protocol Web Interface
+
+    Presents the four application pathways (Farmer, Community, Activator,
+    Living Lab), each linking to its dedicated form route. Purely presentational;
+    the forms POST to /api/v1/applications/* which persist to ubec_ui.applications.
+
+    License (docs/content): CC BY-SA 4.0
+    This project uses the services of Claude and Anthropic PBC to inform our
+    decisions and recommendations. This project was made possible with the
+    assistance of Claude and Anthropic PBC.
+#}
+{% block title %}Apply to Join — UBEC Protocol{% endblock %}
+
+{% block extra_css %}
+<style>
+    .apply-hero { text-align: center; padding: var(--spacing-xxl) var(--spacing-md); max-width: 820px; margin: 0 auto; }
+    .apply-hero h1 { font-size: var(--font-size-4xl); color: var(--text-primary); margin-bottom: var(--spacing-md); }
+    .apply-hero p { font-size: var(--font-size-lg); color: var(--text-secondary); }
+    .pathways { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--spacing-lg); max-width: 1080px; margin: 0 auto var(--spacing-xxxl); padding: 0 var(--spacing-md); }
+    .pathway-card { display: flex; flex-direction: column; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--spacing-xl); box-shadow: var(--shadow-sm); transition: var(--transition-base); text-decoration: none; color: inherit; }
+    .pathway-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .pathway-icon { font-size: 2.5rem; margin-bottom: var(--spacing-sm); }
+    .pathway-card h2 { font-size: var(--font-size-2xl); margin-bottom: var(--spacing-sm); }
+    .pathway-card p { color: var(--text-secondary); font-size: var(--font-size-base); flex-grow: 1; }
+    .pathway-cta { margin-top: var(--spacing-lg); font-weight: 600; color: var(--primary-gradient-end); }
+    .card-air   { border-top: 4px solid var(--element-air); }
+    .card-water { border-top: 4px solid var(--element-water); }
+    .card-fire  { border-top: 4px solid var(--element-fire); }
+    .card-earth { border-top: 4px solid var(--element-earth); }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="apply-hero">
+    <h1>Apply to Join the Commons</h1>
+    <p>The UBEC Protocol funds regenerative food systems and local food sovereignty.
+       Choose the pathway that fits you — each supports a different role in the
+       bioregional commons, guided by Ubuntu: <em>"I am because we are."</em></p>
+</section>
+
+<section class="pathways">
+    <a href="/apply/farmer" class="pathway-card card-air">
+        <div class="pathway-icon">🜁</div>
+        <h2>Farmer</h2>
+        <p>Individual farmers and growers committed to regenerative agriculture,
+           seeking support to transition and sustain practices that heal the land.</p>
+        <span class="pathway-cta">Start farmer application →</span>
+    </a>
+
+    <a href="/apply/community" class="pathway-card card-water">
+        <div class="pathway-icon">🜄</div>
+        <h2>Community</h2>
+        <p>Groups, cooperatives, and collectives building shared food systems,
+           mutual aid, and reciprocal local economies.</p>
+        <span class="pathway-cta">Start community application →</span>
+    </a>
+
+    <a href="/apply/activator" class="pathway-card card-fire">
+        <div class="pathway-icon">🜂</div>
+        <h2>Activator</h2>
+        <p>Facilitators and organizers who catalyze regeneration — connecting people,
+           skills, and resources across the bioregion.</p>
+        <span class="pathway-cta">Start activator application →</span>
+    </a>
+
+    <a href="/apply/livinglab" class="pathway-card card-earth">
+        <div class="pathway-icon">🜃</div>
+        <h2>Living Lab</h2>
+        <p>Educational institutions and research sites integrating regenerative
+           practice, citizen science, and hands-on ecological learning.</p>
+        <span class="pathway-cta">Start living lab application →</span>
+    </a>
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{#
+    apply-success.html — Application submission confirmation
+    UBEC Protocol Web Interface
+
+    Rendered by the /apply/success route, which passes reference_number and
+    application_type. Shown after a successful POST to the applications API.
+
+    License (docs/content): CC BY-SA 4.0
+    This project uses the services of Claude and Anthropic PBC to inform our
+    decisions and recommendations. This project was made possible with the
+    assistance of Claude and Anthropic PBC.
+#}
+{% block title %}Application Received — UBEC Protocol{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-wrap { max-width: 640px; margin: 0 auto; padding: var(--spacing-xxxl) var(--spacing-md); text-align: center; }
+    .success-icon { font-size: 4rem; margin-bottom: var(--spacing-md); }
+    .success-wrap h1 { font-size: var(--font-size-3xl); margin-bottom: var(--spacing-md); }
+    .success-wrap p { color: var(--text-secondary); font-size: var(--font-size-lg); margin-bottom: var(--spacing-lg); }
+    .ref-box { display: inline-block; background: var(--background-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--spacing-md) var(--spacing-xl); margin-bottom: var(--spacing-xl); }
+    .ref-box .label { font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-light); }
+    .ref-box .value { font-family: var(--font-monospace); font-size: var(--font-size-xl); font-weight: 600; color: var(--text-primary); }
+    .success-actions a { display: inline-block; margin: 0 var(--spacing-sm); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); color: #fff; padding: var(--spacing-md) var(--spacing-xl); border-radius: var(--radius-md); text-decoration: none; font-weight: 600; }
+    .btn-secondary { color: var(--primary-gradient-end); text-decoration: none; font-weight: 600; padding: var(--spacing-md); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-wrap">
+    <div class="success-icon">🌱</div>
+    <h1>Application Received</h1>
+    <p>Thank you for applying to join the UBEC bioregional commons. Your
+       application has been recorded and our stewards will review it.
+       You'll receive a confirmation by email.</p>
+
+    {% if reference_number %}
+    <div class="ref-box">
+        <div class="label">Your reference number</div>
+        <div class="value">{{ reference_number }}</div>
+    </div>
+    {% endif %}
+
+    <p>Please keep your reference number for any follow-up about your
+       {% if application_type %}<strong>{{ application_type }}</strong> {% endif %}application.</p>
+
+    <div class="success-actions">
+        <a href="/" class="btn-primary">Return home</a>
+        <a href="/about" class="btn-secondary">Learn more about UBEC</a>
+    </div>
+</div>
+{% endblock %}

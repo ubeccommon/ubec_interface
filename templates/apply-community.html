@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{#
+    apply-community.html — Community application form
+    UBEC Protocol Web Interface
+
+    Fields map 1:1 to CommunityApplicationCreate and POST to
+    /api/v1/applications/community.
+
+    License (docs/content): CC BY-SA 4.0
+    This project uses the services of Claude and Anthropic PBC to inform our
+    decisions and recommendations. This project was made possible with the
+    assistance of Claude and Anthropic PBC.
+#}
+{% block title %}Community Application — UBEC Protocol{% endblock %}
+
+{% block extra_css %}{% include "_form_shared.html" %}{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+    <div class="form-head">
+        <h1>🜄 Community Application</h1>
+        <p>For groups, cooperatives, and collectives building shared food systems.</p>
+    </div>
+
+    <form id="communityForm" class="ubec-form"
+          data-type="community"
+          data-numeric="member_count,requested_amount"
+          onsubmit="event.preventDefault(); submitApplication(this, '/api/v1/applications/community');">
+        <div class="form-msg"></div>
+
+        <fieldset>
+            <legend>Contact</legend>
+            <div class="field-row">
+                <div class="field"><label>Contact name <span class="req">*</span></label>
+                    <input type="text" name="contact_name" required minlength="2" maxlength="255"></div>
+                <div class="field"><label>Email <span class="req">*</span></label>
+                    <input type="email" name="contact_email" required></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Phone</label>
+                    <input type="tel" name="contact_phone"></div>
+                <div class="field"><label>Role in the community <span class="req">*</span></label>
+                    <input type="text" name="contact_role" required minlength="2"></div>
+            </div>
+            <div class="field"><label>Location <span class="req">*</span></label>
+                <input type="text" name="location" required minlength="2" maxlength="255"></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>The Organization</legend>
+            <div class="field-row">
+                <div class="field"><label>Organization name <span class="req">*</span></label>
+                    <input type="text" name="organization_name" required minlength="2" maxlength="255"></div>
+                <div class="field"><label>Organization type <span class="req">*</span></label>
+                    <input type="text" name="organization_type" required
+                           placeholder="e.g. cooperative, collective, association"></div>
+            </div>
+            <div class="field"><label>Number of members <span class="req">*</span></label>
+                <input type="number" name="member_count" required min="3" step="1">
+                <div class="hint">Minimum 3 members.</div></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Mission &amp; Work</legend>
+            <div class="field"><label>Mission <span class="req">*</span></label>
+                <textarea name="mission" required minlength="20"></textarea></div>
+            <div class="field"><label>Current activities <span class="req">*</span></label>
+                <textarea name="current_activities" required minlength="20"></textarea></div>
+            <div class="field"><label>Governance structure <span class="req">*</span></label>
+                <textarea name="governance_structure" required minlength="10"
+                          placeholder="How the community makes decisions"></textarea></div>
+            <div class="field"><label>Regenerative practices <span class="req">*</span></label>
+                <textarea name="regenerative_practices" required minlength="10"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Support Requested</legend>
+            <div class="field"><label>Requested amount (UBEC) <span class="req">*</span></label>
+                <input type="number" name="requested_amount" required min="1000" max="50000" step="1">
+                <div class="hint">Between 1,000 and 50,000 UBEC.</div></div>
+            <div class="field"><label>How the tokens will be used <span class="req">*</span></label>
+                <textarea name="token_usage" required minlength="20"></textarea></div>
+            <div class="field"><label>Expected impact <span class="req">*</span></label>
+                <textarea name="expected_impact" required minlength="20"></textarea></div>
+            <div class="field"><label>Ubuntu alignment <span class="req">*</span></label>
+                <textarea name="ubuntu_alignment" required minlength="20"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>References</legend>
+            <div class="field-row">
+                <div class="field"><label>Reference 1 — name <span class="req">*</span></label>
+                    <input type="text" name="reference1_name" required minlength="2"></div>
+                <div class="field"><label>Reference 1 — contact <span class="req">*</span></label>
+                    <input type="text" name="reference1_contact" required minlength="5"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Reference 2 — name</label>
+                    <input type="text" name="reference2_name"></div>
+                <div class="field"><label>Reference 2 — contact</label>
+                    <input type="text" name="reference2_contact"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Agreement</legend>
+            <div class="check-field">
+                <input type="checkbox" id="c_terms" name="agree_terms" required>
+                <label for="c_terms">Our community agrees to the UBEC Protocol terms of participation. <span class="req">*</span></label>
+            </div>
+            <div class="check-field">
+                <input type="checkbox" id="c_values" name="agree_values" required>
+                <label for="c_values">We share the Ubuntu values of reciprocity, regeneration, and commons stewardship. <span class="req">*</span></label>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Submit Application</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

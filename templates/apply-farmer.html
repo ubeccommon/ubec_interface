@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{#
+    apply-farmer.html — Farmer application form
+    UBEC Protocol Web Interface
+
+    Fields map 1:1 to FarmerApplicationCreate (routes/application_routes.py) and
+    POST as JSON to /api/v1/applications/farmer. Non-column fields become the
+    application_data jsonb server-side (Principle 4: the model is the contract).
+
+    License (docs/content): CC BY-SA 4.0
+    This project uses the services of Claude and Anthropic PBC to inform our
+    decisions and recommendations. This project was made possible with the
+    assistance of Claude and Anthropic PBC.
+#}
+{% block title %}Farmer Application — UBEC Protocol{% endblock %}
+
+{% block extra_css %}{% include "_form_shared.html" %}{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+    <div class="form-head">
+        <h1>🜁 Farmer Application</h1>
+        <p>For individual farmers and growers committed to regenerative agriculture.</p>
+    </div>
+
+    <form id="farmerForm" class="ubec-form"
+          data-type="farmer"
+          data-numeric="years_farming,requested_amount"
+          onsubmit="event.preventDefault(); submitApplication(this, '/api/v1/applications/farmer');">
+        <div class="form-msg"></div>
+
+        <fieldset>
+            <legend>Contact</legend>
+            <div class="field-row">
+                <div class="field"><label>Full name <span class="req">*</span></label>
+                    <input type="text" name="contact_name" required minlength="2" maxlength="255"></div>
+                <div class="field"><label>Email <span class="req">*</span></label>
+                    <input type="email" name="contact_email" required></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Phone</label>
+                    <input type="tel" name="contact_phone"></div>
+                <div class="field"><label>Location <span class="req">*</span></label>
+                    <input type="text" name="location" required minlength="2" maxlength="255"
+                           placeholder="Town / region, country"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>The Farm</legend>
+            <div class="field-row">
+                <div class="field"><label>Farm name <span class="req">*</span></label>
+                    <input type="text" name="farm_name" required minlength="2"></div>
+                <div class="field"><label>Farm size <span class="req">*</span></label>
+                    <input type="text" name="farm_size" required placeholder="e.g. 12 hectares"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Farm type <span class="req">*</span></label>
+                    <input type="text" name="farm_type" required minlength="2"
+                           placeholder="e.g. mixed / market garden / agroforestry"></div>
+                <div class="field"><label>Years farming <span class="req">*</span></label>
+                    <input type="number" name="years_farming" required min="0" step="1"></div>
+            </div>
+            <div class="field"><label>Primary products <span class="req">*</span></label>
+                <textarea name="primary_products" required minlength="10"
+                          placeholder="What you grow or produce"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Regenerative Practice</legend>
+            <div class="field"><label>Current practices <span class="req">*</span></label>
+                <textarea name="current_practices" required minlength="20"
+                          placeholder="Describe how you farm today"></textarea></div>
+            <div class="field"><label>Regeneration goals <span class="req">*</span></label>
+                <textarea name="regeneration_goals" required minlength="20"
+                          placeholder="What you want to transition toward"></textarea></div>
+            <div class="field"><label>Challenges <span class="req">*</span></label>
+                <textarea name="challenges" required minlength="10"
+                          placeholder="What stands in the way"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Support Requested</legend>
+            <div class="field"><label>Requested amount (UBEC) <span class="req">*</span></label>
+                <input type="number" name="requested_amount" required min="1000" max="50000" step="1">
+                <div class="hint">Between 1,000 and 50,000 UBEC.</div></div>
+            <div class="field"><label>How the tokens will be used <span class="req">*</span></label>
+                <textarea name="token_usage" required minlength="20"></textarea></div>
+            <div class="field"><label>Community involvement <span class="req">*</span></label>
+                <textarea name="community_involvement" required minlength="10"
+                          placeholder="How your work connects to your local community"></textarea></div>
+            <div class="field"><label>Ubuntu alignment <span class="req">*</span></label>
+                <textarea name="ubuntu_alignment" required minlength="20"
+                          placeholder="How your work embodies 'I am because we are'"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>References</legend>
+            <div class="field-row">
+                <div class="field"><label>Reference 1 — name <span class="req">*</span></label>
+                    <input type="text" name="reference1_name" required minlength="2"></div>
+                <div class="field"><label>Reference 1 — contact <span class="req">*</span></label>
+                    <input type="text" name="reference1_contact" required minlength="5"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Reference 2 — name</label>
+                    <input type="text" name="reference2_name"></div>
+                <div class="field"><label>Reference 2 — contact</label>
+                    <input type="text" name="reference2_contact"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Agreement</legend>
+            <div class="check-field">
+                <input type="checkbox" id="f_terms" name="agree_terms" required>
+                <label for="f_terms">I agree to the UBEC Protocol terms of participation. <span class="req">*</span></label>
+            </div>
+            <div class="check-field">
+                <input type="checkbox" id="f_values" name="agree_values" required>
+                <label for="f_values">I share the Ubuntu values of reciprocity, regeneration, and commons stewardship. <span class="req">*</span></label>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Submit Application</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

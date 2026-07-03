@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{#
+    apply-activator.html — Community Activator application form
+    UBEC Protocol Web Interface
+
+    Fields map 1:1 to ActivatorApplicationCreate and POST to
+    /api/v1/applications/activator. Note this model uses `name` (not
+    contact_name) for the applicant.
+
+    License (docs/content): CC BY-SA 4.0
+    This project uses the services of Claude and Anthropic PBC to inform our
+    decisions and recommendations. This project was made possible with the
+    assistance of Claude and Anthropic PBC.
+#}
+{% block title %}Activator Application — UBEC Protocol{% endblock %}
+
+{% block extra_css %}{% include "_form_shared.html" %}{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+    <div class="form-head">
+        <h1>🜂 Community Activator Application</h1>
+        <p>For facilitators and organizers who catalyze regeneration across the bioregion.</p>
+    </div>
+
+    <form id="activatorForm" class="ubec-form"
+          data-type="activator"
+          data-numeric="requested_amount"
+          onsubmit="event.preventDefault(); submitApplication(this, '/api/v1/applications/activator');">
+        <div class="form-msg"></div>
+
+        <fieldset>
+            <legend>Contact</legend>
+            <div class="field-row">
+                <div class="field"><label>Full name <span class="req">*</span></label>
+                    <input type="text" name="name" required minlength="2" maxlength="255"></div>
+                <div class="field"><label>Email <span class="req">*</span></label>
+                    <input type="email" name="contact_email" required></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Phone</label>
+                    <input type="tel" name="contact_phone"></div>
+                <div class="field"><label>Location <span class="req">*</span></label>
+                    <input type="text" name="location" required minlength="2" maxlength="255"></div>
+            </div>
+            <div class="field"><label>Affiliation</label>
+                <input type="text" name="affiliation"
+                       placeholder="Organization or network, if any"></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Background &amp; Capacity</legend>
+            <div class="field"><label>Background <span class="req">*</span></label>
+                <textarea name="background" required minlength="20"></textarea></div>
+            <div class="field"><label>Skills <span class="req">*</span></label>
+                <textarea name="skills" required minlength="20"></textarea></div>
+            <div class="field"><label>Track record <span class="req">*</span></label>
+                <textarea name="track_record" required minlength="20"></textarea></div>
+            <div class="field"><label>Networks <span class="req">*</span></label>
+                <textarea name="networks" required minlength="10"
+                          placeholder="Communities and networks you can reach"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Proposed Work</legend>
+            <div class="field"><label>Proposed services <span class="req">*</span></label>
+                <textarea name="proposed_services" required minlength="20"></textarea></div>
+            <div class="field-row">
+                <div class="field"><label>Geographic scope <span class="req">*</span></label>
+                    <input type="text" name="geographic_scope" required minlength="5"></div>
+                <div class="field"><label>Time commitment <span class="req">*</span></label>
+                    <input type="text" name="time_commitment" required
+                           placeholder="e.g. part-time, full-time, hrs/week"></div>
+            </div>
+            <div class="field"><label>Year-one plan <span class="req">*</span></label>
+                <textarea name="year1_plan" required minlength="50"
+                          placeholder="Your concrete plan for the first year"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Support Requested</legend>
+            <div class="field"><label>Requested amount (UBEC) <span class="req">*</span></label>
+                <input type="number" name="requested_amount" required min="1000" max="50000" step="1">
+                <div class="hint">Between 1,000 and 50,000 UBEC.</div></div>
+            <div class="field"><label>Budget breakdown <span class="req">*</span></label>
+                <textarea name="budget_breakdown" required minlength="20"></textarea></div>
+            <div class="field"><label>Facilitation philosophy <span class="req">*</span></label>
+                <textarea name="facilitation_philosophy" required minlength="20"></textarea></div>
+            <div class="field"><label>Ubuntu alignment <span class="req">*</span></label>
+                <textarea name="ubuntu_alignment" required minlength="20"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>References</legend>
+            <div class="field-row">
+                <div class="field"><label>Reference 1 — name <span class="req">*</span></label>
+                    <input type="text" name="reference1_name" required minlength="2"></div>
+                <div class="field"><label>Reference 1 — contact <span class="req">*</span></label>
+                    <input type="text" name="reference1_contact" required minlength="5"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Reference 2 — name</label>
+                    <input type="text" name="reference2_name"></div>
+                <div class="field"><label>Reference 2 — contact</label>
+                    <input type="text" name="reference2_contact"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Agreement</legend>
+            <div class="check-field">
+                <input type="checkbox" id="a_terms" name="agree_terms" required>
+                <label for="a_terms">I agree to the UBEC Protocol terms of participation. <span class="req">*</span></label>
+            </div>
+            <div class="check-field">
+                <input type="checkbox" id="a_values" name="agree_values" required>
+                <label for="a_values">I share the Ubuntu values of reciprocity, regeneration, and commons stewardship. <span class="req">*</span></label>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Submit Application</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

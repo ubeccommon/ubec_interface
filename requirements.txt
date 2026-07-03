@@ -1,0 +1,54 @@
+# =============================================================================
+# UBEC Protocol - Web Interface (ubec_interface) - Python dependencies
+# =============================================================================
+#
+# Pinned to the exact versions verified working on the bioregional.ubec.network
+# deployment (2026-07-02). These pins are load-bearing, not cosmetic:
+#
+#   * fastapi==0.104.1 + starlette==0.27.0 are a MATCHED PAIR. The interface's
+#     templates call Starlette's OLD signature TemplateResponse(name, context).
+#     Starlette >=1.0 changed this to request-first, which raises
+#     "TypeError: unhashable type: 'dict'" on EVERY page. Do not bump starlette
+#     independently of fastapi.
+#   * anyio<4 is required by fastapi 0.104.1.
+#   * pydantic v2 is used; email-validator is needed for the EmailStr fields in
+#     the application models, and bcrypt for admin password hashing.
+#
+# Rebuild the venv reproducibly with:
+#     python3 -m venv venv
+#     ./venv/bin/pip install -r requirements.txt
+#
+# License (code): GNU AGPL v3.0
+# This project uses the services of Claude and Anthropic PBC to inform our
+# decisions and recommendations. This project was made possible with the
+# assistance of Claude and Anthropic PBC.
+# =============================================================================
+
+# --- Web framework (matched pair — see note above) ---
+fastapi==0.104.1
+starlette==0.27.0
+anyio==3.7.1
+
+# --- ASGI server ---
+uvicorn[standard]==0.49.0
+
+# --- Templating & static content ---
+Jinja2==3.1.6
+Markdown==3.10.2
+
+# --- Data / validation ---
+pydantic==2.13.4
+email-validator==2.3.0
+python-multipart==0.0.32
+
+# --- HTTP client (calls the backend API) ---
+aiohttp==3.14.1
+
+# --- Database (ubec_protocol / ubec_ui schema) ---
+asyncpg==0.31.0
+
+# --- Auth / security ---
+bcrypt==5.0.0
+
+# --- Configuration ---
+python-dotenv==1.2.2

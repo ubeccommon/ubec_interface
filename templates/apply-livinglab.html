@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{#
+    apply-livinglab.html — Living Lab application form
+    UBEC Protocol Web Interface
+
+    Fields map 1:1 to LivingLabApplicationCreate and POST to
+    /api/v1/applications/livinglab. `sensors` is a List[str] (min 1) collected
+    from checkboxes via data-lists so the JSON payload is an array.
+
+    License (docs/content): CC BY-SA 4.0
+    This project uses the services of Claude and Anthropic PBC to inform our
+    decisions and recommendations. This project was made possible with the
+    assistance of Claude and Anthropic PBC.
+#}
+{% block title %}Living Lab Application — UBEC Protocol{% endblock %}
+
+{% block extra_css %}{% include "_form_shared.html" %}{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+    <div class="form-head">
+        <h1>🜃 Living Lab Application</h1>
+        <p>For educational institutions and research sites integrating regenerative practice.</p>
+    </div>
+
+    <form id="livinglabForm" class="ubec-form"
+          data-type="livinglab"
+          data-numeric="student_count,requested_amount"
+          data-lists="sensors"
+          onsubmit="event.preventDefault(); submitApplication(this, '/api/v1/applications/livinglab');">
+        <div class="form-msg"></div>
+
+        <fieldset>
+            <legend>Contact</legend>
+            <div class="field-row">
+                <div class="field"><label>Contact name <span class="req">*</span></label>
+                    <input type="text" name="contact_name" required minlength="2" maxlength="255"></div>
+                <div class="field"><label>Email <span class="req">*</span></label>
+                    <input type="email" name="contact_email" required></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Phone</label>
+                    <input type="tel" name="contact_phone"></div>
+                <div class="field"><label>Role <span class="req">*</span></label>
+                    <input type="text" name="contact_role" required minlength="2"></div>
+            </div>
+            <div class="field"><label>Location <span class="req">*</span></label>
+                <input type="text" name="location" required minlength="2" maxlength="255"></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>The Institution</legend>
+            <div class="field-row">
+                <div class="field"><label>Institution name <span class="req">*</span></label>
+                    <input type="text" name="institution_name" required minlength="2" maxlength="255"></div>
+                <div class="field"><label>Institution type <span class="req">*</span></label>
+                    <input type="text" name="institution_type" required
+                           placeholder="e.g. school, university, research centre"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Number of students <span class="req">*</span></label>
+                    <input type="number" name="student_count" required min="10" step="1">
+                    <div class="hint">Minimum 10 students.</div></div>
+                <div class="field"><label>Land area <span class="req">*</span></label>
+                    <input type="text" name="land_area" required placeholder="e.g. 3 hectares"></div>
+            </div>
+            <div class="field"><label>Ecosystem types <span class="req">*</span></label>
+                <input type="text" name="ecosystem_types" required minlength="2"
+                       placeholder="e.g. grassland, woodland, wetland"></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Site &amp; Programme</legend>
+            <div class="field"><label>Site description <span class="req">*</span></label>
+                <textarea name="site_description" required minlength="20"></textarea></div>
+            <div class="field"><label>Infrastructure <span class="req">*</span></label>
+                <textarea name="infrastructure" required minlength="10"></textarea></div>
+            <div class="field"><label>Current curriculum <span class="req">*</span></label>
+                <textarea name="current_curriculum" required minlength="20"></textarea></div>
+            <div class="field"><label>Integration plan <span class="req">*</span></label>
+                <textarea name="integration_plan" required minlength="20"
+                          placeholder="How regenerative practice integrates into teaching"></textarea></div>
+            <div class="field"><label>Citizen science <span class="req">*</span></label>
+                <textarea name="citizen_science" required minlength="10"></textarea></div>
+            <div class="field"><label>Technical support needs <span class="req">*</span></label>
+                <textarea name="technical_support" required minlength="10"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Sensors <span class="req">*</span></legend>
+            <div class="hint" style="margin-bottom:var(--spacing-md)">Select at least one sensor type for environmental monitoring.</div>
+            <div class="check-field"><input type="checkbox" id="s_soil" name="sensors" value="soil_moisture"><label for="s_soil">Soil moisture</label></div>
+            <div class="check-field"><input type="checkbox" id="s_temp" name="sensors" value="temperature"><label for="s_temp">Temperature</label></div>
+            <div class="check-field"><input type="checkbox" id="s_humidity" name="sensors" value="humidity"><label for="s_humidity">Humidity</label></div>
+            <div class="check-field"><input type="checkbox" id="s_ph" name="sensors" value="soil_ph"><label for="s_ph">Soil pH</label></div>
+            <div class="check-field"><input type="checkbox" id="s_light" name="sensors" value="light"><label for="s_light">Light / PAR</label></div>
+            <div class="check-field"><input type="checkbox" id="s_water" name="sensors" value="water_quality"><label for="s_water">Water quality</label></div>
+            <div class="check-field"><input type="checkbox" id="s_air" name="sensors" value="air_quality"><label for="s_air">Air quality</label></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Support Requested</legend>
+            <div class="field"><label>Requested amount (UBEC) <span class="req">*</span></label>
+                <input type="number" name="requested_amount" required min="1000" max="50000" step="1">
+                <div class="hint">Between 1,000 and 50,000 UBEC.</div></div>
+            <div class="field"><label>Budget breakdown <span class="req">*</span></label>
+                <textarea name="budget_breakdown" required minlength="20"></textarea></div>
+            <div class="field"><label>Community access <span class="req">*</span></label>
+                <textarea name="community_access" required minlength="10"
+                          placeholder="How the wider community can use the site"></textarea></div>
+            <div class="field"><label>Ubuntu alignment <span class="req">*</span></label>
+                <textarea name="ubuntu_alignment" required minlength="20"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Reference</legend>
+            <div class="field-row">
+                <div class="field"><label>Reference — name <span class="req">*</span></label>
+                    <input type="text" name="reference1_name" required minlength="2"></div>
+                <div class="field"><label>Reference — contact <span class="req">*</span></label>
+                    <input type="text" name="reference1_contact" required minlength="5"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Agreement</legend>
+            <div class="check-field">
+                <input type="checkbox" id="l_terms" name="agree_terms" required>
+                <label for="l_terms">Our institution agrees to the UBEC Protocol terms of participation. <span class="req">*</span></label>
+            </div>
+            <div class="check-field">
+                <input type="checkbox" id="l_values" name="agree_values" required>
+                <label for="l_values">We share the Ubuntu values of reciprocity, regeneration, and commons stewardship. <span class="req">*</span></label>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Submit Application</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
